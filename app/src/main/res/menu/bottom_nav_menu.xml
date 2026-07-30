@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_scan"
+        android:icon="@drawable/ic_scan"
+        android:title="@string/scan" />
+
+    <item
+        android:id="@+id/nav_boxes"
+        android:icon="@drawable/ic_box"
+        android:title="@string/boxes" />
+
+    <item
+        android:id="@+id/nav_batches"
+        android:icon="@drawable/ic_batch"
+        android:title="@string/parties" />
+    <item
+        android:id="@+id/nav_unpacked"
+        android:icon="@drawable/ic_unpacked"
+        android:title="@string/unclosed" />
+
+</menu>

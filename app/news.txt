@@ -1,0 +1,99 @@
+4.3 (code 32)
+- Added an up-to-date bilingual Russian and English README with features, setup, build instructions, and a GitHub project description.
+
+4.2 (code 31)
+- Added batch name editing from the batch details screen using the edit button or a long press on the batch name.
+
+4.1 (code 30)
+- Restored the proven box-weight calculation from version 2.9: order weights plus empty-box weight.
+
+4.0 (code 29)
+- Use the saved box gross weight as the total weight and keep the empty-box weight as a separate value.
+- Refresh box details after adding or removing an order so the total weight stays current.
+
+3.9 (code 28)
+- Moved the box label QR code upward so it stays within the label.
+
+3.8 (code 27)
+- Added spacing between total box weight and the heavy-weight warning on box labels.
+
+3.7 (code 26)
+- Automatically focus the first order dimension field and open the numeric keyboard.
+
+3.6 (code 25)
+- Simplified the heavy box label warning so it no longer displays a kilogram threshold.
+
+3.5 (code 24)
+- Restored the existing total-weight field as the source for box label printing and the over-25-kg warning.
+
+3.4 (code 23)
+- Print the box gross weight returned in box details instead of recalculating it from orders.
+- Changed the box label caption from "Printed in Malaga" to "Packed in Malaga".
+
+3.3 (code 22)
+- Limited the over-25-kg warning to box labels and made it more visible.
+- Recalculate total box weight from all orders plus box tare immediately before printing.
+
+3.2 (code 21)
+- Fixed scan camera hints using the phone language instead of the language selected in app settings.
+
+3.1 (code 20)
+- Added a high-visibility warning to order and box labels when weight exceeds 25 kg.
+
+3.0 (code 19)
+- Reset box option checkboxes when clearing order data after an unsuccessful track lookup.
+
+2.9 (code 18)
+- Added app name, version, and developer information to the box label near the QR code.
+
+2.8 (code 17)
+- Cleaned the settings screen code, removed broken comments and hardcoded email license text.
+
+2.7 (code 16)
+- Refreshed scan screen action icons while keeping the existing compact layout unchanged.
+
+2.6 (code 15)
+- Kept the license device id in backed-up app preferences so reinstalling the app can keep the same license request number.
+
+2.5 (code 14)
+- Fixed date filter chips on the unpacked orders screen so the last filter is not clipped.
+
+2.4 (code 13)
+- Replaced the order remove cross in box details with a trash icon.
+
+2.3 (code 12)
+- Refreshed the boxes screen UI, box cards, and box detail screen to match the new party screens.
+- Added a visible refresh action for the boxes list.
+
+2.2 (code 11)
+- Refreshed the unpacked orders screen UI with a cleaner header, search area, cards, and report action.
+
+2.1 (code 10)
+- Fixed the party filter button spacing so it is not clipped at the top.
+
+2.0 (code 9)
+- Major UI refresh for party screens: updated party list, party details, cards, and action buttons.
+
+1.8 (code 8)
+- Refined party action buttons with softer color, elevation, and clearer create-party action.
+
+1.7 (code 7)
+- Improved the party detail UI and box cards.
+- Made the add-box action clearer and easier to reach.
+
+1.6 (code 6)
+- Improved the party list UI: clearer header, filter button, readable cards, and visible party status.
+- Replaced hardcoded empty-party text with localized resources.
+
+1.5 (code 5)
+- Returned visible version code in the app version text.
+
+1.4 (code 4)
+- Removed order count row from boxes inside a party.
+- Removed background order-count loading in PartyDetailFragment to avoid crashes and extra server requests.
+
+1.3 (code 3)
+- Improved box order scanning controls: primary scan button moved to the right, paste action made secondary.
+- Added app version display on the scan screen.
+- Added order count loading for boxes inside a party.
+- Hardened PartyDetailFragment async work against crashes after leaving the screen.

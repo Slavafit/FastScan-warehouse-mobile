@@ -1,0 +1,57 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:background="#80000000"
+        android:padding="8dp"
+        android:text="@string/scan_mode" />
+
+    <!-- Кнопки экспозиции (только для weight) -->
+    <LinearLayout
+        android:id="@+id/exposureControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnDarker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/darker" />
+
+        <Button
+            android:id="@+id/btnBrighter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lighter"
+            android:layout_marginStart="16dp" />
+    </LinearLayout>
+
+    <!-- Кнопка фонарика (для barcode и kg) -->
+    <Button
+        android:id="@+id/btnFlashToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="80dp"
+        android:text="@string/flashlight_on"
+        android:visibility="gone" />
+
+</FrameLayout>

@@ -1,0 +1,341 @@
+<resources>
+    <string name="app_name">FastScan Pro</string>
+    <string name="settings">Settings</string>
+    <string name="language_settings">🌍 App language</string>
+    <string name="language">Language</string>
+    <string name="language_summary">Select language</string>
+    <string name="server_settings">💻⚙️ Server Settings</string>
+    <string name="server_url_title">" URL Server"</string>
+    <string name="server_url_summary">Default: https://onza-api.ibm.kg</string>
+    <string name="login_title">Login</string>
+    <string name="password_title">Password</string>
+    <string name="vol_weight_title">Vol Weight</string>
+    <string name="vol_weight_summary">By default: 6000</string>
+    <string name="licence_title">📃 Licence</string>
+    <string name="licence_email_title">Email for licence</string>
+    <string name="licence_email_summary">Enter email, linked with licence</string>
+    <string name="licence_status_title">Licence status</string>
+    <string name="licence_status_summary">Check…</string>
+    <string name="settings_required_message">Enter login, password and email in settings</string>
+    <string name="license_expired_or_inactive">License has expired or is inactive</string>
+    <string name="license_expired_toast">License has expired!</string>
+    <string name="license_days_left_toast">%1$d days left until license expiration!</string>
+    <string name="license_active_days_left_toast">License is active (%1$d days left)</string>
+    <string name="license_email_missing">Email is not specified</string>
+    <string name="license_expiration_missing">Expiration date is not specified</string>
+    <string name="license_expired_status">License has expired</string>
+    <string name="license_expires_soon_status">Expires in %1$d days! (until %2$s)</string>
+    <string name="license_active_until_status">Active until %1$s (%2$d days left)</string>
+    <string name="license_check_error">Status check error</string>
+    <string name="camera_permission_required">Camera access is required</string>
+    <string name="weight_fetch_error">Failed to get weight</string>
+    <string name="track_copied">Track copied: %1$s</string>
+    <string name="developer_info_title">👨🏻‍💻 About developer</string>
+    <string name="developer_title">Viacheslav Fitlin</string>
+    <string name="developer_summary">Telegramm: @Slavafit</string>
+
+    <string name="server_weight_address">Server weight address</string>
+    <string name="server_weight_address_summary">For example: 192.168.1.50</string>
+    <string name="printer_settings">🖨️ Printer Settings</string>
+    <string name="printer_ip_title">Printer IP (Zebra)</string>
+    <string name="printer_ip_summary">For example: 192.168.1.168</string>
+    <string name="printer_width_title">Width (mm)</string>
+    <string name="printer_width_summary">By default: 100 mm</string>
+    <string name="printer_height_title">Height (mm)</string>
+    <string name="printer_height_summary">By default: 150 mm</string>
+    <string name="test_print">Test print</string>
+    <string name="test_print_summary">Send a sample label to the printer</string>
+    <string name="test_print_result">🚀 Sent to printer %1$s</string>
+    <string name="test_print_error">⚠️ Error connecting to printer: %1$s</string>
+    <string name="printer_ip_error">Printer IP not specified</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="flashlight_on">Flashlight ON</string>
+    <string name="flashlight_off">Flashlight OFF</string>
+    <string name="scan_mode">MODE: Scan…</string>
+    <string name="darker">Darker (-)</string>
+    <string name="lighter">Lighter (+)</string>
+    <string name="send_order">SEND ORDER</string>
+    <string name="find_order">Find order info</string>
+    <string name="sending">🚀 Sending…</string>
+
+    <string name="scan">Scan</string>
+    <string name="boxes">Boxes</string>
+    <string name="new_box">New box %s</string>
+    <string name="open_boxes">Open boxes</string>
+    <string name="all_boxes">All boxes</string>
+    <string name="show_all_boxes">👀 Show all boxes</string>
+    <string name="no_boxes">There are no open boxes. Create a new one.</string>
+    <string name="no_open_parties">There are no open parties</string>
+    <string name="no_parties_found">No batches found</string>
+<!--    <string name="box_number">Box number</string>-->
+    <string name="box_track">Box number</string>
+    <string name="finish_part">Finish</string>
+    <string name="finish_part_property">Finish part %1$s ?</string>
+    <string name="finish_party_title">Finish part</string>
+
+    <string name="create">Create</string>
+    <string name="box_created">Box created %s</string>
+    <string name="box_added_format">Box %s added</string>
+    <string name="login_succes">✅ Successful login</string>
+    <string name="login_not_filled">Login or password is not filled in</string>
+    <string name="token_error">Error: token not received</string>
+    <string name="clear_token_title">Delete token</string>
+    <string name="clear_token_summary">Clear access and refresh tokens</string>
+    <string name="clear_token_confirm">Delete saved tokens?</string>
+
+
+
+    <string name="scan_track">Scan order track</string>
+    <string name="save_sizes">Save sizes</string>
+    <string name="print_label">🖨️ Print label</string>
+    <string name="refresh">Refresh</string>
+    <string name="back">↩️ Back</string>
+    <string name="save">Save</string>
+    <string name="apply">APPLY</string>
+    <string name="parties">Parties</string>
+    <string name="scan_or_input">Scan or input…</string>
+    <string name="generate_track">✨ GENERATE ONZA</string>
+
+//tost
+    <string name="name_not_specified">Name not specified</string>
+    <string name="track_not_found">Track not found. Please scan KG</string>
+    <string name="found">Found: %1$s (%2$s)</string>
+    <string name="client_not_found">Client not found</string>
+    <string name="server_error">Server error %1$d</string>
+    <string name="server_res_unknown">Respuesta desconocida del servidor</string>
+    <string name="net_error">Net error %1$s</string>
+    <string name="net_error_code">Net error %1$d</string>
+    <string name="net_error_short">Net error</string>
+    <string name="scan_kg">Scan KG</string>
+    <string name="order_saved">ORDER SAVED!</string>
+    <string name="order_added">ORDER ADDED!</string>
+    <string name="token_cleared">Tokens cleared</string>
+    <string name="input_4_numbers">Enter at least 4 digits after KG</string>
+    <string name="input_all_fields">Fill all fields and client code</string>
+    <string name="input_weight"> Enter correct weight</string>
+    <string name="input_length">Enter correct dimensions</string>
+    <string name="input_name_surname">Enter name and surname</string>
+    <string name="input_3_chars">Enter at least 3 characters</string>
+    <string name="no_code">No code</string>
+    <string name="no_number">No number</string>
+    <string name="selected">Selected: %1$s</string>
+    <string name="scan_error_result">Result scan error</string>
+    <string name="error_create">⚠️ Error create %s</string>
+    <string name="unknown_error">⚠️ Unknown error %s</string>
+    <string name="error_load">⚠️ Load error</string>
+    <string name="error_load_detal">⚠️ Error loading parts</string>
+    <string name="error_load_orders">⚠️ Error loading orders</string>
+    <string name="error_load_boxes">⚠️ Error loading boxes %1$s</string>
+    <string name="error_load_data">⚠️ Error loading data</string>
+    <string name="all_values_positive">All values must be positive.</string>
+    <string name="weight_saved">Dimensions and weight are preserved</string>
+    <string name="error_saving_dim">⚠️ Error saving dimensions</string>
+    <string name="error_deleting">⚠️ Error deleting</string>
+    <string name="incorrect_weight">⚠️ Incorrect weight for printing</string>
+    <string name="sent_for_printing">The label has been sent for printing.</string>
+    <string name="error_printing">Error printing: %1$s</string>
+    <string name="no_GUID">The order does not have GUID</string>
+    <string name="error_firebase">Failed to save to Firebase: %1$s</string>
+    <string name="part_finished">Part finished</string>
+    <string name="delete_box">Box removal is temporarily unavailable.</string>
+    <string name="error_load_boxes_short">Error loading box list</string>
+    <string name="error_adding_box">Error adding box to batch</string>
+    <string name="dimensions_cleared">Dimensions cleared</string>
+
+
+
+
+
+    <string name="scan_wait">⌛ Waiting scan track…</string>
+    <string name="scan_wait_client">Waiting scan client kode…</string>
+    <string name="hint_scan_kg">Point to customer code (KG…)</string>
+    <string name="hint_scan_weight">Point to the scale display</string>
+    <string name="hint_scan_track">Point to the track barcode</string>
+    <string name="weight_kg">⚖️ Weight (kg)</string>
+    <string name="weight">Weight:</string>
+    <string name="weight_format">Weight: %.2f kg</string>
+    <string name="box_info">💾 Save box</string>
+    <string name="save_box">Package</string>
+    <string name="shoe_box">Shoes</string>
+    <string name="bag_box">Bag</string>
+    <string name="client_code">👤 Client code (KG)</string>
+    <string name="search_client">Search by name</string>
+    <string name="dimensions">📏 Dimensions (L x W x H), cm</string>
+    <string name="volume_weight">Volume weight: %.2f kg</string>
+    <string name="sizes">Sizes: %1$d × %2$d × %3$d</string>
+    <string name="orders_count">Orders: %d</string>
+    <string name="date_created">Created: %s</string>
+    <string name="box">Box: %s</string>
+    <string name="calc_v_weight">🧮 Calculation of volumetric weight</string>
+    <string name="dimensions_more_0">☝️ Dimensions must be greater than 0</string>
+
+
+
+    <!-- fragment of the boxes -->
+    <string name="add_new_box">Add new box</string>
+    <string name="add_box_to_party">Add box</string>
+    <string name="party_detail_hint">Select an open box and add it to this batch.</string>
+    <string name="new_box_number">A number will be created: …</string>
+    <string name="length">Length (cm)</string>
+    <string name="width">Width (см)</string>
+    <string name="height">Height (см)</string>
+    <string name="values_cm">values in cm</string>
+    <string name="length_l">Length L</string>
+    <string name="width_w">Width W</string>
+    <string name="height_h">Height H</string>
+    <string name="total_weight">Total: 0.00 kg</string>
+    <string name="tracking_code">Tracking code</string>
+    <string name="order_deleted">Order deleted</string>
+    <string name="delete_order">Delete order</string>
+    <string name="search_error">Search error: %1$d</string>
+    <string name="order_not_found">Order not found</string>
+    <string name="weight_total">Total weight: %1$.2f kg</string>
+
+
+
+
+    <!--   fragment of the party -->
+    <string name="part_title">Batch</string>
+    <string name="part">Batch %1$s</string>
+    <string name="no_party_name">No name</string>
+    <string name="new_part">Creation of a new batch</string>
+    <string name="create_party">New batch</string>
+    <string name="input_part">Batch name KG (numbers only)</string>
+    <string name="track_code">Track code: %1$s</string>
+    <string name="part_name">Batch code: %1$s</string>
+    <string name="country">Country: %1$s</string>
+    <string name="boxes_count">Box count: %1d</string>
+    <string name="input_part_name">Input batch name</string>
+    <string name="part_created">The batch was created</string>
+    <string name="edit_party_name_title">Edit batch name</string>
+    <string name="party_name_updated">Batch name updated</string>
+    <string name="error_code">Error creating code %d</string>
+    <string name="date">Date: %1$s</string>
+    <string name="no_date">no date</string>
+    <string name="box_added">The box was added</string>
+    <string name="show_all">Show all</string>
+    <string name="in_work">In work</string>
+    <string name="party_status_open">In work</string>
+    <string name="party_status_finished">Finished</string>
+    <string name="restore_party_title">Restore to work?</string>
+    <string name="restore_party_message">Are you sure you want to restore batch %1$s to work?</string>
+    <string name="party_restored">Batch restored to work</string>
+    <string name="finished_label"> (Finished)</string>
+
+    <!-- fragment unclosed -->
+    <string name="unclosed">Unclosed</string>
+    <string name="unpacked_orders_title">📊 Unpacked Orders</string>
+    <string name="unpacked_count_default">Total orders: <b>%1$d</b></string>
+    <string name="search_hint">Search by track or client…</string>
+    <string name="today">Today</string>
+    <string name="last_3_days">Last 3 days</string>
+    <string name="last_week">Last week</string>
+    <string name="all_time">All time</string>
+    <string name="print_report">Print Report</string>
+    <string name="no_unpacked_orders">No unpacked orders</string>
+    <string name="report_end">The report is generated automatically.</string>
+    <string name="no_data_to_send">❌ No data to send</string>
+
+
+
+    <!-- Client search dialog-->
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="search_client_title">🕵🏻 Search by name and surname</string>
+    <string name="search">Search</string>
+    <string name="loading_clients">Loading clients…</string>
+    <string name="no_client_found">🙅🏻‍♀️ Client not found</string>
+    <string name="clients_found">Multiple clients found</string>
+
+
+    <!-- Track search dialog-->
+    <string name="input_track">Enter the tracking number</string>
+    <string name="for_example">For example: 28038252</string>
+    <string name="select_box">Select a box to add</string>
+    <string name="orders">Orders: 0</string>
+    <string name="edit_dimensions_and_weight">✏️ Editing dimensions and weight</string>
+
+
+    <!-- Dialog превышения веса -->
+    <string name="weight_limit_title">⚠️ Check weight</string>
+    <string name="weight_limit_message">The entered weight %1$.2f kg exceeds 8 kg.\nAre you sure this is correct?</string>
+    <string name="weight_limit_positive">✔ Yes, send</string>
+    <string name="weight_limit_negative">✘ No, change</string>
+
+    <!-- Global Search Dialog -->
+    <string name="title_find">🕵🏻 Global Search</string>
+    <string name="find">Find</string>
+    <string name="finding">Finding %s… </string>
+    <string name="error">Error: %s</string>
+    <string name="empty">Empty,</string>
+    <string name="no_founded">Empty, Track %s not found</string>
+
+    <string name="dialog_title_info">Track info %1$s</string>
+    <string name="registration_title">📋 REGISTRATION</string>
+    <string name="client">Client</string>
+    <string name="weight_kg2">Вес: %1$.2f кг</string>
+    <string name="reg_date">Date of reg.: %1$s</string>
+    <string name="no_registration">❌ No registration data available</string>
+
+    <string name="in_box_title">📦 IN THE BOX</string>
+    <string name="box_number">Box number: %1$s</string>
+    <string name="actual_weight">Actual weight: %1$.2f кг</string>
+    <string name="packed_date">Packed: %1$s</string>
+    <string name="not_packed_yet">⚠️ The order has not yet been packed in a box.</string>
+
+    <string name="not_found">Track %1$s not found</string>
+
+
+    <string-array name="theme_entries">
+        <item>Follow System</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
+    <string name="theme_title">App Theme</string>
+
+    <string name="share_report">Share Report</string>
+    <string name="share_via">Share via…</string>
+
+
+
+    <string name="box_tare_weight">Box weight (kg)</string>
+    <string name="gross_weight_total">Gross weight (kg)</string>
+    <string name="license_need_activation_detail">Enter email to request trial access.</string>
+    <string name="license_invalid_detail">Contact the developer to restore access.</string>
+    <string name="license_checking_detail">Getting the current license status.</string>
+    <string name="license_activation_message">Enter email to start. Trial access is valid for 3 days.</string>
+    <string name="license_start_trial">Start trial</string>
+    <string name="license_trial_expired_title">Trial period ended</string>
+    <string name="license_no_access_title">No access</string>
+    <string name="license_trial_expired_message">Request a full license from the developer.</string>
+    <string name="license_revoked_message">License was revoked. Contact the developer.</string>
+    <string name="license_expired_message">License has expired. Contact the developer.</string>
+    <string name="license_device_mismatch_message">License is linked to another device.</string>
+    <string name="license_invalid_message">License is invalid. Contact the developer.</string>
+    <string name="license_active_full_status">License is active with no expiration</string>
+    <string name="license_trial_status">Trial access: %1$d days left (until %2$s)</string>
+    <string name="connection_error_title">Could not check license</string>
+    <string name="connection_error_message">Check the internet connection or try later: the license server is unavailable.</string>
+    <string name="app_version_title">App version</string>
+    <string name="app_version_summary">Version %1$s (code %2$d)</string>
+    <string name="party_detail_info">Warehouse: %1$s | Boxes: %2$d</string>
+    <string name="party_detail_info_placeholder">Warehouse: - | Boxes: 0</string>
+    <string name="edit_box_tracking_title">Edit box tracking code</string>
+    <string name="box_tracking_empty">Enter the box tracking code</string>
+    <string name="box_tracking_unchanged">Tracking code was not changed</string>
+    <string name="box_tracking_updated">Box tracking code updated</string>
+    <string name="error_update_box_tracking">Could not update box tracking code</string>
+    <string name="current_box_tracking">Current tracking code: %1$s</string>
+    <string name="paste_from_clipboard">Paste</string>
+    <string name="paste_order_track_from_clipboard">Paste order track from clipboard</string>
+    <string name="clipboard_empty">Clipboard is empty</string>
+</resources>

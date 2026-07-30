@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:key="language"
+        app:title="@string/language_settings"
+        app:summary="%s"
+        app:defaultValue="system"
+        app:entries="@array/language_entries"
+        app:entryValues="@array/language_values"
+        app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        app:key="theme"
+        app:title="@string/theme_title"
+        app:summary="%s"
+        app:defaultValue="system"
+        app:entries="@array/theme_entries"
+        app:entryValues="@array/theme_values"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory app:title="@string/server_settings">
+
+        <EditTextPreference
+            app:key="api_url"
+            app:title="@string/server_url_title"
+            app:summary="@string/server_url_summary"
+            app:defaultValue="https://onza-api.ibm.kg"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="login"
+            app:title="@string/login_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="password"
+            app:title="@string/password_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            app:key="clear_token"
+            app:title="@string/clear_token_title"
+            app:summary="@string/clear_token_summary" />
+
+        <EditTextPreference
+            app:key="vol_weight"
+            app:title="@string/vol_weight_title"
+            app:summary="@string/vol_weight_summary"
+            app:defaultValue="6000"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number" />
+
+        <EditTextPreference
+            app:key="weight_server_url"
+            app:title="@string/server_weight_address"
+            app:summary="@string/server_weight_address_summary"
+            app:defaultValue="http://192.168.1.50"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="textUri" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/printer_settings">
+
+        <EditTextPreference
+            app:key="printer_ip"
+            app:title="@string/printer_ip_title"
+            app:summary="@string/printer_ip_summary"
+            app:defaultValue="192.168.1.168"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="text" />
+
+        <EditTextPreference
+            app:key="printer_width"
+            app:title="@string/printer_width_title"
+            app:summary="@string/printer_width_summary"
+            app:defaultValue="100"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number" />
+
+        <EditTextPreference
+            app:key="printer_height"
+            app:title="@string/printer_height_title"
+            app:summary="@string/printer_height_summary"
+            app:defaultValue="150"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="number" />
+
+        <Preference
+            app:key="test_print"
+            app:title="@string/test_print"
+            app:summary="@string/test_print_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/licence_title">
+
+        <EditTextPreference
+            app:key="user_email"
+            app:title="@string/licence_email_title"
+            app:summary="@string/licence_email_summary"
+            app:defaultValue=""
+            android:inputType="textEmailAddress" />
+
+        <Preference
+            app:key="license_status"
+            app:title="@string/licence_status_title"
+            app:summary="@string/licence_status_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/developer_info_title">
+
+        <Preference
+            app:key="app_version"
+            app:title="@string/app_version_title"
+            app:summary="@string/app_version_summary" />
+
+        <Preference
+            app:key="developer_info"
+            app:title="@string/developer_title"
+            app:summary="@string/developer_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
