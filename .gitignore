@@ -1,0 +1,23 @@
+# Gradle and Android build output
+.gradle/
+.gradle-user/
+**/build/
+.cxx/
+**/.cxx/
+externalNativeBuild/
+
+# Local SDK and environment configuration
+local.properties
+.env
+**/.env
+
+# Android Studio and OS files
+.idea/
+*.iml
+captures/
+.DS_Store
+Thumbs.db
+
+# Local signing material
+*.jks
+*.keystore
