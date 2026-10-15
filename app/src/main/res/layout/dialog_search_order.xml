@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/app_surface"
     android:orientation="vertical"
     android:padding="20dp">
 
@@ -9,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/input_track"
+        android:textColor="@color/app_text_primary"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp"/>
@@ -20,6 +22,8 @@
         android:hint="@string/for_example"
         android:background="@android:drawable/edit_text"
         android:padding="12dp"
-        android:inputType="textCapCharacters" />
+        android:inputType="textCapCharacters"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary" />
 
 </LinearLayout>

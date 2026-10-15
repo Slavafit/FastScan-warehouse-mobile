@@ -226,8 +226,10 @@
                     android:focusable="false"
                     android:longClickable="false"
                     android:cursorVisible="false"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
                     android:background="@android:drawable/edit_text"
-                    android:alpha="0.8" />
+                    android:alpha="1" />
                 <EditText
                     android:id="@+id/etWidth"
                     android:layout_width="0dp"
@@ -238,8 +240,10 @@
                     android:focusable="false"
                     android:longClickable="false"
                     android:cursorVisible="false"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
                     android:background="@android:drawable/edit_text"
-                    android:alpha="0.8" />
+                    android:alpha="1" />
 
                 <EditText
                     android:id="@+id/etHeight"
@@ -250,8 +254,10 @@
                     android:focusable="false"
                     android:longClickable="false"
                     android:cursorVisible="false"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
                     android:background="@android:drawable/edit_text"
-                    android:alpha="0.8" />
+                    android:alpha="1" />
 
             </LinearLayout>
             <Space android:layout_width="match_parent" android:layout_height="32dp" />

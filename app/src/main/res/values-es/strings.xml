@@ -187,6 +187,8 @@
     <string name="tracking_code">Código de seguimiento</string>
     <string name="order_deleted">Pedido eliminado</string>
     <string name="delete_order">Eliminar pedido</string>
+    <string name="confirm_delete_order">¿Eliminar este pedido de la caja?</string>
+    <string name="delete">Eliminar</string>
     <string name="search_error">Error de búsqueda: %1$d</string>
     <string name="order_not_found">Pedido no encontrado</string>
     <string name="weight_total">Weight total: %1$.2f kg</string>

@@ -189,6 +189,8 @@
     <string name="tracking_code">Tracking code</string>
     <string name="order_deleted">Order deleted</string>
     <string name="delete_order">Delete order</string>
+    <string name="confirm_delete_order">Remove this order from the box?</string>
+    <string name="delete">Delete</string>
     <string name="search_error">Search error: %1$d</string>
     <string name="order_not_found">Order not found</string>
     <string name="weight_total">Total weight: %1$.2f kg</string>

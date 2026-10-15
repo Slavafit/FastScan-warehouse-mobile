@@ -134,7 +134,11 @@ class BoxFragment : BaseFragment() {
                             }
                             if (newBoxPosition >= 0 && _binding != null) {
                                 boxesAdapter.highlightBox(highlightTrackingCode)
-                                binding.rvBoxes.scrollToPosition(newBoxPosition)
+                                binding.rvBoxes.post {
+                                    if (_binding == null) return@post
+                                    (binding.rvBoxes.layoutManager as? LinearLayoutManager)
+                                        ?.scrollToPositionWithOffset(newBoxPosition, 0)
+                                }
                                 binding.rvBoxes.postDelayed(
                                     { boxesAdapter.clearHighlight(highlightTrackingCode) },
                                     NEW_BOX_HIGHLIGHT_DURATION_MS

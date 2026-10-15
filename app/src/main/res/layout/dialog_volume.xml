@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/app_surface"
     android:orientation="vertical"
     android:padding="24dp">
 
@@ -9,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/values_cm"
+        android:textColor="@color/app_text_primary"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
@@ -18,19 +20,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/length_l"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/black"
+        android:textColorHint="@color/app_text_secondary" />
     <EditText
         android:id="@+id/etWidth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/width_w"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/black"
+        android:textColorHint="@color/app_text_secondary" />
     <EditText
         android:id="@+id/etHeight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/height_h"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/black"
+        android:textColorHint="@color/app_text_secondary" />
 
     <TextView
         android:id="@+id/tvResultPreview"

@@ -19,20 +19,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/length"
-        android:inputType="number" />
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary" />
 
     <EditText
         android:id="@+id/etWidth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/width"
-        android:inputType="number" />
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary" />
 
     <EditText
         android:id="@+id/etHeight"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/height"
-        android:inputType="number" />
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_secondary" />
 
 </LinearLayout>

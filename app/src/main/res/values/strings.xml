@@ -229,6 +229,8 @@
     <string name="tracking_code">Трек-код</string>
     <string name="order_deleted">Заказ удалён</string>
     <string name="delete_order">Удалить заказ</string>
+    <string name="confirm_delete_order">Удалить этот заказ из коробки?</string>
+    <string name="delete">Удалить</string>
     <string name="search_error">Ошибка поиска: %1$d</string>
     <string name="order_not_found">Заказ не найден</string>
     <string name="weight_total">Общий вес: %1$.2f кг</string>

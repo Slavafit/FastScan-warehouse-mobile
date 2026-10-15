@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -98,6 +99,7 @@ class BoxDetailFragment : BaseFragment() {
         binding.rvOrders.layoutManager = LinearLayoutManager(requireContext())
         binding.rvOrders.adapter = ordersAdapter
         binding.etBoxTareWeight.setText(formatWeight(requireContext().getBoxTareWeight()))
+        binding.tvBoxNumber.text = getString(R.string.box, boxTracking)
 
         setupClickListeners()
         setupSizeListeners()
@@ -265,6 +267,17 @@ class BoxDetailFragment : BaseFragment() {
     }
 
     private fun removeOrderFromBox(orderGuid: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.delete_order)
+            .setMessage(R.string.confirm_delete_order)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                performOrderRemoval(orderGuid)
+            }
+            .show()
+    }
+
+    private fun performOrderRemoval(orderGuid: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val request = RemoveOrderRequest(orderGuid)
