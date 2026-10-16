@@ -13,39 +13,55 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvTrackingCode"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="NBX..."
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvDimensions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="" />
+            <TextView
+                android:id="@+id/tvTrackingCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NBX..."
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvGrossWeight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="" />
+            <TextView
+                android:id="@+id/tvDimensions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
 
-        <TextView
-            android:id="@+id/tvVWeight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="" />
+            <TextView
+                android:id="@+id/tvGrossWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
 
-        <TextView
-            android:id="@+id/tvOrderCount"
+            <TextView
+                android:id="@+id/tvVWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tvOrderCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+        </LinearLayout>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/cbInParty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="" />
+            android:clickable="false"
+            android:focusable="false" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

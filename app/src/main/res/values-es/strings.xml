@@ -148,6 +148,9 @@
     <string name="delete_box">Eliminar la caja no está disponible temporalmente.</string>
     <string name="error_load_boxes_short">Error al cargar la lista de cajas</string>
     <string name="error_adding_box">Error al agregar la caja al lote</string>
+    <string name="box_added_to_party">Caja agregada al lote</string>
+    <string name="box_in_party">La caja ya está en un lote</string>
+    <string name="box_not_in_party">La caja no está en un lote</string>
     <string name="dimensions_cleared">Dimensiones eliminadas</string>
 
 
@@ -294,8 +297,6 @@
     </string-array>
 
     <string name="theme_title">Tema de la aplicación</string>
-
-    <string name="share_report">Compartir reporte</string>
     <string name="share_via">Compartir vía...</string>
 
 
@@ -321,6 +322,10 @@
     <string name="app_version_summary">Versión %1$s (código %2$d)</string>
     <string name="party_detail_info">Almacén: %1$s | Cajas: %2$d</string>
     <string name="party_detail_info_placeholder">Almacén: - | Cajas: 0</string>
+    <string name="get_party_weight">Obtener peso del lote</string>
+    <string name="party_weight_title">Peso del lote</string>
+    <string name="party_weight_result">Lote: %1$s\nCajas: %2$d\nPeso total: %3$.2f kg</string>
+    <string name="party_weight_error">No se pudo obtener el peso del lote</string>
     <string name="edit_box_tracking_title">Editar código de seguimiento de la caja</string>
     <string name="box_tracking_empty">Introduce el código de seguimiento de la caja</string>
     <string name="box_tracking_unchanged">El código de seguimiento no ha cambiado</string>
@@ -330,4 +335,20 @@
     <string name="paste_from_clipboard">Pegar</string>
     <string name="paste_order_track_from_clipboard">Pegar seguimiento del pedido</string>
     <string name="clipboard_empty">El portapapeles está vacío</string>
+    <string name="reports">Informes</string>
+    <string name="report_today">Informe de hoy</string>
+    <string name="report_by_party">Informe por lote</string>
+    <string name="share_report">Compartir informe</string>
+    <string name="report_empty">Seleccione un tipo de informe</string>
+    <string name="select_party_for_report">Seleccione un lote</string>
+    <string name="daily_report_title">INFORME DEL %1$s</string>
+    <string name="party_report_title">INFORME DEL LOTE %1$s</string>
+    <string name="party_report_box_summary">Cajas: %1$d | Peso de cajas: %2$.2f kg</string>
+    <string name="report_totals">Pedidos: %1$d | Peso total: %2$.2f kg</string>
+    <string name="report_client_summary">Pedidos: %1$d | Peso: %2$.2f kg</string>
+    <string name="report_load_error">No se pudo generar el informe</string>
+    <string name="box_weight_placeholder">Caja:\n— kg</string>
+    <string name="box_weight_summary">Caja:\n%1$.2f kg</string>
+    <string name="report_client_code_filter">Código de cliente — déjelo vacío para todos</string>
+    <string name="report_client_filter_applied">Cliente: %1$s</string>
 </resources>

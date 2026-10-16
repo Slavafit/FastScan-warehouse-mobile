@@ -10,8 +10,15 @@ import com.ocr.fastscan.data.model.BoxInPartial
 import com.ocr.fastscan.databinding.ItemOpenBoxBinding
 
 class OpenBoxesAdapter(
+    private val currentPartyGuid: String,
     private val onClick: (BoxInPartial) -> Unit
 ) : ListAdapter<BoxInPartial, OpenBoxesAdapter.ViewHolder>(BoxDiffCallback()) {
+
+    fun markAdded(boxGuid: String) {
+        submitList(currentList.map { box ->
+            if (box.guid == boxGuid) box.copy(partial = currentPartyGuid) else box
+        })
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemOpenBoxBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -26,16 +33,23 @@ class OpenBoxesAdapter(
 
         private val context = binding.root.context
         fun bind(box: BoxInPartial) {
+            val isInParty = box.partial.isNotBlank()
             binding.tvTrackingCode.text = context.getString(
                 R.string.track_code, box.tracking_code)
             binding.tvDimensions.text = context.getString(
                 R.string.sizes, box.width, box.height, box.length)
             binding.tvGrossWeight.text = context.getString(R.string.weight_format, box.gross_weight)
             binding.tvVWeight.text = context.getString(R.string.volume_weight, box.v_weight)
+            binding.cbInParty.isChecked = isInParty
+            binding.cbInParty.contentDescription = context.getString(
+                if (isInParty) R.string.box_in_party else R.string.box_not_in_party
+            )
             //binding.tvOrderCount.text = "Заказов: ${box.orderCount}"
 
+            binding.root.alpha = if (isInParty && box.partial != currentPartyGuid) 0.55f else 1f
+            binding.root.isEnabled = !isInParty
             binding.root.setOnClickListener {
-                onClick(box)
+                if (!isInParty) onClick(box)
             }
         }
     }

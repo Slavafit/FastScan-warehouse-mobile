@@ -7,8 +7,8 @@ object PartyNumberFormatter {
         return if (cleaned.startsWith("KG")) cleaned else "KG$cleaned"
     }
 
-    fun display(value: String): String {
-        val trimmed = value.trim()
+    fun display(value: String?): String {
+        val trimmed = value?.trim().orEmpty()
         val cleaned = trimmed.uppercase().replace("\\s+".toRegex(), "")
         if (cleaned.isEmpty()) return ""
 

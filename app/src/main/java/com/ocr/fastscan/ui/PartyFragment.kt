@@ -32,7 +32,7 @@ class PartyFragment : BaseFragment() {
                 partial.guid,
                 partial.codeid,
                 partial.partial_code,
-                partial.partial_name
+                PartyNumberFormatter.display(partial.partial_name).ifBlank { partial.partial_code }
             )
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, detailFragment)
@@ -141,7 +141,8 @@ class PartyFragment : BaseFragment() {
                 val request = PartialUpdateRequest(
                     guid = party.guid,
                     partial_code = party.partial_code,
-                    partial_name = party.partial_name,
+                    partial_name = PartyNumberFormatter.display(party.partial_name)
+                        .ifBlank { party.partial_code },
                     status = 0
                 )
                 val response = apiService.updatePartial(request)

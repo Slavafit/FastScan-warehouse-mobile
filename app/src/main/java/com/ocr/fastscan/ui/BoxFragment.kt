@@ -108,7 +108,8 @@ class BoxFragment : BaseFragment() {
 
     private fun loadBoxes(
         isOpenOnly: Boolean = true,
-        highlightTrackingCode: String? = null
+        highlightTrackingCode: String? = null,
+        highlightAttempt: Int = 0
     ) {
         if (isLoading) return
         isLoading = true
@@ -126,13 +127,13 @@ class BoxFragment : BaseFragment() {
                     val boxTareWeight = requireContext().getBoxTareWeight()
                     val requestId = ++weightLoadRequestId
                     val boxes = prepareBoxesForDisplay(response.body()!!, highlightTrackingCode)
+                    val newBoxPosition = highlightTrackingCode?.let { trackingCode ->
+                        boxes.indexOfFirst { it.trackingCode == trackingCode }
+                    } ?: -1
 
                     boxesAdapter.submitList(boxes) {
-                        if (highlightTrackingCode != null) {
-                            val newBoxPosition = boxes.indexOfFirst {
-                                it.trackingCode == highlightTrackingCode
-                            }
-                            if (newBoxPosition >= 0 && _binding != null) {
+                        if (highlightTrackingCode != null && newBoxPosition >= 0) {
+                            if (_binding != null) {
                                 boxesAdapter.highlightBox(highlightTrackingCode)
                                 binding.rvBoxes.post {
                                     if (_binding == null) return@post
@@ -144,6 +145,21 @@ class BoxFragment : BaseFragment() {
                                     NEW_BOX_HIGHLIGHT_DURATION_MS
                                 )
                             }
+                        }
+                    }
+
+                    if (
+                        highlightTrackingCode != null &&
+                        newBoxPosition < 0 &&
+                        highlightAttempt < NEW_BOX_MAX_LOAD_ATTEMPTS
+                    ) {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            delay(NEW_BOX_RELOAD_DELAY_MS)
+                            loadBoxes(
+                                isOpenOnly = isOpenOnly,
+                                highlightTrackingCode = highlightTrackingCode,
+                                highlightAttempt = highlightAttempt + 1
+                            )
                         }
                     }
 
@@ -188,7 +204,8 @@ class BoxFragment : BaseFragment() {
                 }
                 dedupedByIdentity[key] = selectedBox
             }
-        return dedupedByIdentity.values.toList()
+        return dedupedByIdentity.values
+            .sortedByDescending { it.trackingCode == preferredTrackingCode }
     }
 
     private fun boxIdentityKey(box: BoxItem): String? {
@@ -403,6 +420,8 @@ class BoxFragment : BaseFragment() {
 
     private companion object {
         const val NEW_BOX_HIGHLIGHT_DURATION_MS = 2500L
+        const val NEW_BOX_RELOAD_DELAY_MS = 700L
+        const val NEW_BOX_MAX_LOAD_ATTEMPTS = 5
         const val BOX_WEIGHT_BATCH_SIZE = 4
     }
 }

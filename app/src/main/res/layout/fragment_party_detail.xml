@@ -116,7 +116,23 @@
         app:layout_constraintBottom_toTopOf="@id/btnFinishParty"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnAddBox" />
+        app:layout_constraintTop_toBottomOf="@id/btnGetPartyWeight" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGetPartyWeight"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/get_party_weight"
+        android:textAllCaps="false"
+        app:icon="@drawable/ic_scale"
+        app:iconGravity="textStart"
+        app:iconTint="@color/app_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnAddBox"
+        app:strokeColor="@color/action_button_outline" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFinishParty"

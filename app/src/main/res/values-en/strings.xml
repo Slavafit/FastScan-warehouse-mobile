@@ -142,6 +142,9 @@
     <string name="delete_box">Box removal is temporarily unavailable.</string>
     <string name="error_load_boxes_short">Error loading box list</string>
     <string name="error_adding_box">Error adding box to batch</string>
+    <string name="box_added_to_party">Box added to batch</string>
+    <string name="box_in_party">Box is already in a batch</string>
+    <string name="box_not_in_party">Box is not in a batch</string>
     <string name="dimensions_cleared">Dimensions cleared</string>
 
 
@@ -304,7 +307,6 @@
 
     <string name="theme_title">App Theme</string>
 
-    <string name="share_report">Share Report</string>
     <string name="share_via">Share via…</string>
 
 
@@ -331,6 +333,10 @@
     <string name="app_version_summary">Version %1$s (code %2$d)</string>
     <string name="party_detail_info">Warehouse: %1$s | Boxes: %2$d</string>
     <string name="party_detail_info_placeholder">Warehouse: - | Boxes: 0</string>
+    <string name="get_party_weight">Get batch weight</string>
+    <string name="party_weight_title">Batch weight</string>
+    <string name="party_weight_result">Batch: %1$s\nBoxes: %2$d\nTotal weight: %3$.2f kg</string>
+    <string name="party_weight_error">Failed to get batch weight</string>
     <string name="edit_box_tracking_title">Edit box tracking code</string>
     <string name="box_tracking_empty">Enter the box tracking code</string>
     <string name="box_tracking_unchanged">Tracking code was not changed</string>
@@ -340,4 +346,20 @@
     <string name="paste_from_clipboard">Paste</string>
     <string name="paste_order_track_from_clipboard">Paste order track from clipboard</string>
     <string name="clipboard_empty">Clipboard is empty</string>
+    <string name="reports">Reports</string>
+    <string name="report_today">Today’s report</string>
+    <string name="report_by_party">Batch report</string>
+    <string name="share_report">Share report</string>
+    <string name="report_empty">Select a report type</string>
+    <string name="select_party_for_report">Select a batch</string>
+    <string name="daily_report_title">REPORT FOR %1$s</string>
+    <string name="party_report_title">BATCH REPORT %1$s</string>
+    <string name="party_report_box_summary">Boxes: %1$d | Box weight: %2$.2f kg</string>
+    <string name="report_totals">Orders: %1$d | Total weight: %2$.2f kg</string>
+    <string name="report_client_summary">Orders: %1$d | Weight: %2$.2f kg</string>
+    <string name="report_load_error">Failed to generate report</string>
+    <string name="box_weight_placeholder">Box:\n— kg</string>
+    <string name="box_weight_summary">Box:\n%1$.2f kg</string>
+    <string name="report_client_code_filter">Client code — leave blank for all</string>
+    <string name="report_client_filter_applied">Client: %1$s</string>
 </resources>

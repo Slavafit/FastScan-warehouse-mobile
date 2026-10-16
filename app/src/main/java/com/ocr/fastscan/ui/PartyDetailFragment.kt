@@ -85,6 +85,7 @@ class PartyDetailFragment : BaseFragment() {
         binding.rvBoxes.adapter = boxesAdapter
 
         binding.btnAddBox.setOnClickListener { showSelectBoxDialog() }
+        binding.btnGetPartyWeight.setOnClickListener { calculatePartyWeight() }
         binding.btnFinishParty.setOnClickListener { showFinishPartyDialog() }
         binding.btnEditPartyName.setOnClickListener { showEditPartyNameDialog() }
         binding.tvTitle.setOnLongClickListener {
@@ -94,6 +95,51 @@ class PartyDetailFragment : BaseFragment() {
         binding.btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
         loadBoxDetails()
+    }
+
+    private fun calculatePartyWeight() {
+        launchOnViewLifecycle {
+            val activeBinding = _binding ?: return@launchOnViewLifecycle
+            activeBinding.progressBar.visibility = View.VISIBLE
+            activeBinding.btnGetPartyWeight.isEnabled = false
+            try {
+                val response = apiService.getBoxesInPartial(partialGuid)
+                if (_binding == null || !isAdded) return@launchOnViewLifecycle
+
+                if (response.isSuccessful) {
+                    val boxes = response.body().orEmpty()
+                    currentBoxes = boxes
+                    boxesAdapter.submitList(boxes)
+                    binding.tvInfo.text = getString(R.string.party_detail_info, "BMG", boxes.size)
+
+                    val totalWeight = boxes.sumOf { it.gross_weight }
+                    AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.party_weight_title)
+                        .setMessage(
+                            getString(
+                                R.string.party_weight_result,
+                                displayPartyNumber,
+                                boxes.size,
+                                totalWeight
+                            )
+                        )
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                } else {
+                    showToast(R.string.party_weight_error)
+                    soundManager.playError()
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("PartyDetail", "Calculate party weight error", e)
+                if (isAdded) showToast(R.string.party_weight_error)
+                soundManager.playError()
+            } finally {
+                _binding?.progressBar?.visibility = View.GONE
+                _binding?.btnGetPartyWeight?.isEnabled = true
+            }
+        }
     }
 
     private fun showEditPartyNameDialog() {
@@ -211,9 +257,11 @@ class PartyDetailFragment : BaseFragment() {
             .setView(dialogBinding.root)
             .create()
 
-        val adapter = OpenBoxesAdapter { box ->
-            addBoxToParty(box)
-            dialog.dismiss()
+        lateinit var adapter: OpenBoxesAdapter
+        adapter = OpenBoxesAdapter(partialGuid) { box ->
+            addBoxToParty(box) {
+                adapter.markAdded(box.guid)
+            }
         }
         dialogBinding.rvOpenBoxes.layoutManager = LinearLayoutManager(requireContext())
         dialogBinding.rvOpenBoxes.adapter = adapter
@@ -234,7 +282,7 @@ class PartyDetailFragment : BaseFragment() {
         dialog.show()
     }
 
-    private fun addBoxToParty(box: BoxInPartial) {
+    private fun addBoxToParty(box: BoxInPartial, onSuccess: () -> Unit) {
         launchOnViewLifecycle {
             val activeBinding = _binding ?: return@launchOnViewLifecycle
             activeBinding.progressBar.visibility = View.VISIBLE
@@ -254,6 +302,8 @@ class PartyDetailFragment : BaseFragment() {
                 if (_binding == null || !isAdded) return@launchOnViewLifecycle
                 if (response.isSuccessful && response.body()?.success == true) {
                     soundManager.playSuccess()
+                    onSuccess()
+                    showToast(R.string.box_added_to_party)
                     loadBoxDetails()
                 } else {
                     showToast(R.string.error_adding_box)

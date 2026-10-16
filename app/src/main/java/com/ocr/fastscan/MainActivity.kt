@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager
 import com.ocr.fastscan.databinding.ActivityMainBinding
 import com.ocr.fastscan.ui.BoxFragment
 import com.ocr.fastscan.ui.PartyFragment
+import com.ocr.fastscan.ui.ReportsFragment
 import com.ocr.fastscan.ui.ScanFragment
 import com.ocr.fastscan.ui.UnpackedOrdersFragment
 import com.ocr.fastscan.utils.AppDependencies
@@ -31,6 +32,9 @@ import java.util.Date
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var isNavigationSetup = false
+    private var pendingNavigationSetup = false
+    private var pendingInitialScreen = false
 
     // Смена языка и темы при запуске приложения
     override fun attachBaseContext(newBase: Context) {
@@ -91,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             val licenseResult = checker.checkLicense(this@MainActivity)
 
             if (licenseResult.hasAccess) {
-                setupNavigation(savedInstanceState)
+                setupNavigationWhenSafe(showInitialScreen = savedInstanceState == null)
 
                 // Показываем статус лицензии
                 Toast.makeText(this@MainActivity, licenseResult.toUserMessage(), Toast.LENGTH_LONG).show()
@@ -100,6 +104,13 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
                 finish()
             }
+        }
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        if (pendingNavigationSetup) {
+            setupNavigationWhenSafe(showInitialScreen = pendingInitialScreen)
         }
     }
 
@@ -124,8 +135,25 @@ class MainActivity : AppCompatActivity() {
         return (((expiresAt * 1000) - Date().time) / (1000 * 60 * 60 * 24)).toInt().coerceAtLeast(0)
     }
 
-    private fun setupNavigation(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {
+    private fun setupNavigationWhenSafe(showInitialScreen: Boolean) {
+        if (isFinishing || isDestroyed || isNavigationSetup) return
+
+        if (supportFragmentManager.isStateSaved) {
+            pendingNavigationSetup = true
+            pendingInitialScreen = pendingInitialScreen || showInitialScreen
+            return
+        }
+
+        pendingNavigationSetup = false
+        pendingInitialScreen = false
+        setupNavigation(showInitialScreen)
+    }
+
+    private fun setupNavigation(showInitialScreen: Boolean) {
+        if (isNavigationSetup) return
+        isNavigationSetup = true
+
+        if (showInitialScreen) {
             navigateToTopLevel(R.id.nav_scan, clearBackStack = false)
         }
 
@@ -156,6 +184,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateToTopLevel(itemId: Int, clearBackStack: Boolean = true): Boolean {
+        if (isFinishing || isDestroyed || supportFragmentManager.isStateSaved) {
+            return false
+        }
+
         val fragment = createTopLevelFragment(itemId) ?: return false
 
         if (clearBackStack) {
@@ -179,6 +211,7 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_boxes -> BoxFragment()
             R.id.nav_batches -> PartyFragment()
             R.id.nav_unpacked -> UnpackedOrdersFragment()
+            R.id.nav_reports -> ReportsFragment()
             else -> null
         }
     }

@@ -263,6 +263,8 @@ class BoxDetailFragment : BaseFragment() {
         val boxTareWeight = parseWeight(activeBinding.etBoxTareWeight.text.toString())
             ?: context?.getBoxTareWeight()
             ?: DEFAULT_BOX_TARE_WEIGHT
+        activeBinding.tvBoxTareWeightSummary.text =
+            getString(R.string.box_weight_summary, boxTareWeight)
         activeBinding.etGrossWeight.setText(formatWeight(ordersGrossWeight + boxTareWeight))
     }
 
@@ -425,7 +427,8 @@ class BoxDetailFragment : BaseFragment() {
                     if (parties.isNotEmpty()) {
                         // Сортируем по дате убыванию, чтобы взять самую свежую
                         val latestParty = parties.sortedByDescending { it.date_created }.first()
-                        partialName = latestParty.partial_name.trim()
+                        partialName = PartyNumberFormatter.display(latestParty.partial_name)
+                            .ifBlank { latestParty.partial_code }
                         Log.d("BoxDetail", "Загружено актуальное имя партии: $partialName")
                     }
                 }

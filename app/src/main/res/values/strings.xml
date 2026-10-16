@@ -33,7 +33,6 @@
     </string-array>
 
 
-    <string name="share_report">Поделиться отчётом</string>
     <string name="share_via">Поделиться через…</string>
 
     <string name="server_settings">💻⚙️ Настройки сервера</string>
@@ -175,6 +174,9 @@
     <string name="delete_box">Удаление коробки временно недоступно</string>
     <string name="error_load_boxes_short">Ошибка загрузки списка коробок</string>
     <string name="error_adding_box">Ошибка добавления коробки в партию</string>
+    <string name="box_added_to_party">Коробка добавлена в партию</string>
+    <string name="box_in_party">Коробка уже находится в партии</string>
+    <string name="box_not_in_party">Коробка не добавлена в партию</string>
     <string name="dimensions_cleared">Размеры удалены</string>
 
 
@@ -347,6 +349,10 @@
     <string name="app_version_summary">Версия %1$s (код %2$d)</string>
     <string name="party_detail_info">Склад: %1$s | Коробок: %2$d</string>
     <string name="party_detail_info_placeholder">Склад: - | Коробок: 0</string>
+    <string name="get_party_weight">Получить вес партии</string>
+    <string name="party_weight_title">Вес партии</string>
+    <string name="party_weight_result">Партия: %1$s\nКоробок: %2$d\nОбщий вес: %3$.2f кг</string>
+    <string name="party_weight_error">Не удалось получить вес партии</string>
     <string name="edit_box_tracking_title">Редактировать трек коробки</string>
     <string name="box_tracking_empty">Введите трек коробки</string>
     <string name="box_tracking_unchanged">Трек не изменен</string>
@@ -356,4 +362,20 @@
     <string name="paste_from_clipboard">Вставить</string>
     <string name="paste_order_track_from_clipboard">Вставить трек из буфера</string>
     <string name="clipboard_empty">Буфер обмена пуст</string>
+    <string name="reports">Отчёты</string>
+    <string name="report_today">Отчёт за сегодня</string>
+    <string name="report_by_party">Отчёт по партии</string>
+    <string name="share_report">Отправить отчёт</string>
+    <string name="report_empty">Выберите тип отчёта</string>
+    <string name="select_party_for_report">Выберите партию</string>
+    <string name="daily_report_title">ОТЧЁТ ЗА %1$s</string>
+    <string name="party_report_title">ОТЧЁТ ПО ПАРТИИ %1$s</string>
+    <string name="party_report_box_summary">Коробок: %1$d | Вес коробок: %2$.2f кг</string>
+    <string name="report_totals">Заказов: %1$d | Общий вес: %2$.2f кг</string>
+    <string name="report_client_summary">Заказов: %1$d | Вес: %2$.2f кг</string>
+    <string name="report_load_error">Не удалось сформировать отчёт</string>
+    <string name="box_weight_placeholder">Коробка:\n— кг</string>
+    <string name="box_weight_summary">Коробка:\n%1$.2f кг</string>
+    <string name="report_client_code_filter">Код клиента — оставьте пустым для всех</string>
+    <string name="report_client_filter_applied">Клиент: %1$s</string>
 </resources>
