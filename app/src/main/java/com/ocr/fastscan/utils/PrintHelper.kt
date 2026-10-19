@@ -35,6 +35,45 @@ class PrintHelper(private val activity: Activity) {
 
         val widthDots = getPrinterWidth() * 8
         val heightDots = getPrinterHeight() * 8
+        val isGeneratedTracking = trackingNumber.startsWith("ONZA", ignoreCase = true)
+        val codeBlock: String
+        val dividerY: Int
+        val clientY: Int
+        val nameY: Int
+        val weightY: Int
+        val weightBlock: String
+        val headerY: Int
+
+        if (isGeneratedTracking) {
+            codeBlock = """
+                ^FO250,60^BQN,2,10^FDQA,$trackingNumber^FS
+                ^CF0,34
+                ^FO60,350^FB680,1,0,C,0^FD$trackingNumber^FS
+            """.trimIndent()
+            dividerY = 410
+            clientY = 450
+            nameY = 520
+            weightY = 650
+            weightBlock = """
+                ^CF0,48
+                ^FO80,$weightY^FB600,1,0,L,0^FDGross weight: $weight kg^FS
+            """.trimIndent()
+            headerY = 10
+        } else {
+            codeBlock = """
+                ^BY3,3,100
+                ^FO80,100^BCN,100,Y,N,N^FD$trackingNumber^FS
+            """.trimIndent()
+            dividerY = 280
+            clientY = 320
+            nameY = 380
+            weightY = 500
+            weightBlock = """
+                ^CF0,80
+                ^FO80,$weightY^FDGross weight: $weight kg^FS
+            """.trimIndent()
+            headerY = 40
+        }
 
         val zpl = """
             ^XA
@@ -42,16 +81,14 @@ class PrintHelper(private val activity: Activity) {
             ^LL$heightDots
             ^CI28
             ^CF0,40
-            ^FO80,40^FDONZA ESPAÑA^FS
-            ^BY3,3,100
-            ^FO80,100^BCN,100,Y,N,N^FD$trackingNumber^FS
-            ^FO80,280^GB600,3,3^FS
+            ^FO80,$headerY^FDONZA ESPAÑA^FS
+            $codeBlock
+            ^FO80,$dividerY^GB600,3,3^FS
             ^CF0,50
-            ^FO80,320^FDClient: $clientCode^FS
+            ^FO80,$clientY^FDClient: $clientCode^FS
             ^CF0,35
-            ^FO80,380^FDName: $client^FS
-            ^CF0,80
-            ^FO80,480^FDGross weight: $weight kg^FS
+            ^FO80,$nameY^FB600,2,0,L,0^FDName: $client^FS
+            $weightBlock
             ^XZ
         """.trimIndent()
         
@@ -110,6 +147,7 @@ class PrintHelper(private val activity: Activity) {
             ^CF0,24
             ^FO360,1085^FB340,1,0,L,0^FDVersion $appVersion^FS
             ^FO360,1120^FB340,1,0,L,0^FDDev: $developer^FS
+            ^PQ2
             ^XZ
         """.trimIndent()
         

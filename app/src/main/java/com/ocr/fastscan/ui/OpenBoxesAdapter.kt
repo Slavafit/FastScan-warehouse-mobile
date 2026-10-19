@@ -14,9 +14,14 @@ class OpenBoxesAdapter(
     private val onClick: (BoxInPartial) -> Unit
 ) : ListAdapter<BoxInPartial, OpenBoxesAdapter.ViewHolder>(BoxDiffCallback()) {
 
-    fun markAdded(boxGuid: String) {
+    fun markAdded(addedBox: BoxInPartial) {
         submitList(currentList.map { box ->
-            if (box.guid == boxGuid) box.copy(partial = currentPartyGuid) else box
+            val isSameBox = when {
+                !addedBox.codeid.isNullOrBlank() -> box.codeid == addedBox.codeid
+                !addedBox.guid.isNullOrBlank() -> box.guid == addedBox.guid
+                else -> box.tracking_code == addedBox.tracking_code
+            }
+            if (isSameBox) box.copy(partial = currentPartyGuid) else box
         })
     }
 
@@ -33,7 +38,7 @@ class OpenBoxesAdapter(
 
         private val context = binding.root.context
         fun bind(box: BoxInPartial) {
-            val isInParty = box.partial.isNotBlank()
+            val isInParty = !box.partial.isNullOrBlank()
             binding.tvTrackingCode.text = context.getString(
                 R.string.track_code, box.tracking_code)
             binding.tvDimensions.text = context.getString(

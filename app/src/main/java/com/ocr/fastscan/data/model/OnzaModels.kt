@@ -198,7 +198,7 @@ data class Partial(
 data class BoxInPartial(
     val guid: String,
     val codeid: String,
-    val partial: String,
+    val partial: String? = null,
     val tracking_code: String,
     val width: Int,
     val height: Int,

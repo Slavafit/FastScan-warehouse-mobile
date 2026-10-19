@@ -45,7 +45,7 @@ object ScanUtils {
         binding.cbWithBox.isChecked = false
         binding.cbShoesBox.isChecked = false
         binding.cbBagBox.isChecked = false
-        binding.btnPrint.visibility = View.GONE
+        binding.btnPrint.visibility = View.VISIBLE
     }
  // Если есть другие общие функции — добавляй сюда
 }

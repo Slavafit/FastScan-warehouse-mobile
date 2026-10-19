@@ -362,6 +362,7 @@ class BoxDetailFragment : BaseFragment() {
                 if (addResponse.isSuccessful) {
                     Toast.makeText(context, getString(R.string.order_added), Toast.LENGTH_SHORT).show()
                     soundManager.playSuccess()
+                    soundManager.vibrateShort()
                     loadOrdersInBox()
 
                     val entry = BoxEntry(

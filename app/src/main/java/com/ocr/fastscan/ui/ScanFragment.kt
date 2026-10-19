@@ -60,6 +60,7 @@ class ScanFragment : BaseFragment() {
     private var currentOrderDimensions: OrderDimensions? = null
     private var isFetchingWeight = false
     private var shouldAutoPrintGeneratedLabel = false
+    private var lastPrintableOrder: SaveOrderRequest? = null
 
     private val receiverCacheRepository by lazy {
         ReceiverCacheRepository(requireContext(), apiService)
@@ -365,31 +366,51 @@ class ScanFragment : BaseFragment() {
         binding.progressBar.visibility = View.VISIBLE
 
         senderManager.submitOrder(req,
-            onSuccess = {
-                binding.progressBar.visibility = View.GONE
+            onSuccess = success@{
+                val activeBinding = _binding ?: return@success
+                activeBinding.progressBar.visibility = View.GONE
                 soundManager.playSent()
                 Toast.makeText(requireContext(), getString(R.string.order_saved), Toast.LENGTH_SHORT).show()
+                lastPrintableOrder = req
                 printGeneratedLabelIfNeeded(req)
-                ScanUtils.clearFieldsAll(binding, requireContext())
+                ScanUtils.clearFieldsAll(activeBinding, requireContext())
                 clearDimensions()
                 currentReceiverGuid = null
-                binding.btnSubmit.isEnabled = true
+                activeBinding.btnSubmit.isEnabled = true
             },
-            onError = { error ->
-                binding.progressBar.visibility = View.GONE
+            onError = error@{ error ->
+                val activeBinding = _binding ?: return@error
+                activeBinding.progressBar.visibility = View.GONE
                 soundManager.playError()
                 Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
-                binding.btnSubmit.isEnabled = true
+                activeBinding.btnSubmit.isEnabled = true
             }
         )
     }
 
     private fun printCurrentOrderLabel() {
+        val currentTracking = binding.etTracking.text.toString().trim()
+        if (currentTracking.isNotEmpty()) {
+            printHelper.printLabel(
+                currentTracking,
+                binding.etClientCode.text.toString(),
+                binding.tvClientName.text.toString(),
+                binding.etWeight.text.toString()
+            )
+            return
+        }
+
+        val previousOrder = lastPrintableOrder
+        if (previousOrder == null) {
+            Toast.makeText(requireContext(), R.string.input_track, Toast.LENGTH_SHORT).show()
+            return
+        }
+
         printHelper.printLabel(
-            binding.etTracking.text.toString(),
-            binding.etClientCode.text.toString(),
-            binding.tvClientName.text.toString(),
-            binding.etWeight.text.toString()
+            previousOrder.trackingNumber,
+            previousOrder.clientCode,
+            previousOrder.clientName,
+            previousOrder.grossWeight?.toString().orEmpty()
         )
     }
 

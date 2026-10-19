@@ -87,7 +87,7 @@
                     android:contentDescription="@string/print_label"
                     android:padding="10dp"
                     android:src="@drawable/ic_print"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     app:tint="@color/app_icon_tint" />
             </LinearLayout>
 

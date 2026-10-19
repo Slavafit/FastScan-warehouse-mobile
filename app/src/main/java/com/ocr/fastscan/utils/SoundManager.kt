@@ -89,6 +89,29 @@ class SoundManager(private val context: Context) {
         }
     }
 
+    @Suppress("DEPRECATION")
+    fun vibrateShort() {
+        try {
+            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+            } else {
+                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            }
+
+            if (vibrator?.hasVibrator() != true) return
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(70, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            } else {
+                vibrator.vibrate(70)
+            }
+        } catch (e: Exception) {
+            Log.e("SoundManager", "Error playing short vibration", e)
+        }
+    }
+
     // Короткие вспомогательные сигналы
     fun playShortBeep() {
         val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)

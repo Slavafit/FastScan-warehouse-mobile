@@ -257,10 +257,11 @@ class PartyDetailFragment : BaseFragment() {
             .setView(dialogBinding.root)
             .create()
 
-        lateinit var adapter: OpenBoxesAdapter
-        adapter = OpenBoxesAdapter(partialGuid) { box ->
+        val adapter = OpenBoxesAdapter(partialGuid) { box ->
             addBoxToParty(box) {
-                adapter.markAdded(box.guid)
+                if (dialog.isShowing) {
+                    dialog.dismiss()
+                }
             }
         }
         dialogBinding.rvOpenBoxes.layoutManager = LinearLayoutManager(requireContext())
@@ -300,9 +301,16 @@ class PartyDetailFragment : BaseFragment() {
                 )
                 val response = apiService.addBoxToPartial(request)
                 if (_binding == null || !isAdded) return@launchOnViewLifecycle
-                if (response.isSuccessful && response.body()?.success == true) {
+                val responseBody = response.body()
+                Log.d(
+                    "PartyDetail",
+                    "Add box response: http=${response.code()}, success=${responseBody?.success}, message=${responseBody?.message}"
+                )
+                if (response.isSuccessful && responseBody?.success != false) {
                     soundManager.playSuccess()
-                    onSuccess()
+                    runCatching(onSuccess).onFailure { error ->
+                        Log.e("PartyDetail", "Box was added, but local list update failed", error)
+                    }
                     showToast(R.string.box_added_to_party)
                     loadBoxDetails()
                 } else {
@@ -312,7 +320,11 @@ class PartyDetailFragment : BaseFragment() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                Log.e("PartyDetail", "Failed to add box ${box.codeid} to party $partialGuid", e)
                 soundManager.playError()
+                if (_binding != null && isAdded) {
+                    showToast(R.string.error_adding_box)
+                }
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
             }
