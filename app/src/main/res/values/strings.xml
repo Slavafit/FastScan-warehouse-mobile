@@ -229,6 +229,7 @@
     <string name="height_h">Высота H</string>
     <string name="total_weight">Итого: 0.00 кг</string>
     <string name="tracking_code">Трек-код</string>
+    <string name="order_description_title">Комментарий к заказу</string>
     <string name="order_deleted">Заказ удалён</string>
     <string name="delete_order">Удалить заказ</string>
     <string name="confirm_delete_order">Удалить этот заказ из коробки?</string>

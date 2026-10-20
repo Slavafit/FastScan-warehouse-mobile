@@ -70,16 +70,6 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/scan_or_input" />
                 <ImageButton
-                    android:id="@+id/btnScanTrack"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/scan_track"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_scan"
-                    app:tint="@color/app_icon_tint" />
-
-                <ImageButton
                     android:id="@+id/btnPrint"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
@@ -88,6 +78,16 @@
                     android:padding="10dp"
                     android:src="@drawable/ic_print"
                     android:visibility="visible"
+                    app:tint="@color/app_icon_tint" />
+
+                <ImageButton
+                    android:id="@+id/btnScanTrack"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/scan_track"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_scan"
                     app:tint="@color/app_icon_tint" />
             </LinearLayout>
 

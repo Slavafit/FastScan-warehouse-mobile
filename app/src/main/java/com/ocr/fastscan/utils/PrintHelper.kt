@@ -46,7 +46,7 @@ class PrintHelper(private val activity: Activity) {
 
         if (isGeneratedTracking) {
             codeBlock = """
-                ^FO250,60^BQN,2,10^FDQA,$trackingNumber^FS
+                ^FO250,20^BQN,2,10^FDQA,$trackingNumber^FS
                 ^CF0,34
                 ^FO60,350^FB680,1,0,C,0^FD$trackingNumber^FS
             """.trimIndent()

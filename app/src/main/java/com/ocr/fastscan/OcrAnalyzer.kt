@@ -31,10 +31,27 @@ class OcrAnalyzer(
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
                     val rawText = visionText.text.uppercase()
-                    val pattern = Pattern.compile("KG\\s*(\\d{4,6})")
+                    val pattern = Pattern.compile("KG\\s*([0-9OQDILZSBG]{4,6})")
                     val matcher = pattern.matcher(rawText)
                     if (matcher.find()) {
-                        resultStabilizer.add("KG" + matcher.group(1))?.let(onResult)
+                        val digits = matcher.group(1)
+                            ?.map { character ->
+                                when (character) {
+                                    'O', 'Q', 'D' -> '0'
+                                    'I', 'L' -> '1'
+                                    'Z' -> '2'
+                                    'S' -> '5'
+                                    'G' -> '6'
+                                    'B' -> '8'
+                                    else -> character
+                                }
+                            }
+                            ?.joinToString("")
+                            .orEmpty()
+
+                        if (digits.length in 4..6 && digits.all(Char::isDigit)) {
+                            resultStabilizer.add("KG$digits")?.let(onResult)
+                        }
                     }
                 }
                 .addOnCompleteListener { imageProxy.close() }

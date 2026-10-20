@@ -31,7 +31,8 @@ data class OrderDetails(
     @SerializedName("user_guid") val userGuid: String?,
     @SerializedName("length") val length: Int?,
     @SerializedName("width") val width: Int?,
-    @SerializedName("height") val height: Int?
+    @SerializedName("height") val height: Int?,
+    @SerializedName("description") val description: String? = null
 )
 data class ReceiverResponse(
     @SerializedName("full_name") val fullName: String?,

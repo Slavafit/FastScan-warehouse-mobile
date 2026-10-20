@@ -188,6 +188,7 @@
     <string name="height_h">Altura</string>
     <string name="total_weight">Total: 0.00 kg</string>
     <string name="tracking_code">Código de seguimiento</string>
+    <string name="order_description_title">Nota del pedido</string>
     <string name="order_deleted">Pedido eliminado</string>
     <string name="delete_order">Eliminar pedido</string>
     <string name="confirm_delete_order">¿Eliminar este pedido de la caja?</string>

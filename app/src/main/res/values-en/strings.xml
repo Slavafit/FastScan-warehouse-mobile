@@ -190,6 +190,7 @@
     <string name="height_h">Height H</string>
     <string name="total_weight">Total: 0.00 kg</string>
     <string name="tracking_code">Tracking code</string>
+    <string name="order_description_title">Order note</string>
     <string name="order_deleted">Order deleted</string>
     <string name="delete_order">Delete order</string>
     <string name="confirm_delete_order">Remove this order from the box?</string>

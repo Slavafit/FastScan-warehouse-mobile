@@ -246,40 +246,52 @@ class ScanFragment : BaseFragment() {
     }
 
     private fun fetchOrderInfo(tcode: String) {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             binding.progressBar.visibility = View.VISIBLE
             try {
                 val response = apiService.getOrderDetails(tcode)
+                val activeBinding = _binding ?: return@launch
                 if (response.isSuccessful && !response.body().isNullOrEmpty()) {
                     val details = response.body()!![0]
-                    binding.tvClientName.text = details.clientName ?: getString(R.string.name_not_specified)
-                    binding.tvClientName.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark))
-                    binding.etClientCode.setText(details.clientCode ?: "")
-                    binding.etWeight.setText(details.grossWeight?.toString() ?: "")
+                    activeBinding.tvClientName.text = details.clientName ?: getString(R.string.name_not_specified)
+                    activeBinding.tvClientName.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark))
+                    activeBinding.etClientCode.setText(details.clientCode ?: "")
+                    activeBinding.etWeight.setText(details.grossWeight?.toString() ?: "")
                     
                     // Обновляем UI и внутренние переменные
                     currentLength = details.length ?: 0
                     currentWidth = details.width ?: 0
                     currentHeight = details.height ?: 0
                     
-                    binding.etLength.setText(details.length?.toString() ?: "")
-                    binding.etWidth.setText(details.width?.toString() ?: "")
-                    binding.etHeight.setText(details.height?.toString() ?: "")
+                    activeBinding.etLength.setText(details.length?.toString() ?: "")
+                    activeBinding.etWidth.setText(details.width?.toString() ?: "")
+                    activeBinding.etHeight.setText(details.height?.toString() ?: "")
                     
-                    binding.cbWithBox.isChecked = details.withBox == "1"
+                    activeBinding.cbWithBox.isChecked = details.withBox == "1"
                     currentReceiverGuid = details.userGuid
                     soundManager.playSuccess()
+
+                    details.description
+                        ?.trim()
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { description ->
+                            AlertDialog.Builder(requireContext())
+                                .setTitle(R.string.order_description_title)
+                                .setMessage(description)
+                                .setPositiveButton(R.string.ok, null)
+                                .show()
+                        }
                 } else {
-                    binding.tvClientName.text = getString(R.string.track_not_found)
-                    binding.tvClientName.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_orange_dark))
-                    ScanUtils.clearFields(binding, requireContext())
+                    activeBinding.tvClientName.text = getString(R.string.track_not_found)
+                    activeBinding.tvClientName.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_orange_dark))
+                    ScanUtils.clearFields(activeBinding, requireContext())
                     clearDimensions()
                 }
             } catch (e: Exception) {
                 Log.e("FetchInfo", "Error: ${e.message}")
                 Toast.makeText(requireContext(), R.string.net_error_short, Toast.LENGTH_SHORT).show()
             } finally {
-                binding.progressBar.visibility = View.GONE
+                _binding?.progressBar?.visibility = View.GONE
             }
         }
     }
