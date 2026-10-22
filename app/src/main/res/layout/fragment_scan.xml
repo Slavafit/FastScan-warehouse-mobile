@@ -96,7 +96,7 @@
             <Space android:layout_width="match_parent" android:layout_height="12dp" />
 
             <TextView android:id="@+id/tvClientName" android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="@string/scan_wait" android:textColor="@color/app_text_secondary" android:textSize="18sp" android:textStyle="bold" android:gravity="center" />
+                android:text="@string/scan_wait" android:textColor="@color/scan_wait_text" android:textSize="18sp" android:textStyle="bold" android:gravity="center" />
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/box_info" android:textStyle="bold" android:gravity="center" android:layout_marginTop="4dp"/>
             <LinearLayout
@@ -141,6 +141,15 @@
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:hint="KG123456" />
+                <ImageButton
+                    android:id="@+id/btnVoiceClientCode"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/voice_client_code"
+                    android:padding="11dp"
+                    android:src="@drawable/ic_mic"
+                    app:tint="@color/app_icon_tint" />
                 <ImageButton
                     android:id="@+id/btnScanKg"
                     android:layout_width="48dp"

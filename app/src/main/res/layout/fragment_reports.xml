@@ -18,77 +18,372 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnTodayReport"
-        android:layout_width="0dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/report_today"
-        android:textAllCaps="false"
-        app:icon="@drawable/ic_report"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etClientCodeFilter" />
-
-    <EditText
-        android:id="@+id/etClientCodeFilter"
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/reportTypeToggle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="@string/report_client_code_filter"
-        android:imeOptions="actionDone"
-        android:inputType="textCapCharacters"
-        android:singleLine="true"
-        android:textColor="@color/app_text_primary"
-        android:textColorHint="@color/app_text_secondary"
+        app:checkedButton="@id/btnSectionUnpacked"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:selectionRequired="true"
+        app:singleSelection="true">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnPartyReport"
-        style="@style/Widget.Material3.Button.OutlinedButton"
-        android:layout_width="0dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/report_by_party"
-        android:textAllCaps="false"
-        app:icon="@drawable/ic_batch"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnTodayReport" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSectionUnpacked"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/report_section_unpacked"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnShareReport"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:text="@string/share_report"
-        android:textAllCaps="false"
-        android:visibility="gone"
-        app:icon="@drawable/ic_send"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnPartyReport" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSectionTracks"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/report_section_tracks"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
 
-    <androidx.core.widget.NestedScrollView
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSectionWeight"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/report_section_weight"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sectionUnpacked"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnShareReport">
+        app:layout_constraintTop_toBottomOf="@id/reportTypeToggle">
+
+        <HorizontalScrollView
+            android:id="@+id/scrollUnpackedDays"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toStartOf="@id/btnRefreshUnpacked"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.chip.ChipGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipUnpackedToday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:checked="true"
+                    android:text="@string/today" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipUnpacked3Days"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="@string/last_3_days" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipUnpackedWeek"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="@string/last_week" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipUnpackedAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="@string/all_time" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRefreshUnpacked"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/get_report"
+            android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="@id/scrollUnpackedDays"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/scrollUnpackedDays" />
+
+        <EditText
+            android:id="@+id/etUnpackedSearch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:hint="@string/search_hint"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textColor="@color/app_text_primary"
+            android:textColorHint="@color/app_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/scrollUnpackedDays" />
 
         <TextView
-            android:id="@+id/tvReport"
-            android:layout_width="match_parent"
+            android:id="@+id/tvUnpackedSummary"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingBottom="24dp"
-            android:text="@string/report_empty"
+            android:layout_marginTop="8dp"
             android:textColor="@color/app_text_primary"
-            android:textIsSelectable="true"
-            android:textSize="15sp" />
-    </androidx.core.widget.NestedScrollView>
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/btnShareUnpackedReport"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etUnpackedSearch" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShareUnpackedReport"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="@string/share_report"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_send"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etUnpackedSearch" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvUnpacked"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnShareUnpackedReport" />
+
+        <TextView
+            android:id="@+id/tvUnpackedEmpty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/no_unpacked_orders"
+            android:textColor="@color/app_text_secondary"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnShareUnpackedReport" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sectionTracks"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/reportTypeToggle">
+
+        <EditText
+            android:id="@+id/etClientCodeFilter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/report_client_code_filter"
+            android:imeOptions="actionDone"
+            android:inputType="textCapCharacters"
+            android:singleLine="true"
+            android:textColor="@color/app_text_primary"
+            android:textColorHint="@color/app_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTodayReport"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/report_today"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_report"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etClientCodeFilter" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPartyReport"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/report_by_party"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_batch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnTodayReport" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShareTrackReport"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:enabled="false"
+            android:text="@string/share_report"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_send"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnPartyReport" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnShareTrackReport">
+
+            <TextView
+                android:id="@+id/tvTrackReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="24dp"
+                android:text="@string/report_empty"
+                android:textColor="@color/app_text_primary"
+                android:textIsSelectable="true"
+                android:textSize="15sp" />
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/sectionWeight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/reportTypeToggle">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPreviousYear"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/previous_year"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconTint="@color/app_primary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvWeightYear"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:textColor="@color/app_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/btnNextYear"
+            app:layout_constraintStart_toEndOf="@id/btnPreviousYear"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNextYear"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/next_year"
+            android:rotation="180"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconTint="@color/app_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/etWeightClientCodeFilter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/report_client_code_filter"
+            android:imeOptions="actionDone"
+            android:inputType="textCapCharacters"
+            android:singleLine="true"
+            android:textColor="@color/app_text_primary"
+            android:textColorHint="@color/app_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvWeightYear" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnWeightReport"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/get_report"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_scale"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etWeightClientCodeFilter" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShareWeightReport"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:enabled="false"
+            android:text="@string/share_report"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_send"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnWeightReport" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnShareWeightReport">
+
+            <TextView
+                android:id="@+id/tvWeightReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="24dp"
+                android:text="@string/report_monthly_weight_empty"
+                android:textColor="@color/app_text_primary"
+                android:textIsSelectable="true"
+                android:textSize="15sp" />
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"

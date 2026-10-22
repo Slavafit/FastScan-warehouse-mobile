@@ -141,6 +141,10 @@
     <string name="net_error_code">Ошибка сети %1$d</string>
     <string name="net_error_short">Ошибка сети</string>
     <string name="scan_kg">Сканирование KG</string>
+    <string name="voice_client_code">Ввести код клиента голосом</string>
+    <string name="voice_client_code_prompt">Произнесите цифры кода клиента после KG</string>
+    <string name="voice_client_code_not_recognized">Не удалось распознать минимум 4 цифры. Попробуйте ещё раз или введите код вручную</string>
+    <string name="voice_recognition_unavailable">Голосовой ввод недоступен на этом устройстве</string>
     <string name="order_saved">ЗАКАЗ УСПЕШНО СОХРАНЕН!</string>
     <string name="order_added">ЗАКАЗ ДОБАВЛЕН!</string>
     <string name="token_cleared">Токены очищены</string>
@@ -277,6 +281,9 @@
     <string name="last_3_days">3 дня</string>
     <string name="last_week">Неделя</string>
     <string name="all_time">Все</string>
+    <string name="get_report">Получить</string>
+    <string name="select_period_and_get_report">Выберите период и нажмите «Получить»</string>
+    <string name="select_year_and_get_report">Выберите год, при необходимости укажите код клиента и нажмите «Получить»</string>
     <string name="print_report">Печать отчёта</string>
     <string name="no_unpacked_orders">Нет незакрытых заказов</string>
     <string name="report_end">Отчёт сформирован автоматически.</string>
@@ -379,4 +386,16 @@
     <string name="box_weight_summary">Коробка:\n%1$.2f кг</string>
     <string name="report_client_code_filter">Код клиента — оставьте пустым для всех</string>
     <string name="report_client_filter_applied">Клиент: %1$s</string>
+    <string name="report_section_unpacked">Вне коробок</string>
+    <string name="report_section_tracks">Треки</string>
+    <string name="report_section_weight">Вес</string>
+    <string name="unpacked_report_summary">Заказов: %1$d | Вес: %2$.2f кг</string>
+    <string name="previous_year">Предыдущий год</string>
+    <string name="next_year">Следующий год</string>
+    <string name="calculate_monthly_weight">Рассчитать вес по месяцам</string>
+    <string name="report_monthly_weight_empty">Выберите год и рассчитайте отчёт</string>
+    <string name="monthly_weight_report_title">ВЕС ПО МЕСЯЦАМ — %1$d</string>
+    <string name="monthly_weight_year_total">Всего заказов за год: %1$d\nОбщий вес: %2$.2f кг\nВ коробках: %3$.2f кг | Вне коробок: %4$.2f кг</string>
+    <string name="monthly_weight_month_summary">%1$s\nЗаказов за месяц: %2$d\nОбщий вес: %3$.2f кг\nВ коробках: %4$.2f кг | Вне коробок: %5$.2f кг</string>
+    <string name="no_report_data">За выбранный период данных нет</string>
 </resources>

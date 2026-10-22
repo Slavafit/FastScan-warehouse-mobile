@@ -115,6 +115,10 @@
     <string name="net_error_code">Error de red %1$d</string>
     <string name="net_error_short">Error de red</string>
     <string name="scan_kg">Escanear KG</string>
+    <string name="voice_client_code">Introducir código de cliente por voz</string>
+    <string name="voice_client_code_prompt">Diga los dígitos del código de cliente después de KG</string>
+    <string name="voice_client_code_not_recognized">No se pudieron reconocer al menos 4 dígitos. Inténtelo de nuevo o introduzca el código manualmente</string>
+    <string name="voice_recognition_unavailable">La entrada de voz no está disponible en este dispositivo</string>
     <string name="order_saved">PEDIDO GUARDADO!</string>
     <string name="order_added">Pedido agregado!</string>
     <string name="token_cleared">Tokens limpiados</string>
@@ -235,6 +239,9 @@
     <string name="last_3_days">Últimos 3 días</string>
     <string name="last_week">Última semana</string>
     <string name="all_time">Todo el tiempo</string>
+    <string name="get_report">Obtener</string>
+    <string name="select_period_and_get_report">Selecciona un período y pulsa Obtener</string>
+    <string name="select_year_and_get_report">Selecciona un año, indica el código de cliente si es necesario y pulsa Obtener</string>
     <string name="print_report">Imprimir reporte</string>
     <string name="no_unpacked_orders">No hay pedidos sin empaquetar</string>
     <string name="report_end">El informe se genera automáticamente.</string>
@@ -352,4 +359,16 @@
     <string name="box_weight_summary">Caja:\n%1$.2f kg</string>
     <string name="report_client_code_filter">Código de cliente — déjelo vacío para todos</string>
     <string name="report_client_filter_applied">Cliente: %1$s</string>
+    <string name="report_section_unpacked">Sin caja</string>
+    <string name="report_section_tracks">Seguimientos</string>
+    <string name="report_section_weight">Peso</string>
+    <string name="unpacked_report_summary">Pedidos: %1$d | Peso: %2$.2f kg</string>
+    <string name="previous_year">Año anterior</string>
+    <string name="next_year">Año siguiente</string>
+    <string name="calculate_monthly_weight">Calcular peso mensual</string>
+    <string name="report_monthly_weight_empty">Seleccione un año y calcule el informe</string>
+    <string name="monthly_weight_report_title">PESO POR MES — %1$d</string>
+    <string name="monthly_weight_year_total">Total de pedidos del año: %1$d\nPeso total: %2$.2f kg\nEn cajas: %3$.2f kg | Sin caja: %4$.2f kg</string>
+    <string name="monthly_weight_month_summary">%1$s\nPedidos del mes: %2$d\nPeso total: %3$.2f kg\nEn cajas: %4$.2f kg | Sin caja: %5$.2f kg</string>
+    <string name="no_report_data">No hay datos para el período seleccionado</string>
 </resources>

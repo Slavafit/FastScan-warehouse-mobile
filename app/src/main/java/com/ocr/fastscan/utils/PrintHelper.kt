@@ -45,11 +45,7 @@ class PrintHelper(private val activity: Activity) {
         val headerY: Int
 
         if (isGeneratedTracking) {
-            codeBlock = """
-                ^FO250,20^BQN,2,10^FDQA,$trackingNumber^FS
-                ^CF0,34
-                ^FO60,350^FB680,1,0,C,0^FD$trackingNumber^FS
-            """.trimIndent()
+            codeBlock = GeneratedOrderLabelLayout.buildCodeBlock(trackingNumber, widthDots)
             dividerY = 410
             clientY = 450
             nameY = 520
@@ -260,4 +256,34 @@ class PrintHelper(private val activity: Activity) {
     private fun showToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
+}
+
+internal object GeneratedOrderLabelLayout {
+    const val QR_Y = 0
+    const val QR_MAGNIFICATION = 9
+    const val TRACKING_TEXT_Y = 350
+    const val TRACKING_TEXT_HORIZONTAL_MARGIN = 60
+
+    // ONZA + 8 digits uses a version 2 QR: 25 printed modules plus its quiet zone.
+    const val QR_PRINTED_MODULES = 25
+    const val QR_MODULES_WITH_QUIET_ZONE = 33
+    const val MIN_TEXT_GAP_DOTS = 40
+
+    val qrPrintedSizeDots: Int
+        get() = QR_PRINTED_MODULES * QR_MAGNIFICATION
+
+    val estimatedQrBottom: Int
+        get() = QR_Y + QR_MODULES_WITH_QUIET_ZONE * QR_MAGNIFICATION
+
+    fun qrX(labelWidthDots: Int): Int =
+        ((labelWidthDots - qrPrintedSizeDots) / 2).coerceAtLeast(0)
+
+    fun trackingTextWidth(labelWidthDots: Int): Int =
+        (labelWidthDots - TRACKING_TEXT_HORIZONTAL_MARGIN * 2).coerceAtLeast(1)
+
+    fun buildCodeBlock(trackingNumber: String, labelWidthDots: Int): String = """
+        ^FO${qrX(labelWidthDots)},$QR_Y^BQN,2,$QR_MAGNIFICATION^FDQA,$trackingNumber^FS
+        ^CF0,34
+        ^FO$TRACKING_TEXT_HORIZONTAL_MARGIN,$TRACKING_TEXT_Y^FB${trackingTextWidth(labelWidthDots)},1,0,C,0^FD$trackingNumber^FS
+    """.trimIndent()
 }

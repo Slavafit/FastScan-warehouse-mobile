@@ -16,11 +16,6 @@
         android:icon="@drawable/ic_batch"
         android:title="@string/parties" />
     <item
-        android:id="@+id/nav_unpacked"
-        android:icon="@drawable/ic_unpacked"
-        android:title="@string/unclosed" />
-
-    <item
         android:id="@+id/nav_reports"
         android:icon="@drawable/ic_report"
         android:title="@string/reports" />

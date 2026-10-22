@@ -36,6 +36,7 @@ class BoxFragment : BaseFragment() {
     private var isLoading = false
     private var isUpdatingTracking = false
     private var weightLoadRequestId = 0
+    private var pendingCreatedBox: BoxItem? = null
     
     private val boxesAdapter = BoxesAdapter(
         onClick = { box ->
@@ -72,14 +73,15 @@ class BoxFragment : BaseFragment() {
             DialogUtils.showAddNewBoxDialog(
                 lifecycleOwner = viewLifecycleOwner,
                 context = requireContext(),
-                onSuccess = { trackingCode ->
+                onSuccess = { createdBox ->
+                    showCreatedBox(createdBox)
                     viewLifecycleOwner.lifecycleScope.launch {
-                        delay(300)
+                        delay(NEW_BOX_RELOAD_DELAY_MS)
                         loadBoxes(
                             isOpenOnly = !isShowingAllBoxes,
-                            highlightTrackingCode = trackingCode
+                            highlightTrackingCode = createdBox.trackingCode,
+                            showLoading = false
                         )
-                        Toast.makeText(requireContext(), getString(R.string.box_added_format, trackingCode), Toast.LENGTH_SHORT).show()
                     }
                 },
                 onError = { errorMsg ->
@@ -109,12 +111,16 @@ class BoxFragment : BaseFragment() {
     private fun loadBoxes(
         isOpenOnly: Boolean = true,
         highlightTrackingCode: String? = null,
-        highlightAttempt: Int = 0
+        highlightAttempt: Int = 0,
+        showLoading: Boolean = boxesAdapter.currentList.isEmpty()
     ) {
-        if (isLoading) return
+        if (isLoading) {
+            scheduleBoxReload(isOpenOnly, highlightTrackingCode, highlightAttempt)
+            return
+        }
         isLoading = true
 
-        binding.progressBar.visibility = View.VISIBLE
+        if (showLoading) binding.progressBar.visibility = View.VISIBLE
         binding.tvNoBoxes.visibility = View.GONE
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -126,9 +132,20 @@ class BoxFragment : BaseFragment() {
                 if (response.isSuccessful && response.body() != null) {
                     val boxTareWeight = requireContext().getBoxTareWeight()
                     val requestId = ++weightLoadRequestId
-                    val boxes = prepareBoxesForDisplay(response.body()!!, highlightTrackingCode)
+                    val serverBoxes = prepareBoxesForDisplay(response.body()!!, highlightTrackingCode)
+                    val pendingBox = pendingCreatedBox
+                    val pendingBoxOnServer = pendingBox != null && serverBoxes.any {
+                        isSameBox(it, pendingBox)
+                    }
+                    if (pendingBoxOnServer) pendingCreatedBox = null
+
+                    val boxes = if (pendingBox != null && !pendingBoxOnServer) {
+                        prepareBoxesForDisplay(listOf(pendingBox) + serverBoxes, highlightTrackingCode)
+                    } else {
+                        serverBoxes
+                    }
                     val newBoxPosition = highlightTrackingCode?.let { trackingCode ->
-                        boxes.indexOfFirst { it.trackingCode == trackingCode }
+                        boxes.indexOfFirst { sameTracking(it.trackingCode, trackingCode) }
                     } ?: -1
 
                     boxesAdapter.submitList(boxes) {
@@ -148,24 +165,11 @@ class BoxFragment : BaseFragment() {
                         }
                     }
 
-                    if (
-                        highlightTrackingCode != null &&
-                        newBoxPosition < 0 &&
-                        highlightAttempt < NEW_BOX_MAX_LOAD_ATTEMPTS
-                    ) {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            delay(NEW_BOX_RELOAD_DELAY_MS)
-                            loadBoxes(
-                                isOpenOnly = isOpenOnly,
-                                highlightTrackingCode = highlightTrackingCode,
-                                highlightAttempt = highlightAttempt + 1
-                            )
-                        }
+                    if (highlightTrackingCode != null && pendingBox != null && !pendingBoxOnServer) {
+                        scheduleBoxReload(isOpenOnly, highlightTrackingCode, highlightAttempt)
                     }
 
-                    val baseText = if (isOpenOnly) getString(R.string.open_boxes) else getString(R.string.all_boxes)
-                    binding.tvTitle.text = "$baseText (${boxes.size})"
-                    binding.btnShowAll.text = if (isOpenOnly) getString(R.string.all_boxes) else getString(R.string.open_boxes)
+                    updateBoxesHeader(boxes.size, isOpenOnly)
                     
                     binding.tvNoBoxes.visibility = if (boxes.isEmpty()) View.VISIBLE else View.GONE
                     updateCalculatedBoxWeights(boxes, boxTareWeight, requestId)
@@ -188,29 +192,72 @@ class BoxFragment : BaseFragment() {
         boxes: List<BoxItem>,
         preferredTrackingCode: String? = null
     ): List<BoxItem> {
-        val dedupedByIdentity = linkedMapOf<String, BoxItem>()
-        boxes
-            .map { box -> box.copy(dateCreated = formatBoxDate(box.dateCreated)) }
-            .forEach { box ->
-                val key = boxIdentityKey(box) ?: box.trackingCode.orEmpty()
-                if (key.isBlank()) return@forEach
-
-                val current = dedupedByIdentity[key]
-                val selectedBox = when {
-                    current == null -> box
-                    box.trackingCode == preferredTrackingCode -> box
-                    current.trackingCode == preferredTrackingCode -> current
-                    else -> box
-                }
-                dedupedByIdentity[key] = selectedBox
-            }
-        return dedupedByIdentity.values
-            .sortedByDescending { it.trackingCode == preferredTrackingCode }
+        val formattedBoxes = boxes.map { box ->
+            box.copy(dateCreated = formatBoxDate(box.dateCreated))
+        }
+        return BoxListReconciler.deduplicateAndPrioritize(
+            formattedBoxes,
+            preferredTrackingCode
+        )
     }
 
-    private fun boxIdentityKey(box: BoxItem): String? {
-        return box.guid?.takeIf { it.isNotBlank() }
-            ?: box.codeid?.takeIf { it.isNotBlank() }
+    private fun boxIdentityKey(box: BoxItem): String? = BoxListReconciler.identityKey(box)
+
+    private fun normalizedTracking(value: String?): String =
+        BoxListReconciler.normalizedTracking(value)
+
+    private fun sameTracking(first: String?, second: String?): Boolean =
+        BoxListReconciler.sameTracking(first, second)
+
+    private fun isSameBox(first: BoxItem, second: BoxItem): Boolean =
+        BoxListReconciler.isSameBox(first, second)
+
+    private fun showCreatedBox(createdBox: BoxItem) {
+        weightLoadRequestId++
+        val displayedBox = createdBox.copy(dateCreated = formatBoxDate(createdBox.dateCreated))
+        pendingCreatedBox = displayedBox
+        val updatedList = listOf(displayedBox) + boxesAdapter.currentList.filterNot {
+            isSameBox(it, displayedBox)
+        }
+        boxesAdapter.submitList(updatedList) {
+            val trackingCode = displayedBox.trackingCode ?: return@submitList
+            if (_binding == null) return@submitList
+            boxesAdapter.highlightBox(trackingCode)
+            binding.rvBoxes.post {
+                if (_binding == null) return@post
+                (binding.rvBoxes.layoutManager as? LinearLayoutManager)
+                    ?.scrollToPositionWithOffset(0, 0)
+            }
+            binding.rvBoxes.postDelayed(
+                { boxesAdapter.clearHighlight(trackingCode) },
+                NEW_BOX_HIGHLIGHT_DURATION_MS
+            )
+        }
+        updateBoxesHeader(updatedList.size, !isShowingAllBoxes)
+        binding.tvNoBoxes.visibility = View.GONE
+    }
+
+    private fun scheduleBoxReload(
+        isOpenOnly: Boolean,
+        trackingCode: String?,
+        attempt: Int
+    ) {
+        if (trackingCode == null || attempt >= NEW_BOX_MAX_LOAD_ATTEMPTS) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            delay(NEW_BOX_RELOAD_DELAY_MS)
+            loadBoxes(
+                isOpenOnly = isOpenOnly,
+                highlightTrackingCode = trackingCode,
+                highlightAttempt = attempt + 1,
+                showLoading = false
+            )
+        }
+    }
+
+    private fun updateBoxesHeader(boxCount: Int, isOpenOnly: Boolean) {
+        val baseText = if (isOpenOnly) getString(R.string.open_boxes) else getString(R.string.all_boxes)
+        binding.tvTitle.text = "$baseText ($boxCount)"
+        binding.btnShowAll.text = if (isOpenOnly) getString(R.string.all_boxes) else getString(R.string.open_boxes)
     }
 
     private fun updateCalculatedBoxWeights(
@@ -220,8 +267,9 @@ class BoxFragment : BaseFragment() {
     ) {
         if (boxes.isEmpty()) return
         viewLifecycleOwner.lifecycleScope.launch {
+            val calculatedBoxes = mutableListOf<BoxItem>()
             boxes.chunked(BOX_WEIGHT_BATCH_SIZE).forEach { chunk ->
-                val calculatedBoxes = chunk.map { box ->
+                calculatedBoxes += chunk.map { box ->
                     async {
                         val ordersWeight = loadOrdersWeight(box.trackingCode)
                         if (ordersWeight == null) null else box.copy(grossWeight = ordersWeight + boxTareWeight)
@@ -229,21 +277,25 @@ class BoxFragment : BaseFragment() {
                 }.awaitAll().filterNotNull()
 
                 if (_binding == null || requestId != weightLoadRequestId) return@launch
-                if (calculatedBoxes.isEmpty()) return@forEach
-
-                val calculatedByGuid = calculatedBoxes
-                    .mapNotNull { box -> box.guid?.let { it to box } }
-                    .toMap()
-                val calculatedByTracking = calculatedBoxes
-                    .mapNotNull { box -> box.trackingCode?.let { it to box } }
-                    .toMap()
-                val updatedList = boxesAdapter.currentList.map { currentBox ->
-                    val calculatedWeight = calculatedByGuid[currentBox.guid]?.grossWeight
-                        ?: calculatedByTracking[currentBox.trackingCode]?.grossWeight
-                    if (calculatedWeight == null) currentBox else currentBox.copy(grossWeight = calculatedWeight)
-                }
-                boxesAdapter.submitList(updatedList)
             }
+            if (calculatedBoxes.isEmpty()) return@launch
+
+            val calculatedByGuid = calculatedBoxes
+                .mapNotNull { box -> box.guid?.takeIf { it.isNotBlank() }?.let { it to box } }
+                .toMap()
+            val calculatedByTracking = calculatedBoxes
+                .mapNotNull { box ->
+                    normalizedTracking(box.trackingCode).takeIf { it.isNotBlank() }?.let { it to box }
+                }
+                .toMap()
+            val updatedList = boxesAdapter.currentList.map { currentBox ->
+                val calculatedWeight = currentBox.guid
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { calculatedByGuid[it]?.grossWeight }
+                    ?: calculatedByTracking[normalizedTracking(currentBox.trackingCode)]?.grossWeight
+                if (calculatedWeight == null) currentBox else currentBox.copy(grossWeight = calculatedWeight)
+            }
+            boxesAdapter.submitList(updatedList)
         }
     }
 

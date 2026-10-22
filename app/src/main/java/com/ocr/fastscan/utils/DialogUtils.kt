@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.ocr.fastscan.R
+import com.ocr.fastscan.data.model.BoxItem
 import com.ocr.fastscan.data.model.BoxRequest
 import com.ocr.fastscan.data.model.OrderDimensions
 import com.ocr.fastscan.databinding.DialogAddBoxBinding
@@ -102,7 +103,7 @@ object DialogUtils {
     fun showAddNewBoxDialog(
         lifecycleOwner: LifecycleOwner,
         context: Context,
-        onSuccess: (String) -> Unit,  // колбэк успеха — передаёт trackingCode
+        onSuccess: (BoxItem) -> Unit,
         onError: (String) -> Unit = {}  // колбэк ошибки — опционально
     ) {
         val dialogBinding = DialogAddBoxBinding.inflate(LayoutInflater.from(context))
@@ -171,7 +172,25 @@ object DialogUtils {
                                 Toast.LENGTH_SHORT)
                                 .show()
                             soundManager.playSuccess()
-                            onSuccess(generatedTrackingCode)  // ← передаём код коробки в колбэк
+                            onSuccess(
+                                BoxItem(
+                                    guid = null,
+                                    codeid = response.body()?.result?.firstOrNull()?.newCodeID?.toString(),
+                                    trackingCode = generatedTrackingCode,
+                                    warehouse = null,
+                                    warehouseGuid = null,
+                                    width = width,
+                                    height = height,
+                                    length = length,
+                                    vWeight = request.vWeight,
+                                    grossWeight = context.getBoxTareWeight(),
+                                    dateCreated = SimpleDateFormat(
+                                        "yyyy-MM-dd'T'HH:mm:ss",
+                                        Locale.US
+                                    ).format(Date()),
+                                    orderCount = 0
+                                )
+                            )
                             dialog.dismiss()
                         } else {
                             val errorMsg = response.body()?.message ?: context.getString(R.string.error_create)

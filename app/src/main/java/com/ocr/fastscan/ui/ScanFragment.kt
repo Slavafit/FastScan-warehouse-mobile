@@ -3,6 +3,7 @@ package com.ocr.fastscan.ui
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +15,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.speech.RecognizerIntent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -44,6 +46,25 @@ class ScanFragment : BaseFragment() {
             handleScanResult(mode, value)
         }
     }
+    private val clientCodeVoiceLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val activeBinding = _binding ?: return@registerForActivityResult
+
+            val candidates = result.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                .orEmpty()
+            val clientCode = ClientCodeVoiceParser.parse(candidates)
+            if (clientCode == null) {
+                Toast.makeText(requireContext(), R.string.voice_client_code_not_recognized, Toast.LENGTH_LONG).show()
+                soundManager.playError()
+                return@registerForActivityResult
+            }
+
+            activeBinding.etClientCode.setText(clientCode)
+            activeBinding.etClientCode.setSelection(clientCode.length)
+            fetchClientByKgCode(clientCode)
+        }
     private var currentReceiverGuid: String? = null
     private val searchOrder by lazy { SearchOrder(this) }
     private val printHelper by lazy { PrintHelper(requireActivity()) }
@@ -130,6 +151,7 @@ class ScanFragment : BaseFragment() {
         binding.btnScanKg.setOnClickListener {
             ScanUtils.launchCamera(requireContext(), "kg", scanLauncher)
         }
+        binding.btnVoiceClientCode.setOnClickListener { startClientCodeVoiceInput() }
         binding.btnScanWeight.setOnClickListener {
             fetchWeightFromServer()
         }
@@ -177,6 +199,23 @@ class ScanFragment : BaseFragment() {
 
         binding.btnSearchClient.setOnClickListener {
             showSearchClientDialog()
+        }
+    }
+
+    private fun startClientCodeVoiceInput() {
+        val locale = resources.configuration.locales[0]
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale.toLanguageTag())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_client_code_prompt))
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+        }
+        try {
+            clientCodeVoiceLauncher.launch(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG).show()
+            soundManager.playError()
         }
     }
 

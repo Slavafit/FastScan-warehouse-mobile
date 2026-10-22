@@ -10,6 +10,7 @@ import com.google.android.material.color.MaterialColors
 import com.ocr.fastscan.R
 import com.ocr.fastscan.data.model.BoxItem
 import com.ocr.fastscan.databinding.ItemBoxBinding
+import java.util.Locale
 
 class BoxesAdapter(
     private val onClick: (BoxItem) -> Unit,
@@ -25,7 +26,12 @@ class BoxesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val box = getItem(position)
-        holder.bind(box, box.trackingCode == highlightedTrackingCode, onClick, onLongClick)
+        holder.bind(
+            box,
+            normalizeTracking(box.trackingCode) == normalizeTracking(highlightedTrackingCode),
+            onClick,
+            onLongClick
+        )
     }
 
     fun highlightBox(trackingCode: String) {
@@ -42,7 +48,10 @@ class BoxesAdapter(
     }
 
     private fun notifyHighlightChanged(trackingCode: String?) {
-        val position = currentList.indexOfFirst { it.trackingCode == trackingCode }
+        val normalizedTracking = normalizeTracking(trackingCode)
+        val position = currentList.indexOfFirst {
+            normalizeTracking(it.trackingCode) == normalizedTracking
+        }
         if (position >= 0) notifyItemChanged(position)
     }
 
@@ -91,10 +100,25 @@ class BoxesAdapter(
     }
 
     object DiffCallback : DiffUtil.ItemCallback<BoxItem>() {
-        override fun areItemsTheSame(oldItem: BoxItem, newItem: BoxItem): Boolean =
-            oldItem.guid == newItem.guid
+        override fun areItemsTheSame(oldItem: BoxItem, newItem: BoxItem): Boolean {
+            val oldGuid = oldItem.guid?.takeIf { it.isNotBlank() }
+            val newGuid = newItem.guid?.takeIf { it.isNotBlank() }
+            if (oldGuid != null && newGuid != null) return oldGuid == newGuid
+
+            val oldCodeId = oldItem.codeid?.takeIf { it.isNotBlank() }
+            val newCodeId = newItem.codeid?.takeIf { it.isNotBlank() }
+            if (oldCodeId != null && newCodeId != null) return oldCodeId == newCodeId
+
+            val oldTracking = normalizeTracking(oldItem.trackingCode)
+            return oldTracking.isNotEmpty() && oldTracking == normalizeTracking(newItem.trackingCode)
+        }
 
         override fun areContentsTheSame(oldItem: BoxItem, newItem: BoxItem): Boolean =
             oldItem == newItem
+    }
+
+    private companion object {
+        fun normalizeTracking(value: String?): String =
+            value.orEmpty().trim().uppercase(Locale.ROOT)
     }
 }

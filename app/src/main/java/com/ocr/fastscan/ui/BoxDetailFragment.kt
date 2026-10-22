@@ -36,6 +36,7 @@ class BoxDetailFragment : BaseFragment() {
     private var boxTracking: String = ""
     private var partialName: String = ""
     private var ordersGrossWeight: Double = 0.0
+    private var loadingOperations = 0
 
     private val ordersAdapter = OrdersAdapter { order: OrderDetails ->
         removeOrderFromBox(order.guid ?: "")
@@ -133,7 +134,7 @@ class BoxDetailFragment : BaseFragment() {
         binding.btnRefresh.setOnClickListener {
             loadBoxInfo()
             loadOrdersInBox()
-            loadPartialName()
+            loadPartialName(showProgress = true)
         }
 
         binding.btnBack.setOnClickListener {
@@ -162,7 +163,7 @@ class BoxDetailFragment : BaseFragment() {
 
     private fun loadOrdersInBox() {
         viewLifecycleOwner.lifecycleScope.launch {
-            _binding?.progressBar?.visibility = View.VISIBLE
+            showLoading()
             try {
                 val response = apiService.getOrderDetailsBox(boxTracking)
                 if (_binding == null || !isAdded) return@launch
@@ -181,7 +182,7 @@ class BoxDetailFragment : BaseFragment() {
             } catch (e: Exception) {
                 if (isAdded) Toast.makeText(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_SHORT).show()
             } finally {
-                _binding?.progressBar?.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -207,7 +208,7 @@ class BoxDetailFragment : BaseFragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            _binding?.progressBar?.visibility = View.VISIBLE
+            showLoading()
             try {
                 val request = BoxRequest(
                     guid = boxGuid,
@@ -232,7 +233,7 @@ class BoxDetailFragment : BaseFragment() {
             } catch (e: Exception) {
                 if (isAdded) Toast.makeText(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_SHORT).show()
             } finally {
-                _binding?.progressBar?.visibility = View.GONE
+                hideLoading()
             }
         }
     }
@@ -389,7 +390,7 @@ class BoxDetailFragment : BaseFragment() {
 
     private fun loadBoxInfo() {
         viewLifecycleOwner.lifecycleScope.launch {
-            _binding?.progressBar?.visibility = View.VISIBLE
+            showLoading()
             try {
                 val response = apiService.getBoxes(tCode = boxTracking)
                 if (_binding == null || !isAdded) return@launch
@@ -411,13 +412,14 @@ class BoxDetailFragment : BaseFragment() {
             } catch (e: Exception) {
                 if (isAdded) Toast.makeText(context, R.string.net_error_short, Toast.LENGTH_SHORT).show()
             } finally {
-                _binding?.progressBar?.visibility = View.GONE
+                hideLoading()
             }
         }
     }
 
-    private fun loadPartialName() {
+    private fun loadPartialName(showProgress: Boolean = false) {
         viewLifecycleOwner.lifecycleScope.launch {
+            if (showProgress) showLoading()
             try {
                 // Загружаем только открытые партии (typePartial = 0)
                 val response = apiService.getPartials(0)
@@ -435,8 +437,21 @@ class BoxDetailFragment : BaseFragment() {
                 }
             } catch (e: Exception) {
                 Log.e("BoxDetail", "Load partial error", e)
+            } finally {
+                if (showProgress) hideLoading()
             }
         }
+    }
+
+    private fun showLoading() {
+        loadingOperations++
+        _binding?.loadingOverlay?.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        loadingOperations = (loadingOperations - 1).coerceAtLeast(0)
+        _binding?.loadingOverlay?.visibility =
+            if (loadingOperations > 0) View.VISIBLE else View.GONE
     }
 
     private fun parseWeight(value: String): Double? {
@@ -452,6 +467,7 @@ class BoxDetailFragment : BaseFragment() {
     }
 
     override fun onDestroyView() {
+        loadingOperations = 0
         super.onDestroyView()
         _binding = null
     }

@@ -109,6 +109,10 @@
     <string name="net_error_code">Net error %1$d</string>
     <string name="net_error_short">Net error</string>
     <string name="scan_kg">Scan KG</string>
+    <string name="voice_client_code">Enter client code by voice</string>
+    <string name="voice_client_code_prompt">Say the client code digits after KG</string>
+    <string name="voice_client_code_not_recognized">Could not recognize at least 4 digits. Try again or enter the code manually</string>
+    <string name="voice_recognition_unavailable">Voice input is unavailable on this device</string>
     <string name="order_saved">ORDER SAVED!</string>
     <string name="order_added">ORDER ADDED!</string>
     <string name="token_cleared">Tokens cleared</string>
@@ -239,6 +243,9 @@
     <string name="last_3_days">Last 3 days</string>
     <string name="last_week">Last week</string>
     <string name="all_time">All time</string>
+    <string name="get_report">Get</string>
+    <string name="select_period_and_get_report">Select a period and tap Get</string>
+    <string name="select_year_and_get_report">Select a year, optionally enter a client code, and tap Get</string>
     <string name="print_report">Print Report</string>
     <string name="no_unpacked_orders">No unpacked orders</string>
     <string name="report_end">The report is generated automatically.</string>
@@ -363,4 +370,16 @@
     <string name="box_weight_summary">Box:\n%1$.2f kg</string>
     <string name="report_client_code_filter">Client code — leave blank for all</string>
     <string name="report_client_filter_applied">Client: %1$s</string>
+    <string name="report_section_unpacked">Unpacked</string>
+    <string name="report_section_tracks">Tracks</string>
+    <string name="report_section_weight">Weight</string>
+    <string name="unpacked_report_summary">Orders: %1$d | Weight: %2$.2f kg</string>
+    <string name="previous_year">Previous year</string>
+    <string name="next_year">Next year</string>
+    <string name="calculate_monthly_weight">Calculate monthly weight</string>
+    <string name="report_monthly_weight_empty">Select a year and calculate the report</string>
+    <string name="monthly_weight_report_title">MONTHLY WEIGHT — %1$d</string>
+    <string name="monthly_weight_year_total">Total orders for the year: %1$d\nTotal weight: %2$.2f kg\nPacked: %3$.2f kg | Unpacked: %4$.2f kg</string>
+    <string name="monthly_weight_month_summary">%1$s\nOrders for the month: %2$d\nTotal weight: %3$.2f kg\nPacked: %4$.2f kg | Unpacked: %5$.2f kg</string>
+    <string name="no_report_data">No data for the selected period</string>
 </resources>

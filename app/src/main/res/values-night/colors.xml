@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="scan_wait_text">#FFB74D</color>
     <color name="app_primary">#81C784</color>
     <color name="app_primary_dark">#2E7D32</color>
     <color name="app_on_primary">#102313</color>

@@ -18,7 +18,6 @@ import com.ocr.fastscan.ui.BoxFragment
 import com.ocr.fastscan.ui.PartyFragment
 import com.ocr.fastscan.ui.ReportsFragment
 import com.ocr.fastscan.ui.ScanFragment
-import com.ocr.fastscan.ui.UnpackedOrdersFragment
 import com.ocr.fastscan.utils.AppDependencies
 import com.ocr.fastscan.utils.LicenseChecker
 import com.ocr.fastscan.utils.LicenseCheckResult
@@ -210,7 +209,6 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_scan -> ScanFragment()
             R.id.nav_boxes -> BoxFragment()
             R.id.nav_batches -> PartyFragment()
-            R.id.nav_unpacked -> UnpackedOrdersFragment()
             R.id.nav_reports -> ReportsFragment()
             else -> null
         }

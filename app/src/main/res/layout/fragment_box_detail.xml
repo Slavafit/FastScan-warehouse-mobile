@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/app_background"
-    android:fillViewport="true">
+    android:background="@color/app_background">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,20 +22,10 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnBack"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="48dp"
-                android:text="@string/back"
-                android:textAllCaps="false" />
-
             <TextView
                 android:id="@+id/tvBoxNumber"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:ellipsize="middle"
                 android:maxLines="1"
@@ -116,29 +110,9 @@
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPasteOrderTrack"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:minWidth="0dp"
-                android:paddingHorizontal="8dp"
-                android:text="@string/paste_from_clipboard"
-                android:textAllCaps="false"
-                android:textColor="@color/app_primary"
-                android:textSize="14sp"
-                app:icon="@android:drawable/ic_menu_upload"
-                app:iconGravity="textStart"
-                app:iconPadding="4dp"
-                app:iconTint="@color/app_primary"
-                app:strokeColor="@color/action_button_outline" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddOrder"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_weight="2"
                 android:elevation="6dp"
                 android:minWidth="0dp"
                 android:text="@string/scan_track"
@@ -161,10 +135,30 @@
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBack"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:contentDescription="@string/back"
+                app:icon="@drawable/ic_arrow_back"
+                app:iconTint="@color/app_primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPasteOrderTrack"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@string/paste_from_clipboard"
+                app:icon="@drawable/ic_content_paste"
+                app:iconTint="@color/app_primary" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveSizes"
                 style="@style/Widget.Material3.Button.IconButton.Outlined"
                 android:layout_width="52dp"
                 android:layout_height="52dp"
+                android:layout_marginStart="8dp"
                 android:contentDescription="@string/save"
                 app:icon="@android:drawable/ic_menu_save"
                 app:iconTint="@color/app_primary" />
@@ -189,14 +183,6 @@
                 app:icon="@android:drawable/ic_popup_sync"
                 app:iconTint="@color/app_primary" />
         </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvOrders"
@@ -366,4 +352,21 @@
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#33000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
+</FrameLayout>
