@@ -94,7 +94,7 @@ class CameraActivity : AppCompatActivity() {
 
             val analyzer: ImageAnalysis.Analyzer = when (mode) {
                 "barcode" -> BarcodeAnalyzer { result -> returnResult(result) }
-                "track" -> TrackAnalyzer { result -> returnResult(result) }
+                "track" -> TrackAnalyzer { result, source -> returnResult(result, source) }
                 else -> OcrAnalyzer(mode) { result -> returnResult(result) }
             }
 
@@ -138,7 +138,7 @@ class CameraActivity : AppCompatActivity() {
         //Log.d("CAMERA_FLASH", "Фонарик: ${if (on) "ВКЛ" else "ВЫКЛ"}")
     }
 
-    private fun returnResult(value: String) {
+    private fun returnResult(value: String, source: String? = null) {
         if (isProcessing) return
         isProcessing = true
 
@@ -147,6 +147,7 @@ class CameraActivity : AppCompatActivity() {
         val intent = Intent()
         intent.putExtra("scan_result", value)
         intent.putExtra("scan_mode", mode)
+        source?.let { intent.putExtra("scan_source", it) }
         setResult(RESULT_OK, intent)
         finish()
     }

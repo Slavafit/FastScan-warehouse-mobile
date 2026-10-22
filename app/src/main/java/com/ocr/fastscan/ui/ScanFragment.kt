@@ -20,9 +20,12 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
+import com.ocr.fastscan.OrderRegistrationShop
 import com.ocr.fastscan.R
 import com.ocr.fastscan.SettingsActivity
+import com.ocr.fastscan.TrackScanSource
 import com.ocr.fastscan.data.model.*
 import com.ocr.fastscan.data.ReceiverCacheRepository
 import com.ocr.fastscan.data.SenderManager
@@ -43,7 +46,8 @@ class ScanFragment : BaseFragment() {
         if (result.resultCode == Activity.RESULT_OK) {
             val value = result.data?.getStringExtra("scan_result") ?: ""
             val mode = result.data?.getStringExtra("scan_mode") ?: ""
-            handleScanResult(mode, value)
+            val source = result.data?.getStringExtra("scan_source")
+            handleScanResult(mode, value, source)
         }
     }
     private val clientCodeVoiceLauncher =
@@ -82,6 +86,8 @@ class ScanFragment : BaseFragment() {
     private var isFetchingWeight = false
     private var shouldAutoPrintGeneratedLabel = false
     private var lastPrintableOrder: SaveOrderRequest? = null
+    private var orderNumberTracking: String? = null
+    private var isApplyingScannedTracking = false
 
     private val receiverCacheRepository by lazy {
         ReceiverCacheRepository(requireContext(), apiService)
@@ -113,6 +119,14 @@ class ScanFragment : BaseFragment() {
                     true
                 } else false
             } else false
+        }
+        binding.etTracking.doOnTextChanged { text, _, _, _ ->
+            if (!isApplyingScannedTracking &&
+                orderNumberTracking != null &&
+                text?.toString() != orderNumberTracking
+            ) {
+                orderNumberTracking = null
+            }
         }
         setupButtons()
         setupClientCodeInput()
@@ -181,6 +195,7 @@ class ScanFragment : BaseFragment() {
 
         binding.btnGenerateOnza.setOnClickListener {
             val generated = "ONZA${System.currentTimeMillis().toString().takeLast(8)}"
+            orderNumberTracking = null
             binding.etTracking.setText(generated)
             binding.btnPrint.visibility = View.VISIBLE
             shouldAutoPrintGeneratedLabel = true
@@ -266,13 +281,16 @@ class ScanFragment : BaseFragment() {
         }
     }
 
-    private fun handleScanResult(mode: String, value: String) {
+    private fun handleScanResult(mode: String, value: String, source: String? = null) {
         if (value.isEmpty()) return
         soundManager.playScanBeep()
         when (mode) {
             "barcode", "track" -> {
                 shouldAutoPrintGeneratedLabel = false
+                isApplyingScannedTracking = true
+                orderNumberTracking = value.takeIf { source == TrackScanSource.ORDER_NUMBER }
                 binding.etTracking.setText(value)
+                isApplyingScannedTracking = false
                 fetchOrderInfo(value)
             }
             "kg" -> {
@@ -392,7 +410,8 @@ class ScanFragment : BaseFragment() {
             withBox = if (binding.cbWithBox.isChecked) 1 else 0,
             length = currentLength,
             width  = currentWidth,
-            height = currentHeight
+            height = currentHeight,
+            shop = OrderRegistrationShop.resolve(track, orderNumberTracking)
         )
 
         if (grossWeight > 8.0) {
@@ -427,6 +446,7 @@ class ScanFragment : BaseFragment() {
                 ScanUtils.clearFieldsAll(activeBinding, requireContext())
                 clearDimensions()
                 currentReceiverGuid = null
+                orderNumberTracking = null
                 activeBinding.btnSubmit.isEnabled = true
             },
             onError = error@{ error ->

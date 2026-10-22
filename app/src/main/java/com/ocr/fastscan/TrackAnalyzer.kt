@@ -11,7 +11,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 @ExperimentalGetImage
 class TrackAnalyzer(
-    private val onResult: (String) -> Unit
+    private val onResult: (value: String, source: String) -> Unit
 ) : ImageAnalysis.Analyzer {
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val barcodeScanner = BarcodeScanning.getClient()
@@ -30,7 +30,9 @@ class TrackAnalyzer(
             .addOnSuccessListener { visionText ->
                 val orderNumber = OrderNumberTextParser.parse(visionText.text)
                 if (orderNumber != null) {
-                    orderNumberStabilizer.add(orderNumber)?.let(onResult)
+                    orderNumberStabilizer.add(orderNumber)?.let {
+                        onResult(it, TrackScanSource.ORDER_NUMBER)
+                    }
                     imageProxy.close()
                 } else if (SystemClock.elapsedRealtime() - startedAtMs >= BARCODE_FALLBACK_DELAY_MS) {
                     scanBarcode(image, imageProxy)
@@ -52,7 +54,7 @@ class TrackAnalyzer(
             .addOnSuccessListener { barcodes ->
                 barcodes.firstNotNullOfOrNull { it.rawValue?.takeIf(String::isNotBlank) }
                     ?.let(barcodeStabilizer::add)
-                    ?.let(onResult)
+                    ?.let { onResult(it, TrackScanSource.BARCODE) }
             }
             .addOnCompleteListener { imageProxy.close() }
     }
