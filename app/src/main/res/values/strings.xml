@@ -192,6 +192,7 @@
     <string name="hint_scan_kg">Наведите на код клиента (KG…)</string>
     <string name="hint_scan_weight">Наведите на дисплей весов</string>
     <string name="hint_scan_track">Наведите на штрих-код трека</string>
+    <string name="hint_scan_order_number">Наведите на Order num. или штрихкод трека</string>
     <string name="weight_kg">⚖️ Вес (кг)</string>
     <string name="weight">Bec:</string>
     <string name="weight_format">Вес: %1$.2f кг</string>

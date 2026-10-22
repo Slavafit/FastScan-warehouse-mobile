@@ -98,6 +98,7 @@
     <string name="hint_scan_kg">Señale al código del cliente (KG...)</string>
     <string name="hint_scan_weight">Señale la pantalla de la báscula</string>
     <string name="hint_scan_track">Señale el código de barras de la pista.</string>
+    <string name="hint_scan_order_number">Apunte a Order num. o al código de barras de seguimiento</string>
     <string name="parties">Partes</string>
     <string name="scan_or_input">Escanear o ingresar...</string>
     <string name="generate_track">✨ Generar tracking</string>

@@ -160,6 +160,7 @@
     <string name="hint_scan_kg">Point to customer code (KG…)</string>
     <string name="hint_scan_weight">Point to the scale display</string>
     <string name="hint_scan_track">Point to the track barcode</string>
+    <string name="hint_scan_order_number">Point to Order num. or the tracking barcode</string>
     <string name="weight_kg">⚖️ Weight (kg)</string>
     <string name="weight">Weight:</string>
     <string name="weight_format">Weight: %.2f kg</string>

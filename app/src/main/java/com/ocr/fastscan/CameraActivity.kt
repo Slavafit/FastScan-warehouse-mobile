@@ -46,6 +46,7 @@ class CameraActivity : AppCompatActivity() {
         binding.tvHint?.text = when (mode) {
             "kg" -> getString(R.string.hint_scan_kg)
             "weight" -> getString(R.string.hint_scan_weight)
+            "track" -> getString(R.string.hint_scan_order_number)
             else -> getString(R.string.hint_scan_track)
         }
 
@@ -91,10 +92,10 @@ class CameraActivity : AppCompatActivity() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
-            val analyzer: ImageAnalysis.Analyzer = if (mode == "barcode") {
-                BarcodeAnalyzer { result -> returnResult(result) }
-            } else {
-                OcrAnalyzer(mode) { result -> returnResult(result) }
+            val analyzer: ImageAnalysis.Analyzer = when (mode) {
+                "barcode" -> BarcodeAnalyzer { result -> returnResult(result) }
+                "track" -> TrackAnalyzer { result -> returnResult(result) }
+                else -> OcrAnalyzer(mode) { result -> returnResult(result) }
             }
 
             imageAnalyzer.setAnalyzer(cameraExecutor, analyzer)

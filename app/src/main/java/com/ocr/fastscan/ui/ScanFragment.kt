@@ -146,7 +146,7 @@ class ScanFragment : BaseFragment() {
         }
 
         binding.btnScanTrack.setOnClickListener {
-            ScanUtils.launchCamera(requireContext(), "barcode", scanLauncher)
+            ScanUtils.launchCamera(requireContext(), "track", scanLauncher)
         }
         binding.btnScanKg.setOnClickListener {
             ScanUtils.launchCamera(requireContext(), "kg", scanLauncher)
@@ -270,7 +270,7 @@ class ScanFragment : BaseFragment() {
         if (value.isEmpty()) return
         soundManager.playScanBeep()
         when (mode) {
-            "barcode" -> {
+            "barcode", "track" -> {
                 shouldAutoPrintGeneratedLabel = false
                 binding.etTracking.setText(value)
                 fetchOrderInfo(value)
