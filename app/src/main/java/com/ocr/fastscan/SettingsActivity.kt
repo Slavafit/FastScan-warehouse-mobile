@@ -21,9 +21,16 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_settings)
 
-        supportFragmentManager.beginTransaction()
-            .replace(android.R.id.content, SettingsFragment())
-            .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.settings_container, SettingsFragment())
+                .commit()
+        }
+
+        findViewById<android.view.View>(R.id.btn_save_and_exit).setOnClickListener {
+            finish()
+        }
     }
 }

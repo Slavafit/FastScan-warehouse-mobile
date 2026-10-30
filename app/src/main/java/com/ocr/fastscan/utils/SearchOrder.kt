@@ -20,28 +20,38 @@ class SearchOrder(private val fragment: Fragment) {
     private val firebaseManager by lazy { AppDependencies.firebaseManager }
     private val context = fragment.requireContext()
     
-    fun showSearchDialog() {
+    fun showSearchDialog(onScanRequested: () -> Unit) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_search_order, null)
         val input = dialogView.findViewById<EditText>(R.id.etSearchTrack)
 
-        AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context)
             .setTitle(R.string.title_find)
             .setView(dialogView)
             .setPositiveButton(R.string.find) { _, _ ->
                 hideKeyboard(input) // Прячем клавиатуру при запуске поиска
                 val track = input.text.toString().trim()
-                if (track.isNotEmpty()) startGlobalSearch(track)
+                if (track.isNotEmpty()) search(track)
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+
+        dialogView.findViewById<View>(R.id.btnScanSearchTrack).setOnClickListener {
+            hideKeyboard(input)
+            dialog.dismiss()
+            onScanRequested()
+        }
+        dialog.show()
     }
 
-    private fun startGlobalSearch(track: String) {
+    fun search(track: String) {
+        val normalizedTrack = track.trim()
+        if (normalizedTrack.isEmpty()) return
+
         fragment.lifecycleScope.launch {
             try {
-                Toast.makeText(context, context.getString(R.string.finding, track), Toast.LENGTH_SHORT).show()
-                val result = firebaseManager.findOrderEverywhere(track)
-                displayResults(track, result)
+                Toast.makeText(context, context.getString(R.string.finding, normalizedTrack), Toast.LENGTH_SHORT).show()
+                val result = firebaseManager.findOrderEverywhere(normalizedTrack)
+                displayResults(normalizedTrack, result)
             } catch (e: Exception) {
                 Toast.makeText(context, context.getString(R.string.error, e.message), Toast.LENGTH_SHORT).show()
             }

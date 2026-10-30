@@ -25,6 +25,15 @@ class GeneratedOrderLabelLayoutTest {
     }
 
     @Test
+    fun `regular tracking number is encoded as qr`() {
+        val tracking = "1Z999AA10123456784"
+        val zpl = GeneratedOrderLabelLayout.buildCodeBlock(tracking, LABEL_WIDTH_DOTS)
+
+        assertTrue(zpl.contains("^BQN,2,9^FDQA,$tracking^FS"))
+        assertTrue(!zpl.contains("^BC"))
+    }
+
+    @Test
     fun `qr and tracking text share the label center`() {
         val qrCenterTimesTwo = GeneratedOrderLabelLayout.qrX(LABEL_WIDTH_DOTS) * 2 +
             GeneratedOrderLabelLayout.qrPrintedSizeDots

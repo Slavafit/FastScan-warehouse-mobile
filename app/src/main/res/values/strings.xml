@@ -36,6 +36,7 @@
     <string name="share_via">Поделиться через…</string>
 
     <string name="server_settings">💻⚙️ Настройки сервера</string>
+    <string name="save_and_exit">Сохранить и выйти</string>
     <string name="server_url_title">URL сервера</string>
     <string name="server_url_summary">По умолчанию: https://onza-api.ibm.kg</string>
     <string name="login_title">Логин</string>
@@ -80,7 +81,7 @@
     <string name="track_copied">Трек скопирован: %1$s</string>
 
     <string name="developer_info_title">👨🏻‍💻 О разработчике</string>
-    <string name="developer_title">Вячеслав Фитлин</string>
+    <string name="developer_title">Viacheslav Fitlin</string>
     <string name="developer_summary">Telegramm: @Slavafit</string>
 
     <string name="scan">Скан</string>
@@ -192,7 +193,7 @@
     <string name="hint_scan_kg">Наведите на код клиента (KG…)</string>
     <string name="hint_scan_weight">Наведите на дисплей весов</string>
     <string name="hint_scan_track">Наведите на штрих-код трека</string>
-    <string name="hint_scan_order_number">Наведите на Order num. или штрихкод трека</string>
+    <string name="hint_scan_order_number">Наведите на штрихкод или QR-код; Order num. держите в кадре</string>
     <string name="weight_kg">⚖️ Вес (кг)</string>
     <string name="weight">Bec:</string>
     <string name="weight_format">Вес: %1$.2f кг</string>
@@ -234,6 +235,7 @@
     <string name="height_h">Высота H</string>
     <string name="total_weight">Итого: 0.00 кг</string>
     <string name="tracking_code">Трек-код</string>
+    <string name="recognized_order_number">Order №: %1$s</string>
     <string name="order_description_title">Комментарий к заказу</string>
     <string name="order_deleted">Заказ удалён</string>
     <string name="delete_order">Удалить заказ</string>
@@ -349,6 +351,8 @@
     <string name="license_revoked_message">Лицензия отозвана. Обратитесь к разработчику.</string>
     <string name="license_expired_message">Срок лицензии истёк. Обратитесь к разработчику.</string>
     <string name="license_device_mismatch_message">Лицензия привязана к другому устройству.</string>
+    <string name="license_not_found_message">Лицензия не найдена. Обратитесь к разработчику.</string>
+    <string name="license_token_missing_message">Устройство уже зарегистрировано, но сохранённый токен лицензии отсутствует. Обратитесь к разработчику.</string>
     <string name="license_invalid_message">Лицензия недействительна. Обратитесь к разработчику.</string>
     <string name="license_active_full_status">Лицензия активна без ограничения срока</string>
     <string name="license_trial_status">Пробный доступ: осталось %1$d дней (до %2$s)</string>

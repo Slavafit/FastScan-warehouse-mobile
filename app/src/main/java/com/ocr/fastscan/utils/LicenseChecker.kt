@@ -11,7 +11,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.net.URLEncoder
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -30,13 +29,16 @@ class LicenseChecker(private val userId: String) {
         val deviceId = getDeviceId(context)
         val appId = context.packageName
         val appName = getAppName(context)
+        val savedToken = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(KEY_LICENSE_TOKEN, null)
+            ?.takeIf { it.isNotBlank() }
         Log.d(
             "LicenseCheck",
             "Checking license: email=${email.maskEmail()}, device=${deviceId.maskDeviceId()}, app_id=$appId, app_name=$appName"
         )
 
         return try {
-            val response = requestLicense(email, deviceId, appId, appName)
+            val response = requestLicense(email, deviceId, appId, appName, savedToken)
             saveLicenseToken(context, response.token)
             response.toResult()
         } catch (e: Exception) {
@@ -49,13 +51,15 @@ class LicenseChecker(private val userId: String) {
         email: String,
         deviceId: String,
         appId: String,
-        appName: String
+        appName: String,
+        savedToken: String?
     ): LicenseServerResponse {
         return withContext(Dispatchers.IO) {
-            val postResponse = executePost(email, deviceId, appId, appName)
-            if (postResponse != null) return@withContext postResponse
-
-            executeGet(email, deviceId, appId, appName) ?: LicenseServerResponse(ok = false, status = "connection_error")
+            if (savedToken != null) {
+                executeVerify(savedToken, deviceId, appId)
+            } else {
+                executePost(email, deviceId, appId, appName)
+            } ?: LicenseServerResponse(ok = false, status = "connection_error")
         }
     }
 
@@ -83,22 +87,24 @@ class LicenseChecker(private val userId: String) {
         return executeRequest(request)
     }
 
-    private fun executeGet(
-        email: String,
+    private fun executeVerify(
+        token: String,
         deviceId: String,
-        appId: String,
-        appName: String
+        appId: String
     ): LicenseServerResponse? {
-        val encodedEmail = URLEncoder.encode(email, "UTF-8")
-        val encodedDeviceId = URLEncoder.encode(deviceId, "UTF-8")
-        val encodedAppId = URLEncoder.encode(appId, "UTF-8")
-        val encodedAppName = URLEncoder.encode(appName, "UTF-8")
+        val json = gson.toJson(
+            mapOf(
+                "token" to token,
+                "device_id" to deviceId,
+                "app_id" to appId
+            )
+        )
         val request = Request.Builder()
-            .url("$LICENSE_SERVER_URL?email=$encodedEmail&device_id=$encodedDeviceId&app_id=$encodedAppId&app_name=$encodedAppName")
-            .get()
+            .url(LICENSE_VERIFY_URL)
+            .post(json.toRequestBody(JSON_MEDIA_TYPE))
             .build()
 
-        Log.d("LicenseCheck", "Sending GET license check fallback")
+        Log.d("LicenseCheck", "Sending POST license verification")
         return executeRequest(request)
     }
 
@@ -107,22 +113,24 @@ class LicenseChecker(private val userId: String) {
             val body = response.body?.string().orEmpty()
             Log.d("LicenseCheck", "${request.method} license response: HTTP ${response.code}, body=$body")
 
-            if (!response.isSuccessful) {
-                Log.w("LicenseCheck", "${request.method} license check failed: HTTP ${response.code}")
-                return null
-            }
-
             if (body.isBlank()) {
                 Log.w("LicenseCheck", "${request.method} license check failed: empty response")
                 return null
             }
 
-            return gson.fromJson(body, LicenseServerResponse::class.java)
+            val parsed = runCatching {
+                gson.fromJson(body, LicenseServerResponse::class.java)
+            }.getOrNull()
+
+            if (!response.isSuccessful) {
+                Log.w("LicenseCheck", "${request.method} license check failed: HTTP ${response.code}")
+            }
+            return parsed
         }
     }
 
     private fun LicenseServerResponse.toResult(): LicenseCheckResult {
-        val normalizedStatus = status.orEmpty().lowercase()
+        val normalizedStatus = (status ?: reason).orEmpty().lowercase()
         if (!ok) {
             return LicenseCheckResult(normalizedStatus.toLicenseStatus())
         }
@@ -145,10 +153,13 @@ class LicenseChecker(private val userId: String) {
             "trial" -> LicenseStatus.TRIAL
             "active" -> LicenseStatus.ACTIVE
             "expired" -> LicenseStatus.EXPIRED
+            "trial_expired" -> LicenseStatus.EXPIRED
             "revoked" -> LicenseStatus.REVOKED
             "device_mismatch" -> LicenseStatus.DEVICE_MISMATCH
             "connection_error" -> LicenseStatus.CONNECTION_ERROR
-            "need_activation", "not_found", "missing_email" -> LicenseStatus.NEED_ACTIVATION
+            "not_found" -> LicenseStatus.NOT_FOUND
+            "already_registered" -> LicenseStatus.TOKEN_MISSING
+            "need_activation", "missing_email" -> LicenseStatus.NEED_ACTIVATION
             else -> LicenseStatus.INVALID
         }
     }
@@ -202,12 +213,15 @@ class LicenseChecker(private val userId: String) {
         val ok: Boolean = false,
         val status: String? = null,
         val token: String? = null,
-        val expires_at: Long? = null
+        val expires_at: Long? = null,
+        val reason: String? = null
     )
 
     companion object {
         private const val LICENSE_SERVER_URL = "https://license-server.slavafit.workers.dev/activate"
+        private const val LICENSE_VERIFY_URL = "https://license-server.slavafit.workers.dev/verify"
         private const val KEY_LICENSE_DEVICE_ID = "license_device_id"
+        private const val KEY_LICENSE_TOKEN = "license_token"
         private const val BROKEN_ANDROID_ID = "9774d56d682e549c"
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
         private val ACCESS_STATUSES = setOf(LicenseStatus.TRIAL, LicenseStatus.ACTIVE)
@@ -237,6 +251,8 @@ enum class LicenseStatus {
     EXPIRED,
     REVOKED,
     DEVICE_MISMATCH,
+    NOT_FOUND,
+    TOKEN_MISSING,
     INVALID,
     CONNECTION_ERROR
 }

@@ -1,8 +1,10 @@
 package com.ocr.fastscan.data
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.util.Log
 import android.widget.Toast
+import com.google.gson.GsonBuilder
 import com.ocr.fastscan.api.OnzaApiService
 import com.ocr.fastscan.data.model.FirestoreShipment
 import com.ocr.fastscan.data.model.SaveOrderRequest
@@ -27,7 +29,7 @@ class SenderManager(
     ) {
         ioScope.launch {
             try {
-                val response = apiService.saveOrder(request)
+                                val response = apiService.saveOrder(request)
                 if (response.isSuccessful) {
                     // Создаём объект для Firestore
                     val shipment = FirestoreShipment(

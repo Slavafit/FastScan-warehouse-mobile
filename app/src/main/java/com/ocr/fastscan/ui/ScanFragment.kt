@@ -22,10 +22,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
-import com.ocr.fastscan.OrderRegistrationShop
 import com.ocr.fastscan.R
+import com.ocr.fastscan.RegistrationDescription
 import com.ocr.fastscan.SettingsActivity
-import com.ocr.fastscan.TrackScanSource
 import com.ocr.fastscan.data.model.*
 import com.ocr.fastscan.data.ReceiverCacheRepository
 import com.ocr.fastscan.data.SenderManager
@@ -46,10 +45,19 @@ class ScanFragment : BaseFragment() {
         if (result.resultCode == Activity.RESULT_OK) {
             val value = result.data?.getStringExtra("scan_result") ?: ""
             val mode = result.data?.getStringExtra("scan_mode") ?: ""
-            val source = result.data?.getStringExtra("scan_source")
-            handleScanResult(mode, value, source)
+            val description = result.data?.getStringExtra("scan_description")
+            handleScanResult(mode, value, description)
         }
     }
+    private val searchOrderScanLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val value = result.data?.getStringExtra("scan_result").orEmpty()
+            if (value.isNotBlank()) {
+                soundManager.playScanBeep()
+                searchOrder.search(value)
+            }
+        }
     private val clientCodeVoiceLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
@@ -85,8 +93,7 @@ class ScanFragment : BaseFragment() {
     private var currentOrderDimensions: OrderDimensions? = null
     private var isFetchingWeight = false
     private var shouldAutoPrintGeneratedLabel = false
-    private var lastPrintableOrder: SaveOrderRequest? = null
-    private var orderNumberTracking: String? = null
+    private var scannedOrderNumber: String? = null
     private var isApplyingScannedTracking = false
 
     private val receiverCacheRepository by lazy {
@@ -120,12 +127,9 @@ class ScanFragment : BaseFragment() {
                 } else false
             } else false
         }
-        binding.etTracking.doOnTextChanged { text, _, _, _ ->
-            if (!isApplyingScannedTracking &&
-                orderNumberTracking != null &&
-                text?.toString() != orderNumberTracking
-            ) {
-                orderNumberTracking = null
+        binding.etTracking.doOnTextChanged { _, _, _, _ ->
+            if (!isApplyingScannedTracking && scannedOrderNumber != null) {
+                setScannedOrderNumber(null)
             }
         }
         setupButtons()
@@ -195,7 +199,7 @@ class ScanFragment : BaseFragment() {
 
         binding.btnGenerateOnza.setOnClickListener {
             val generated = "ONZA${System.currentTimeMillis().toString().takeLast(8)}"
-            orderNumberTracking = null
+            setScannedOrderNumber(null)
             binding.etTracking.setText(generated)
             binding.btnPrint.visibility = View.VISIBLE
             shouldAutoPrintGeneratedLabel = true
@@ -209,7 +213,9 @@ class ScanFragment : BaseFragment() {
         binding.btnSubmit.setOnClickListener { submitFinalOrder() }
 
         binding.btnGlobalSearch.setOnClickListener {
-            searchOrder.showSearchDialog()
+            searchOrder.showSearchDialog {
+                ScanUtils.launchCamera(requireContext(), "track", searchOrderScanLauncher)
+            }
         }
 
         binding.btnSearchClient.setOnClickListener {
@@ -281,14 +287,14 @@ class ScanFragment : BaseFragment() {
         }
     }
 
-    private fun handleScanResult(mode: String, value: String, source: String? = null) {
+    private fun handleScanResult(mode: String, value: String, description: String? = null) {
         if (value.isEmpty()) return
         soundManager.playScanBeep()
         when (mode) {
             "barcode", "track" -> {
                 shouldAutoPrintGeneratedLabel = false
                 isApplyingScannedTracking = true
-                orderNumberTracking = value.takeIf { source == TrackScanSource.ORDER_NUMBER }
+                setScannedOrderNumber(description)
                 binding.etTracking.setText(value)
                 isApplyingScannedTracking = false
                 fetchOrderInfo(value)
@@ -299,6 +305,19 @@ class ScanFragment : BaseFragment() {
                 fetchClientByKgCode(cleanCode)
             }
             "weight" -> binding.etWeight.setText(value)
+        }
+    }
+
+    private fun setScannedOrderNumber(value: String?) {
+        scannedOrderNumber = value?.trim()?.takeIf { it.isNotEmpty() }
+        val activeBinding = _binding ?: return
+        val orderNumber = scannedOrderNumber
+        if (orderNumber == null) {
+            activeBinding.tvOrderNumber.text = ""
+            activeBinding.tvOrderNumber.visibility = View.GONE
+        } else {
+            activeBinding.tvOrderNumber.text = getString(R.string.recognized_order_number, orderNumber)
+            activeBinding.tvOrderNumber.visibility = View.VISIBLE
         }
     }
 
@@ -326,6 +345,9 @@ class ScanFragment : BaseFragment() {
                     
                     activeBinding.cbWithBox.isChecked = details.withBox == "1"
                     currentReceiverGuid = details.userGuid
+                    RegistrationDescription.extractOrderNumber(details.stockComment)?.let {
+                        setScannedOrderNumber(it)
+                    }
                     soundManager.playSuccess()
 
                     details.description
@@ -411,7 +433,7 @@ class ScanFragment : BaseFragment() {
             length = currentLength,
             width  = currentWidth,
             height = currentHeight,
-            shop = OrderRegistrationShop.resolve(track, orderNumberTracking)
+            stockComment = RegistrationDescription.resolve(scannedOrderNumber)
         )
 
         if (grossWeight > 8.0) {
@@ -441,12 +463,11 @@ class ScanFragment : BaseFragment() {
                 activeBinding.progressBar.visibility = View.GONE
                 soundManager.playSent()
                 Toast.makeText(requireContext(), getString(R.string.order_saved), Toast.LENGTH_SHORT).show()
-                lastPrintableOrder = req
                 printGeneratedLabelIfNeeded(req)
                 ScanUtils.clearFieldsAll(activeBinding, requireContext())
                 clearDimensions()
                 currentReceiverGuid = null
-                orderNumberTracking = null
+                setScannedOrderNumber(null)
                 activeBinding.btnSubmit.isEnabled = true
             },
             onError = error@{ error ->
@@ -461,27 +482,16 @@ class ScanFragment : BaseFragment() {
 
     private fun printCurrentOrderLabel() {
         val currentTracking = binding.etTracking.text.toString().trim()
-        if (currentTracking.isNotEmpty()) {
-            printHelper.printLabel(
-                currentTracking,
-                binding.etClientCode.text.toString(),
-                binding.tvClientName.text.toString(),
-                binding.etWeight.text.toString()
-            )
-            return
-        }
-
-        val previousOrder = lastPrintableOrder
-        if (previousOrder == null) {
+        if (currentTracking.isEmpty()) {
             Toast.makeText(requireContext(), R.string.input_track, Toast.LENGTH_SHORT).show()
             return
         }
 
         printHelper.printLabel(
-            previousOrder.trackingNumber,
-            previousOrder.clientCode,
-            previousOrder.clientName,
-            previousOrder.grossWeight?.toString().orEmpty()
+            currentTracking,
+            binding.etClientCode.text.toString(),
+            binding.tvClientName.text.toString(),
+            binding.etWeight.text.toString()
         )
     }
 

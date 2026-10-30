@@ -5,6 +5,7 @@
     <string name="language">Language</string>
     <string name="language_summary">Select language</string>
     <string name="server_settings">💻⚙️ Server Settings</string>
+    <string name="save_and_exit">Save and exit</string>
     <string name="server_url_title">" URL Server"</string>
     <string name="server_url_summary">Default: https://onza-api.ibm.kg</string>
     <string name="login_title">Login</string>
@@ -160,7 +161,7 @@
     <string name="hint_scan_kg">Point to customer code (KG…)</string>
     <string name="hint_scan_weight">Point to the scale display</string>
     <string name="hint_scan_track">Point to the track barcode</string>
-    <string name="hint_scan_order_number">Point to Order num. or the tracking barcode</string>
+    <string name="hint_scan_order_number">Point to the barcode or QR code; keep Order num. in frame</string>
     <string name="weight_kg">⚖️ Weight (kg)</string>
     <string name="weight">Weight:</string>
     <string name="weight_format">Weight: %.2f kg</string>
@@ -195,6 +196,7 @@
     <string name="height_h">Height H</string>
     <string name="total_weight">Total: 0.00 kg</string>
     <string name="tracking_code">Tracking code</string>
+    <string name="recognized_order_number">Order No.: %1$s</string>
     <string name="order_description_title">Order note</string>
     <string name="order_deleted">Order deleted</string>
     <string name="delete_order">Delete order</string>
@@ -333,6 +335,8 @@
     <string name="license_revoked_message">License was revoked. Contact the developer.</string>
     <string name="license_expired_message">License has expired. Contact the developer.</string>
     <string name="license_device_mismatch_message">License is linked to another device.</string>
+    <string name="license_not_found_message">License not found. Contact the developer.</string>
+    <string name="license_token_missing_message">This device is already registered, but its saved license token is missing. Contact the developer.</string>
     <string name="license_invalid_message">License is invalid. Contact the developer.</string>
     <string name="license_active_full_status">License is active with no expiration</string>
     <string name="license_trial_status">Trial access: %1$d days left (until %2$s)</string>

@@ -1,6 +1,5 @@
 package com.ocr.fastscan
 
-import android.os.SystemClock
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -11,13 +10,13 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 @ExperimentalGetImage
 class TrackAnalyzer(
-    private val onResult: (value: String, source: String) -> Unit
+    private val onResult: (tracking: String, orderNumber: String?) -> Unit
 ) : ImageAnalysis.Analyzer {
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val barcodeScanner = BarcodeScanning.getClient()
     private val orderNumberStabilizer = ScanResultStabilizer(requiredMatches = 2)
     private val barcodeStabilizer = ScanResultStabilizer()
-    private val startedAtMs = SystemClock.elapsedRealtime()
+    private var recognizedOrderNumber: String? = null
 
     override fun analyze(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image ?: run {
@@ -31,21 +30,13 @@ class TrackAnalyzer(
                 val orderNumber = OrderNumberTextParser.parse(visionText.text)
                 if (orderNumber != null) {
                     orderNumberStabilizer.add(orderNumber)?.let {
-                        onResult(it, TrackScanSource.ORDER_NUMBER)
+                        recognizedOrderNumber = it
                     }
-                    imageProxy.close()
-                } else if (SystemClock.elapsedRealtime() - startedAtMs >= BARCODE_FALLBACK_DELAY_MS) {
-                    scanBarcode(image, imageProxy)
-                } else {
-                    imageProxy.close()
                 }
+                scanBarcode(image, imageProxy)
             }
             .addOnFailureListener {
-                if (SystemClock.elapsedRealtime() - startedAtMs >= BARCODE_FALLBACK_DELAY_MS) {
-                    scanBarcode(image, imageProxy)
-                } else {
-                    imageProxy.close()
-                }
+                scanBarcode(image, imageProxy)
             }
     }
 
@@ -54,12 +45,8 @@ class TrackAnalyzer(
             .addOnSuccessListener { barcodes ->
                 barcodes.firstNotNullOfOrNull { it.rawValue?.takeIf(String::isNotBlank) }
                     ?.let(barcodeStabilizer::add)
-                    ?.let { onResult(it, TrackScanSource.BARCODE) }
+                    ?.let { onResult(it, recognizedOrderNumber) }
             }
             .addOnCompleteListener { imageProxy.close() }
-    }
-
-    companion object {
-        private const val BARCODE_FALLBACK_DELAY_MS = 1_200L
     }
 }

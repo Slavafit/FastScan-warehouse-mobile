@@ -32,7 +32,8 @@ data class OrderDetails(
     @SerializedName("length") val length: Int?,
     @SerializedName("width") val width: Int?,
     @SerializedName("height") val height: Int?,
-    @SerializedName("description") val description: String? = null
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("stock_comment") val stockComment: String? = null
 )
 data class ReceiverResponse(
     @SerializedName("full_name") val fullName: String?,
@@ -68,7 +69,7 @@ data class SaveOrderRequest(
     @SerializedName("length") val length: Int?,
     @SerializedName("width") val width: Int?,
     @SerializedName("height") val height: Int?,
-    @SerializedName("shop") val shop: String? = null
+    @SerializedName("stock_comment") val stockComment: String?
 )
 //объект только для размеров и веса
 data class OrderDimensions(

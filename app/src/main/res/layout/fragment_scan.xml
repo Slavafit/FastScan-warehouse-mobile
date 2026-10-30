@@ -91,6 +91,15 @@
                     app:tint="@color/app_icon_tint" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/tvOrderNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
             <Button android:id="@+id/btnGenerateOnza" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/generate_track" android:textSize="12sp" style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
             <Space android:layout_width="match_parent" android:layout_height="12dp" />
@@ -269,7 +278,7 @@
                     android:alpha="1" />
 
             </LinearLayout>
-            <Space android:layout_width="match_parent" android:layout_height="32dp" />
+            <Space android:layout_width="match_parent" android:layout_height="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmit"

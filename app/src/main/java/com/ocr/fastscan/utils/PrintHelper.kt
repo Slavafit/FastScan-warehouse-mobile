@@ -35,41 +35,16 @@ class PrintHelper(private val activity: Activity) {
 
         val widthDots = getPrinterWidth() * 8
         val heightDots = getPrinterHeight() * 8
-        val isGeneratedTracking = trackingNumber.startsWith("ONZA", ignoreCase = true)
-        val codeBlock: String
-        val dividerY: Int
-        val clientY: Int
-        val nameY: Int
-        val weightY: Int
-        val weightBlock: String
-        val headerY: Int
-
-        if (isGeneratedTracking) {
-            codeBlock = GeneratedOrderLabelLayout.buildCodeBlock(trackingNumber, widthDots)
-            dividerY = 410
-            clientY = 450
-            nameY = 520
-            weightY = 650
-            weightBlock = """
-                ^CF0,48
-                ^FO80,$weightY^FB600,1,0,L,0^FDGross weight: $weight kg^FS
-            """.trimIndent()
-            headerY = 10
-        } else {
-            codeBlock = """
-                ^BY3,3,100
-                ^FO80,100^BCN,100,Y,N,N^FD$trackingNumber^FS
-            """.trimIndent()
-            dividerY = 280
-            clientY = 320
-            nameY = 380
-            weightY = 500
-            weightBlock = """
-                ^CF0,80
-                ^FO80,$weightY^FDGross weight: $weight kg^FS
-            """.trimIndent()
-            headerY = 40
-        }
+        val codeBlock = GeneratedOrderLabelLayout.buildCodeBlock(trackingNumber, widthDots)
+        val dividerY = 410
+        val clientY = 450
+        val nameY = 520
+        val weightY = 650
+        val weightBlock = """
+            ^CF0,48
+            ^FO80,$weightY^FB600,1,0,L,0^FDGross weight: $weight kg^FS
+        """.trimIndent()
+        val headerY = 10
 
         val zpl = """
             ^XA

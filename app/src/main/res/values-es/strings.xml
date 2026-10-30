@@ -6,6 +6,7 @@
     <string name="app_name">FastScan Pro</string>
     <string name="settings">Configuración</string>
     <string name="server_settings">💻⚙️ Configuración del servidor</string>
+    <string name="save_and_exit">Guardar y salir</string>
     <string name="server_url_title">URL del servidor</string>
     <string name="server_url_summary">Por defecto: https://onza-api.ibm.kg</string>
     <string name="login_title">Login</string>
@@ -98,7 +99,7 @@
     <string name="hint_scan_kg">Señale al código del cliente (KG...)</string>
     <string name="hint_scan_weight">Señale la pantalla de la báscula</string>
     <string name="hint_scan_track">Señale el código de barras de la pista.</string>
-    <string name="hint_scan_order_number">Apunte a Order num. o al código de barras de seguimiento</string>
+    <string name="hint_scan_order_number">Apunte al código de barras o QR y mantenga Order num. en el encuadre</string>
     <string name="parties">Partes</string>
     <string name="scan_or_input">Escanear o ingresar...</string>
     <string name="generate_track">✨ Generar tracking</string>
@@ -193,6 +194,7 @@
     <string name="height_h">Altura</string>
     <string name="total_weight">Total: 0.00 kg</string>
     <string name="tracking_code">Código de seguimiento</string>
+    <string name="recognized_order_number">Pedido n.º: %1$s</string>
     <string name="order_description_title">Nota del pedido</string>
     <string name="order_deleted">Pedido eliminado</string>
     <string name="delete_order">Eliminar pedido</string>
@@ -322,6 +324,8 @@
     <string name="license_revoked_message">La licencia fue revocada. Contacta con el desarrollador.</string>
     <string name="license_expired_message">La licencia ha caducado. Contacta con el desarrollador.</string>
     <string name="license_device_mismatch_message">La licencia está vinculada a otro dispositivo.</string>
+    <string name="license_not_found_message">No se encontró la licencia. Contacta con el desarrollador.</string>
+    <string name="license_token_missing_message">Este dispositivo ya está registrado, pero falta el token de licencia guardado. Contacta con el desarrollador.</string>
     <string name="license_invalid_message">La licencia no es válida. Contacta con el desarrollador.</string>
     <string name="license_active_full_status">La licencia está activa sin fecha de caducidad</string>
     <string name="license_trial_status">Acceso de prueba: quedan %1$d días (hasta %2$s)</string>

@@ -124,6 +124,8 @@ class MainActivity : AppCompatActivity() {
             LicenseStatus.EXPIRED -> getString(R.string.license_expired_message)
             LicenseStatus.REVOKED -> getString(R.string.license_revoked_message)
             LicenseStatus.DEVICE_MISMATCH -> getString(R.string.license_device_mismatch_message)
+            LicenseStatus.NOT_FOUND -> getString(R.string.license_not_found_message)
+            LicenseStatus.TOKEN_MISSING -> getString(R.string.license_token_missing_message)
             LicenseStatus.CONNECTION_ERROR -> getString(R.string.connection_error_message)
             LicenseStatus.INVALID -> getString(R.string.license_invalid_message)
         }
