@@ -1,62 +1,58 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function activeLicense() {
-      return signedIn()
+    function warehouseAccess(warehouseId) {
+      return request.auth != null
+        && request.auth.token.keys().hasAll([
+          'warehouse_id', 'license_active', 'license_expires_at', 'auth_time'
+        ])
+        && request.auth.token.warehouse_id is string
+        && request.auth.token.warehouse_id.size() > 0
+        && request.auth.token.warehouse_id == warehouseId
         && request.auth.token.license_active == true
+        && request.auth.token.license_expires_at is int
+        && request.auth.token.auth_time is int
         && request.time.toMillis() < (request.auth.token.auth_time + 172800) * 1000
-        && (
-          request.auth.token.license_expires_at == 0
-          || request.time.toMillis() < request.auth.token.license_expires_at * 1000
-        );
-    }
-
-    function belongsToWarehouse(warehouseId) {
-      return activeLicense() && request.auth.token.warehouse_id == warehouseId;
+        && (request.auth.token.license_expires_at == 0
+          || request.time.toMillis() < request.auth.token.license_expires_at * 1000);
     }
 
     match /warehouses/{warehouseId}/shipments/{document} {
-      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow read, create, update: if warehouseAccess(warehouseId);
       allow delete: if false;
     }
 
     match /warehouses/{warehouseId}/box_entries/{document} {
-      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow read, create, update: if warehouseAccess(warehouseId);
       allow delete: if false;
     }
 
     match /warehouses/{warehouseId}/product_catalog/{document} {
-      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow read, create, update: if warehouseAccess(warehouseId);
       allow delete: if false;
     }
 
     match /warehouses/{warehouseId}/order_contents/{document} {
-      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow read, create, update: if warehouseAccess(warehouseId);
       allow delete: if false;
     }
 
     match /warehouses/{warehouseId}/box_inventory_reports/{document} {
-      allow read, create: if belongsToWarehouse(warehouseId);
+      allow read, create: if warehouseAccess(warehouseId);
       allow update, delete: if false;
     }
 
-    // Temporary read access for historical data from the first warehouse.
-    // Remove these two matches after migrating the legacy root collections.
-    match /shipments/{document} {
-      allow read: if belongsToWarehouse('es-main');
+    // Temporary compatibility for historical root documents, not subcollections.
+    match /shipments/{shipmentId} {
+      allow read: if warehouseAccess('es-main');
+      allow write: if false;
+    }
+    match /box_entries/{entryId} {
+      allow read: if warehouseAccess('es-main');
       allow write: if false;
     }
 
-    match /box_entries/{document} {
-      allow read: if belongsToWarehouse('es-main');
-      allow write: if false;
-    }
-
+    // All remaining paths are denied; this grants no additional access.
     match /{document=**} {
       allow read, write: if false;
     }
