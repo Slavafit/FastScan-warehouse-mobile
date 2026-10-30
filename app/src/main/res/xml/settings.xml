@@ -97,6 +97,15 @@
 
     <PreferenceCategory app:title="@string/licence_title">
 
+        <ListPreference
+            app:key="warehouse_country"
+            app:title="@string/warehouse_country_title"
+            app:summary="%s"
+            app:defaultValue="ES"
+            app:entries="@array/warehouse_country_entries"
+            app:entryValues="@array/warehouse_country_values"
+            app:useSimpleSummaryProvider="true" />
+
         <EditTextPreference
             app:key="user_email"
             app:title="@string/licence_email_title"

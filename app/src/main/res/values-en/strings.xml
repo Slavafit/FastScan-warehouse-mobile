@@ -13,6 +13,15 @@
     <string name="vol_weight_title">Vol Weight</string>
     <string name="vol_weight_summary">By default: 6000</string>
     <string name="licence_title">📃 Licence</string>
+    <string name="warehouse_country_title">Warehouse country</string>
+    <string-array name="warehouse_country_entries">
+        <item>Spain</item>
+        <item>United States</item>
+    </string-array>
+    <string-array name="warehouse_country_values">
+        <item>ES</item>
+        <item>US</item>
+    </string-array>
     <string name="licence_email_title">Email for licence</string>
     <string name="licence_email_summary">Enter email, linked with licence</string>
     <string name="licence_status_title">Licence status</string>
@@ -387,4 +396,41 @@
     <string name="monthly_weight_year_total">Total orders for the year: %1$d\nTotal weight: %2$.2f kg\nPacked: %3$.2f kg | Unpacked: %4$.2f kg</string>
     <string name="monthly_weight_month_summary">%1$s\nOrders for the month: %2$d\nTotal weight: %3$.2f kg\nPacked: %4$.2f kg | Unpacked: %5$.2f kg</string>
     <string name="no_report_data">No data for the selected period</string>
+    <string name="order_content">Contents</string>
+    <string name="order_content_with_count">Contents · %1$d</string>
+    <string name="content_tracking">Track: %1$s</string>
+    <string name="content_summary">Items: %1$d · Units: %2$d</string>
+    <string name="content_empty">No contents added yet</string>
+    <string name="category_clothing">Clothing</string>
+    <string name="category_footwear">Footwear</string>
+    <string name="category_electronics">Electronics</string>
+    <string name="category_food">Food</string>
+    <string name="category_bags">Bags</string>
+    <string name="category_other">Other</string>
+    <string name="manual_input">Manual</string>
+    <string name="voice_input">Voice</string>
+    <string name="voice_quantity_prompt">Say the quantity</string>
+    <string name="quantity_not_recognized">Quantity was not recognized</string>
+    <string name="add_item">Add another</string>
+    <string name="change_quantity">Change</string>
+    <string name="delete_item">Delete item</string>
+    <string name="review_content">List</string>
+    <string name="finish_content">Finish</string>
+    <string name="back_plain">Back</string>
+    <string name="content_position">Item %1$d of %2$d</string>
+    <string name="content_item_format">%1$s\n%2$d %3$s</string>
+    <string name="input_track_for_content">Scan or enter a tracking number first</string>
+    <string name="content_saved">Contents saved</string>
+    <string name="content_save_error">Could not save contents</string>
+    <string name="custom_product">Other item</string>
+    <string name="custom_product_local_name">Item name</string>
+    <string name="custom_product_english_name">English name</string>
+    <string name="custom_product_names_required">Enter both names</string>
+    <string name="select_unit">Select unit</string>
+    <string name="inventory_preparing">Preparing box inventories…</string>
+    <string name="inventory_missing_warning">%1$d orders have no contents. Close the batch without them?</string>
+    <string name="inventory_ready_confirm">English inventories will be created for %1$d boxes. Close the batch?</string>
+    <string name="inventory_save_error">The batch was closed, but inventories could not be saved</string>
+    <string name="box_contents_report">Box contents</string>
+    <string name="no_box_contents_reports">There are no saved inventories for this batch</string>
 </resources>

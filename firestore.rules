@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function activeLicense() {
+      return signedIn()
+        && request.auth.token.license_active == true
+        && request.time.toMillis() < (request.auth.token.auth_time + 172800) * 1000
+        && (
+          request.auth.token.license_expires_at == 0
+          || request.time.toMillis() < request.auth.token.license_expires_at * 1000
+        );
+    }
+
+    function belongsToWarehouse(warehouseId) {
+      return activeLicense() && request.auth.token.warehouse_id == warehouseId;
+    }
+
+    match /warehouses/{warehouseId}/shipments/{document} {
+      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow delete: if false;
+    }
+
+    match /warehouses/{warehouseId}/box_entries/{document} {
+      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow delete: if false;
+    }
+
+    match /warehouses/{warehouseId}/product_catalog/{document} {
+      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow delete: if false;
+    }
+
+    match /warehouses/{warehouseId}/order_contents/{document} {
+      allow read, create, update: if belongsToWarehouse(warehouseId);
+      allow delete: if false;
+    }
+
+    match /warehouses/{warehouseId}/box_inventory_reports/{document} {
+      allow read, create: if belongsToWarehouse(warehouseId);
+      allow update, delete: if false;
+    }
+
+    // Temporary read access for historical data from the first warehouse.
+    // Remove these two matches after migrating the legacy root collections.
+    match /shipments/{document} {
+      allow read: if belongsToWarehouse('es-main');
+      allow write: if false;
+    }
+
+    match /box_entries/{document} {
+      allow read: if belongsToWarehouse('es-main');
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

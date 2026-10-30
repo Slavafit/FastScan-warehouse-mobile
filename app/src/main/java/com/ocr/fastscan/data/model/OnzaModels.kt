@@ -182,6 +182,50 @@ data class BoxEntry(
     val orderWeight: Double = 0.0
 )
 
+data class ProductCatalogItem(
+    val id: String = "",
+    val categoryId: String = "",
+    val names: Map<String, String> = emptyMap(),
+    val reportNameEn: String = "",
+    val unitSingular: String = "pc",
+    val unitPlural: String = "pcs",
+    val sortOrder: Int = 0,
+    val custom: Boolean = false
+)
+
+data class OrderContentItem(
+    val productId: String = "",
+    val categoryId: String = "",
+    val reportNameEn: String = "",
+    val quantity: Int = 0,
+    val unitSingular: String = "pc",
+    val unitPlural: String = "pcs"
+)
+
+data class OrderContent(
+    val tracking: String = "",
+    val items: List<OrderContentItem> = emptyList(),
+    val status: String = "draft",
+    val updatedAt: Timestamp = Timestamp.now()
+)
+
+data class BoxInventoryItem(
+    val productId: String = "",
+    val reportNameEn: String = "",
+    val quantity: Int = 0,
+    val unitSingular: String = "pc",
+    val unitPlural: String = "pcs"
+)
+
+data class BoxInventoryReport(
+    val partyGuid: String = "",
+    val partyName: String = "",
+    val boxTracking: String = "",
+    val items: List<BoxInventoryItem> = emptyList(),
+    val reportText: String = "",
+    val createdAt: Timestamp = Timestamp.now()
+)
+
 //fragment 3. Cajas
 // Партия (Partial)
 data class Partial(

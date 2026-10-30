@@ -61,6 +61,15 @@
     <string name="printer_ip_error">IP принтера не указан</string>
 
     <string name="licence_title">📃 Лицензия</string>
+    <string name="warehouse_country_title">Страна склада</string>
+    <string-array name="warehouse_country_entries">
+        <item>Испания</item>
+        <item>США</item>
+    </string-array>
+    <string-array name="warehouse_country_values">
+        <item>ES</item>
+        <item>US</item>
+    </string-array>
     <string name="licence_email_title">Email для лицензии</string>
     <string name="licence_email_summary">Введите email, привязанный к лицензии</string>
     <string name="licence_status_title">Статус лицензии</string>
@@ -403,4 +412,41 @@
     <string name="monthly_weight_year_total">Всего заказов за год: %1$d\nОбщий вес: %2$.2f кг\nВ коробках: %3$.2f кг | Вне коробок: %4$.2f кг</string>
     <string name="monthly_weight_month_summary">%1$s\nЗаказов за месяц: %2$d\nОбщий вес: %3$.2f кг\nВ коробках: %4$.2f кг | Вне коробок: %5$.2f кг</string>
     <string name="no_report_data">За выбранный период данных нет</string>
+    <string name="order_content">Состав</string>
+    <string name="order_content_with_count">Состав · %1$d</string>
+    <string name="content_tracking">Трек: %1$s</string>
+    <string name="content_summary">Позиций: %1$d · Единиц: %2$d</string>
+    <string name="content_empty">Состав пока пуст</string>
+    <string name="category_clothing">Одежда</string>
+    <string name="category_footwear">Обувь</string>
+    <string name="category_electronics">Электроника</string>
+    <string name="category_food">Продукты</string>
+    <string name="category_bags">Сумки</string>
+    <string name="category_other">Прочее</string>
+    <string name="manual_input">Вручную</string>
+    <string name="voice_input">Голосом</string>
+    <string name="voice_quantity_prompt">Назовите количество</string>
+    <string name="quantity_not_recognized">Количество не распознано</string>
+    <string name="add_item">Добавить ещё</string>
+    <string name="change_quantity">Изменить</string>
+    <string name="delete_item">Удалить позицию</string>
+    <string name="review_content">Список</string>
+    <string name="finish_content">Завершить</string>
+    <string name="back_plain">Назад</string>
+    <string name="content_position">Позиция %1$d из %2$d</string>
+    <string name="content_item_format">%1$s\n%2$d %3$s</string>
+    <string name="input_track_for_content">Сначала отсканируйте или введите трек</string>
+    <string name="content_saved">Состав сохранён</string>
+    <string name="content_save_error">Не удалось сохранить состав</string>
+    <string name="custom_product">Другой товар</string>
+    <string name="custom_product_local_name">Название товара</string>
+    <string name="custom_product_english_name">Название на английском</string>
+    <string name="custom_product_names_required">Введите оба названия</string>
+    <string name="select_unit">Выберите единицу</string>
+    <string name="inventory_preparing">Подготовка описей коробок…</string>
+    <string name="inventory_missing_warning">У %1$d заказов не заполнен состав. Закрыть партию без них?</string>
+    <string name="inventory_ready_confirm">Для %1$d коробок будут созданы английские описи. Закрыть партию?</string>
+    <string name="inventory_save_error">Партия закрыта, но описи не удалось сохранить</string>
+    <string name="box_contents_report">Описи коробок</string>
+    <string name="no_box_contents_reports">Для этой партии сохранённых описей нет</string>
 </resources>

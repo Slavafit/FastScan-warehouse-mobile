@@ -28,6 +28,15 @@
     <string name="test_print_error">⚠️ Error al conectar a la impresora: %1$s</string>
     <string name="printer_ip_error">IP de la impresora no especificada</string>
     <string name="licence_title">📃 Licencia</string>
+    <string name="warehouse_country_title">País del almacén</string>
+    <string-array name="warehouse_country_entries">
+        <item>España</item>
+        <item>Estados Unidos</item>
+    </string-array>
+    <string-array name="warehouse_country_values">
+        <item>ES</item>
+        <item>US</item>
+    </string-array>
     <string name="licence_email_title">Email para licencia</string>
     <string name="licence_email_summary">Introduce el email asociado a la licencia</string>
     <string name="licence_status_title">Estado de la licencia</string>
@@ -376,4 +385,41 @@
     <string name="monthly_weight_year_total">Total de pedidos del año: %1$d\nPeso total: %2$.2f kg\nEn cajas: %3$.2f kg | Sin caja: %4$.2f kg</string>
     <string name="monthly_weight_month_summary">%1$s\nPedidos del mes: %2$d\nPeso total: %3$.2f kg\nEn cajas: %4$.2f kg | Sin caja: %5$.2f kg</string>
     <string name="no_report_data">No hay datos para el período seleccionado</string>
+    <string name="order_content">Contenido</string>
+    <string name="order_content_with_count">Contenido · %1$d</string>
+    <string name="content_tracking">Código: %1$s</string>
+    <string name="content_summary">Artículos: %1$d · Unidades: %2$d</string>
+    <string name="content_empty">Aún no hay contenido</string>
+    <string name="category_clothing">Ropa</string>
+    <string name="category_footwear">Calzado</string>
+    <string name="category_electronics">Electrónica</string>
+    <string name="category_food">Alimentos</string>
+    <string name="category_bags">Bolsos</string>
+    <string name="category_other">Otros</string>
+    <string name="manual_input">Manual</string>
+    <string name="voice_input">Voz</string>
+    <string name="voice_quantity_prompt">Diga la cantidad</string>
+    <string name="quantity_not_recognized">No se reconoció la cantidad</string>
+    <string name="add_item">Añadir otro</string>
+    <string name="change_quantity">Cambiar</string>
+    <string name="delete_item">Eliminar artículo</string>
+    <string name="review_content">Lista</string>
+    <string name="finish_content">Finalizar</string>
+    <string name="back_plain">Atrás</string>
+    <string name="content_position">Artículo %1$d de %2$d</string>
+    <string name="content_item_format">%1$s\n%2$d %3$s</string>
+    <string name="input_track_for_content">Escanee o introduzca primero el código</string>
+    <string name="content_saved">Contenido guardado</string>
+    <string name="content_save_error">No se pudo guardar el contenido</string>
+    <string name="custom_product">Otro artículo</string>
+    <string name="custom_product_local_name">Nombre del artículo</string>
+    <string name="custom_product_english_name">Nombre en inglés</string>
+    <string name="custom_product_names_required">Introduzca ambos nombres</string>
+    <string name="select_unit">Seleccione la unidad</string>
+    <string name="inventory_preparing">Preparando inventarios de cajas…</string>
+    <string name="inventory_missing_warning">%1$d pedidos no tienen contenido. ¿Cerrar el lote sin ellos?</string>
+    <string name="inventory_ready_confirm">Se crearán inventarios en inglés para %1$d cajas. ¿Cerrar el lote?</string>
+    <string name="inventory_save_error">El lote se cerró, pero no se pudieron guardar los inventarios</string>
+    <string name="box_contents_report">Contenido de cajas</string>
+    <string name="no_box_contents_reports">No hay inventarios guardados para este lote</string>
 </resources>

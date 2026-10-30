@@ -32,6 +32,8 @@ import com.ocr.fastscan.databinding.FragmentScanBinding
 import com.ocr.fastscan.utils.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 import com.ocr.fastscan.databinding.DialogSearchClientBinding
@@ -95,6 +97,7 @@ class ScanFragment : BaseFragment() {
     private var shouldAutoPrintGeneratedLabel = false
     private var scannedOrderNumber: String? = null
     private var isApplyingScannedTracking = false
+    private var contentCountJob: Job? = null
 
     private val receiverCacheRepository by lazy {
         ReceiverCacheRepository(requireContext(), apiService)
@@ -130,6 +133,16 @@ class ScanFragment : BaseFragment() {
         binding.etTracking.doOnTextChanged { _, _, _, _ ->
             if (!isApplyingScannedTracking && scannedOrderNumber != null) {
                 setScannedOrderNumber(null)
+            }
+            scheduleContentCountUpdate()
+        }
+        parentFragmentManager.setFragmentResultListener(
+            OrderContentDialogFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
+            val resultTracking = result.getString(OrderContentDialogFragment.RESULT_TRACKING).orEmpty()
+            if (resultTracking.equals(binding.etTracking.text.toString().trim(), ignoreCase = true)) {
+                updateContentButton(result.getInt(OrderContentDialogFragment.RESULT_ITEM_COUNT))
             }
         }
         setupButtons()
@@ -211,6 +224,7 @@ class ScanFragment : BaseFragment() {
         }
 
         binding.btnSubmit.setOnClickListener { submitFinalOrder() }
+        binding.btnContent.setOnClickListener { openOrderContent() }
 
         binding.btnGlobalSearch.setOnClickListener {
             searchOrder.showSearchDialog {
@@ -220,6 +234,40 @@ class ScanFragment : BaseFragment() {
 
         binding.btnSearchClient.setOnClickListener {
             showSearchClientDialog()
+        }
+    }
+
+    private fun openOrderContent() {
+        val track = binding.etTracking.text.toString().trim()
+        if (track.isBlank()) {
+            Toast.makeText(requireContext(), R.string.input_track_for_content, Toast.LENGTH_SHORT).show()
+            return
+        }
+        OrderContentDialogFragment.newInstance(track)
+            .show(parentFragmentManager, "order_content")
+    }
+
+    private fun scheduleContentCountUpdate() {
+        contentCountJob?.cancel()
+        val track = _binding?.etTracking?.text?.toString()?.trim().orEmpty()
+        if (track.isBlank()) {
+            updateContentButton(0)
+            return
+        }
+        contentCountJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(300)
+            val count = firebaseManager.getOrderContent(track)?.items?.count { it.quantity > 0 } ?: 0
+            if (_binding?.etTracking?.text?.toString()?.trim().equals(track, ignoreCase = true)) {
+                updateContentButton(count)
+            }
+        }
+    }
+
+    private fun updateContentButton(itemCount: Int) {
+        _binding?.btnContent?.text = if (itemCount > 0) {
+            getString(R.string.order_content_with_count, itemCount)
+        } else {
+            getString(R.string.order_content)
         }
     }
 
@@ -460,6 +508,9 @@ class ScanFragment : BaseFragment() {
         senderManager.submitOrder(req,
             onSuccess = success@{
                 val activeBinding = _binding ?: return@success
+                viewLifecycleOwner.lifecycleScope.launch {
+                    runCatching { firebaseManager.confirmOrderContent(req.trackingNumber) }
+                }
                 activeBinding.progressBar.visibility = View.GONE
                 soundManager.playSent()
                 Toast.makeText(requireContext(), getString(R.string.order_saved), Toast.LENGTH_SHORT).show()
@@ -644,6 +695,7 @@ class ScanFragment : BaseFragment() {
     }
 
     override fun onDestroyView() {
+        contentCountJob?.cancel()
         super.onDestroyView()
         _binding = null
     }

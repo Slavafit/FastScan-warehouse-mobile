@@ -256,6 +256,19 @@
             android:textAllCaps="false"
             app:icon="@drawable/ic_send"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnBoxContentsReport" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBoxContentsReport"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/box_contents_report"
+            android:textAllCaps="false"
+            app:icon="@drawable/ic_box"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnPartyReport" />
 
         <androidx.core.widget.NestedScrollView

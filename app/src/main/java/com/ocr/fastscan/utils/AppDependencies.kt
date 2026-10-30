@@ -21,7 +21,7 @@ object AppDependencies {
         apiService = NetworkModule.createService(context)
         tokenManager = TokenManager(context)
         soundManager = SoundManager(context)
-        firebaseManager = FirebaseManager()
+        firebaseManager = FirebaseManager(context.applicationContext)
     }
 
     suspend fun performAutoLogin(context: Context): Boolean {

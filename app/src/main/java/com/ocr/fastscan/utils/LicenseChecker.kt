@@ -4,13 +4,17 @@ import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import androidx.preference.PreferenceManager
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -32,15 +36,24 @@ class LicenseChecker(private val userId: String) {
         val savedToken = PreferenceManager.getDefaultSharedPreferences(context)
             .getString(KEY_LICENSE_TOKEN, null)
             ?.takeIf { it.isNotBlank() }
+        val countryCode = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(PREF_COUNTRY_CODE, DEFAULT_COUNTRY_CODE)
+            .orEmpty()
+            .uppercase(Locale.ROOT)
+            .takeIf { it in SUPPORTED_COUNTRY_CODES }
+            ?: DEFAULT_COUNTRY_CODE
         Log.d(
             "LicenseCheck",
             "Checking license: email=${email.maskEmail()}, device=${deviceId.maskDeviceId()}, app_id=$appId, app_name=$appName"
         )
 
         return try {
-            val response = requestLicense(email, deviceId, appId, appName, savedToken)
+            val response = requestLicense(email, deviceId, appId, appName, countryCode, savedToken)
             saveLicenseToken(context, response.token)
-            response.toResult()
+            saveWarehouseId(context, response.warehouseId ?: response.legacyTenantId)
+            saveCountryCode(context, response.countryCode)
+            val firebaseAuthenticated = authenticateFirebase(response.firebaseToken)
+            response.toResult(firebaseAuthenticated)
         } catch (e: Exception) {
             Log.e("LicenseCheck", "License server check failed", e)
             LicenseCheckResult(LicenseStatus.CONNECTION_ERROR, errorMessage = e.localizedMessage)
@@ -52,13 +65,14 @@ class LicenseChecker(private val userId: String) {
         deviceId: String,
         appId: String,
         appName: String,
+        countryCode: String,
         savedToken: String?
     ): LicenseServerResponse {
         return withContext(Dispatchers.IO) {
             if (savedToken != null) {
                 executeVerify(savedToken, deviceId, appId)
             } else {
-                executePost(email, deviceId, appId, appName)
+                executePost(email, deviceId, appId, appName, countryCode)
             } ?: LicenseServerResponse(ok = false, status = "connection_error")
         }
     }
@@ -67,14 +81,16 @@ class LicenseChecker(private val userId: String) {
         email: String,
         deviceId: String,
         appId: String,
-        appName: String
+        appName: String,
+        countryCode: String
     ): LicenseServerResponse? {
         val json = gson.toJson(
             mapOf(
                 "email" to email,
                 "device_id" to deviceId,
                 "app_id" to appId,
-                "app_name" to appName
+                "app_name" to appName,
+                "country_code" to countryCode
             )
         )
         val body = json.toRequestBody(JSON_MEDIA_TYPE)
@@ -129,7 +145,37 @@ class LicenseChecker(private val userId: String) {
         }
     }
 
-    private fun LicenseServerResponse.toResult(): LicenseCheckResult {
+    private suspend fun authenticateFirebase(customToken: String?): Boolean {
+        if (customToken.isNullOrBlank()) {
+            return FirebaseAuth.getInstance().currentUser != null
+        }
+        return try {
+            FirebaseAuth.getInstance().signInWithCustomToken(customToken).await()
+            true
+        } catch (e: Exception) {
+            Log.e("LicenseCheck", "Firebase custom-token sign-in failed", e)
+            false
+        }
+    }
+
+    private fun saveWarehouseId(context: Context, warehouseId: String?) {
+        if (warehouseId.isNullOrBlank()) return
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putString(FirebaseManager.PREF_WAREHOUSE_ID, warehouseId.trim())
+            .apply()
+    }
+
+    private fun saveCountryCode(context: Context, countryCode: String?) {
+        val normalized = countryCode?.trim()?.uppercase(Locale.ROOT)
+        if (normalized !in SUPPORTED_COUNTRY_CODES) return
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putString(PREF_COUNTRY_CODE, normalized)
+            .apply()
+    }
+
+    private fun LicenseServerResponse.toResult(firebaseAuthenticated: Boolean): LicenseCheckResult {
         val normalizedStatus = (status ?: reason).orEmpty().lowercase()
         if (!ok) {
             return LicenseCheckResult(normalizedStatus.toLicenseStatus())
@@ -141,10 +187,10 @@ class LicenseChecker(private val userId: String) {
         val isExpired = expiresAt > 0L && nowSeconds >= expiresAt
 
         return when {
-            status == LicenseStatus.ACTIVE && expiresAt == 0L -> LicenseCheckResult(status, token, expiresAt)
-            status in ACCESS_STATUSES && !isExpired -> LicenseCheckResult(status, token, expiresAt)
-            status in ACCESS_STATUSES -> LicenseCheckResult(LicenseStatus.EXPIRED, token, expiresAt)
-            else -> LicenseCheckResult(status, token, expiresAt)
+            status == LicenseStatus.ACTIVE && expiresAt == 0L -> LicenseCheckResult(status, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
+            status in ACCESS_STATUSES && !isExpired -> LicenseCheckResult(status, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
+            status in ACCESS_STATUSES -> LicenseCheckResult(LicenseStatus.EXPIRED, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
+            else -> LicenseCheckResult(status, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
         }
     }
 
@@ -214,7 +260,12 @@ class LicenseChecker(private val userId: String) {
         val status: String? = null,
         val token: String? = null,
         val expires_at: Long? = null,
-        val reason: String? = null
+        val reason: String? = null,
+        @SerializedName("firebase_token") val firebaseToken: String? = null,
+        @SerializedName("warehouse_id") val warehouseId: String? = null,
+        @SerializedName("country_code") val countryCode: String? = null,
+        // Accepted during rollout from the earlier Worker contract.
+        @SerializedName("tenant_id") val legacyTenantId: String? = null
     )
 
     companion object {
@@ -222,9 +273,12 @@ class LicenseChecker(private val userId: String) {
         private const val LICENSE_VERIFY_URL = "https://license-server.slavafit.workers.dev/verify"
         private const val KEY_LICENSE_DEVICE_ID = "license_device_id"
         private const val KEY_LICENSE_TOKEN = "license_token"
+        const val PREF_COUNTRY_CODE = "warehouse_country"
+        const val DEFAULT_COUNTRY_CODE = "ES"
         private const val BROKEN_ANDROID_ID = "9774d56d682e549c"
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
         private val ACCESS_STATUSES = setOf(LicenseStatus.TRIAL, LicenseStatus.ACTIVE)
+        private val SUPPORTED_COUNTRY_CODES = setOf("ES", "US")
         private val gson = Gson()
         private val httpClient = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -238,7 +292,8 @@ data class LicenseCheckResult(
     val status: LicenseStatus,
     val token: String? = null,
     val expiresAt: Long = 0L,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val firebaseAuthenticated: Boolean = false
 ) {
     val hasAccess: Boolean
         get() = status == LicenseStatus.TRIAL || status == LicenseStatus.ACTIVE

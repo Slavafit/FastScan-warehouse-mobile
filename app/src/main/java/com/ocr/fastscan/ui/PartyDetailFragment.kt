@@ -14,11 +14,11 @@ import com.ocr.fastscan.R
 import com.ocr.fastscan.data.model.*
 import com.ocr.fastscan.databinding.DialogSelectBoxBinding
 import com.ocr.fastscan.databinding.FragmentPartyDetailBinding
+import com.ocr.fastscan.utils.FirebaseManager
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class PartyDetailFragment : BaseFragment() {
 
@@ -331,7 +331,7 @@ class PartyDetailFragment : BaseFragment() {
         }
     }
 
-    private fun finishParty() {
+    private fun finishParty(inventoryReports: List<BoxInventoryReport>) {
         if (isFinishing) return
         isFinishing = true
 
@@ -347,7 +347,14 @@ class PartyDetailFragment : BaseFragment() {
                     soundManager.playSuccess()
                     showToast(R.string.part_finished)
 
-                    sharePartyReport()
+                    try {
+                        firebaseManager.saveBoxInventoryReports(inventoryReports)
+                    } catch (e: Exception) {
+                        Log.e("PartyDetail", "Batch closed but inventory snapshots were not saved", e)
+                        showToast(R.string.inventory_save_error)
+                    }
+
+                    sharePartyReport(inventoryReports)
                     
                     delay(800) 
                     if (_binding != null && isAdded) {
@@ -369,46 +376,91 @@ class PartyDetailFragment : BaseFragment() {
         }
     }
 
-    private fun sharePartyReport() {
-        val boxes = currentBoxes
-        if (boxes.isEmpty()) {
-            Log.w("PartyDetail", "Report attempt with empty boxes list")
+    private fun sharePartyReport(reports: List<BoxInventoryReport>) {
+        if (reports.isEmpty()) {
+            Log.w("PartyDetail", "Inventory share attempted with no reports")
             return
         }
-
-        val sb = StringBuilder()
-        sb.append("📋 ОТЧЕТ ПО ПАРТИИ: $displayPartyNumber\n")
-        sb.append("🆔 Код: $partialCode\n")
-        sb.append("📅 Дата: ${SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())}\n")
-        sb.append("📦 Коробок: ${boxes.size}\n")
-        sb.append("────────────────\n")
-
-        var totalWeight = 0.0
-        boxes.forEachIndexed { index, box ->
-            sb.append("${index + 1}. 📦 ${box.tracking_code}\n")
-            sb.append("   📏 Размеры: ${box.length} × ${box.width} × ${box.height} см\n")
-            sb.append("   ⚖️ Вес: ${String.format("%.2f", box.gross_weight)} кг\n")
-            totalWeight += box.gross_weight
-        }
-        
-        sb.append("────────────────\n")
-        sb.append("⚖️ ОБЩИЙ ВЕС: ${String.format("%.2f", totalWeight)} кг\n")
-        sb.append("\n✅ Партия успешно закрыта.")
+        val text = reports.joinToString("\n\n────────────────\n\n") { it.reportText }
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, sb.toString())
+            putExtra(Intent.EXTRA_TEXT, text)
         }
-        startActivity(Intent.createChooser(shareIntent, "Отправить отчет по партии"))
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_report)))
     }
 
     private fun showFinishPartyDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.finish_party_title)
-            .setMessage(getString(R.string.finish_part_property, displayPartyNumber))
-            .setPositiveButton(R.string.finish_part) { _, _ -> finishParty() }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+        if (isFinishing) return
+        prepareInventoryReports()
+    }
+
+    private fun prepareInventoryReports() {
+        launchOnViewLifecycle {
+            val activeBinding = _binding ?: return@launchOnViewLifecycle
+            activeBinding.progressBar.visibility = View.VISIBLE
+            activeBinding.btnFinishParty.isEnabled = false
+            try {
+                val boxesResponse = apiService.getBoxesInPartial(partialGuid)
+                if (!boxesResponse.isSuccessful) {
+                    showToast(R.string.error_load_boxes_short)
+                    return@launchOnViewLifecycle
+                }
+                val boxes = boxesResponse.body().orEmpty()
+                currentBoxes = boxes
+                val ordersByBox = boxes.chunked(4).flatMap { chunk ->
+                    chunk.map { box ->
+                        async {
+                            val response = apiService.getOrderDetailsBox(box.tracking_code)
+                            if (!response.isSuccessful) {
+                                throw IllegalStateException("Failed to load box ${box.tracking_code}")
+                            }
+                            box to response.body().orEmpty()
+                        }
+                    }.awaitAll()
+                }.toMap()
+                val allTrackings = ordersByBox.values
+                    .flatten()
+                    .mapNotNull { it.trackingNumber?.trim()?.takeIf(String::isNotBlank) }
+                val contentsByTracking = firebaseManager.getOrderContents(allTrackings)
+                val missingCount = allTrackings
+                    .map(FirebaseManager::normalizeTracking)
+                    .distinct()
+                    .count { contentsByTracking[it]?.items.isNullOrEmpty() }
+                val reports = boxes.map { box ->
+                    val contents = ordersByBox[box].orEmpty().mapNotNull { order ->
+                        contentsByTracking[FirebaseManager.normalizeTracking(order.trackingNumber.orEmpty())]
+                    }
+                    BoxInventoryFormatter.createReport(
+                        partyGuid = partialGuid,
+                        partyName = displayPartyNumber,
+                        boxTracking = box.tracking_code,
+                        contents = contents
+                    )
+                }
+                if (_binding == null || !isAdded) return@launchOnViewLifecycle
+                val message = if (missingCount > 0) {
+                    getString(R.string.inventory_missing_warning, missingCount)
+                } else {
+                    getString(R.string.inventory_ready_confirm, boxes.size)
+                }
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.finish_party_title)
+                    .setMessage(message)
+                    .setPositiveButton(R.string.finish_part) { _, _ -> finishParty(reports) }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("PartyDetail", "Failed to prepare box inventories", e)
+                showToast(R.string.report_load_error)
+                soundManager.playError()
+            } finally {
+                _binding?.progressBar?.visibility = View.GONE
+                _binding?.btnFinishParty?.isEnabled = true
+            }
+        }
     }
 
     override fun onDestroyView() {

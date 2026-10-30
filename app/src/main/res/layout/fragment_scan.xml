@@ -280,14 +280,34 @@
             </LinearLayout>
             <Space android:layout_width="match_parent" android:layout_height="8dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSubmit"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
-                android:text="@string/send_order"
-                android:textSize="18sp"
-                app:cornerRadius="12dp"
-                android:backgroundTint="@color/app_primary" />
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnContent"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:text="@string/order_content"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSubmit"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/app_primary"
+                    android:text="@string/send_order"
+                    android:textSize="16sp"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGlobalSearch"

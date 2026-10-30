@@ -169,6 +169,7 @@ class ReportsFragment : BaseFragment() {
     private fun setupTrackSection() {
         binding.btnTodayReport.setOnClickListener { loadTodayReport() }
         binding.btnPartyReport.setOnClickListener { selectParty() }
+        binding.btnBoxContentsReport.setOnClickListener { selectPartyForBoxContents() }
         binding.btnShareTrackReport.setOnClickListener { shareReport(lastTrackReport) }
     }
 
@@ -236,6 +237,38 @@ class ReportsFragment : BaseFragment() {
                     boxCount = boxes.size,
                     clientCodeFilter = clientCodeFilter
                 )
+            )
+        }
+    }
+
+    private fun selectPartyForBoxContents() {
+        launchReportJob {
+            val response = apiService.getPartials(null)
+            val parties = response.body().orEmpty().sortedByDescending { it.date_created }
+            if (!response.isSuccessful || parties.isEmpty()) {
+                showToast(R.string.no_parties_found)
+                return@launchReportJob
+            }
+            val labels = parties.map {
+                PartyNumberFormatter.display(it.partial_name).ifBlank { it.partial_code }
+            }.toTypedArray()
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.select_party_for_report)
+                .setItems(labels) { _, index -> loadBoxContentsReport(parties[index]) }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun loadBoxContentsReport(party: Partial) {
+        launchReportJob {
+            val reports = firebaseManager.getBoxInventoryReports(party.guid)
+            if (reports.isEmpty()) {
+                showTrackReport(getString(R.string.no_box_contents_reports))
+                return@launchReportJob
+            }
+            showTrackReport(
+                reports.joinToString("\n\n────────────────\n\n") { it.reportText }
             )
         }
     }
@@ -453,6 +486,7 @@ class ReportsFragment : BaseFragment() {
         activeBinding.btnRefreshUnpacked.isEnabled = !loading
         activeBinding.btnTodayReport.isEnabled = !loading
         activeBinding.btnPartyReport.isEnabled = !loading
+        activeBinding.btnBoxContentsReport.isEnabled = !loading
         activeBinding.btnWeightReport.isEnabled = !loading
         activeBinding.btnPreviousYear.isEnabled = !loading
         activeBinding.btnNextYear.isEnabled = !loading
