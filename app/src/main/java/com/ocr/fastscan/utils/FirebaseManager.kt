@@ -39,6 +39,15 @@ class FirebaseManager(context: Context) {
         .trim()
         .ifBlank { DEFAULT_WAREHOUSE_ID }
 
+    fun activeWarehouseId(): String = currentWarehouseId()
+
+    suspend fun verifyWarehouseAccess() {
+        warehouseDocument.collection("order_contents")
+            .limit(1)
+            .get()
+            .await()
+    }
+
     fun saveShipment(
         shipment: FirestoreShipment,    // ← основной параметр — объект с данными
         onSuccess: () -> Unit,          // колбэк успеха

@@ -118,6 +118,11 @@
             app:title="@string/licence_status_title"
             app:summary="@string/licence_status_summary" />
 
+        <Preference
+            app:key="service_diagnostics"
+            app:title="@string/service_diagnostics_title"
+            app:summary="@string/service_diagnostics_summary" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/developer_info_title">

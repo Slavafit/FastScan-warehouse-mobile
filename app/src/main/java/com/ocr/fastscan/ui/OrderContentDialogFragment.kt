@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.ocr.fastscan.R
 import com.ocr.fastscan.data.ProductCatalog
 import com.ocr.fastscan.data.model.OrderContent
@@ -390,9 +392,17 @@ class OrderContentDialogFragment : DialogFragment() {
                 )
                 Toast.makeText(requireContext(), R.string.content_saved, Toast.LENGTH_SHORT).show()
                 dismiss()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("OrderContent", "Failed to save contents for $tracking", e)
                 setLoading(false)
-                Toast.makeText(requireContext(), R.string.content_save_error, Toast.LENGTH_LONG).show()
+                val detail = (e as? FirebaseFirestoreException)?.code?.name
+                    ?: e.localizedMessage
+                    ?: e.javaClass.simpleName
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.content_save_error_detail, detail.take(120)),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }

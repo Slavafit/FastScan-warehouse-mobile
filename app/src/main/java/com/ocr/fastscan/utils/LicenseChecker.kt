@@ -5,6 +5,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +53,8 @@ class LicenseChecker(private val userId: String) {
             saveLicenseToken(context, response.token)
             saveWarehouseId(context, response.warehouseId ?: response.legacyTenantId)
             saveCountryCode(context, response.countryCode)
-            val firebaseAuthenticated = authenticateFirebase(response.firebaseToken)
-            response.toResult(firebaseAuthenticated)
+            val firebaseSignIn = authenticateFirebase(response.firebaseToken)
+            response.toResult(firebaseSignIn)
         } catch (e: Exception) {
             Log.e("LicenseCheck", "License server check failed", e)
             LicenseCheckResult(LicenseStatus.CONNECTION_ERROR, errorMessage = e.localizedMessage)
@@ -127,7 +128,7 @@ class LicenseChecker(private val userId: String) {
     private fun executeRequest(request: Request): LicenseServerResponse? {
         httpClient.newCall(request).execute().use { response ->
             val body = response.body?.string().orEmpty()
-            Log.d("LicenseCheck", "${request.method} license response: HTTP ${response.code}, body=$body")
+            Log.d("LicenseCheck", "${request.method} license response: HTTP ${response.code}")
 
             if (body.isBlank()) {
                 Log.w("LicenseCheck", "${request.method} license check failed: empty response")
@@ -145,25 +146,33 @@ class LicenseChecker(private val userId: String) {
         }
     }
 
-    private suspend fun authenticateFirebase(customToken: String?): Boolean {
+    private suspend fun authenticateFirebase(customToken: String?): FirebaseSignInResult {
         if (customToken.isNullOrBlank()) {
-            return FirebaseAuth.getInstance().currentUser != null
+            FirebaseAuth.getInstance().signOut()
+            return FirebaseSignInResult(
+                authenticated = false,
+                errorCode = "missing_custom_token",
+                errorMessage = "License server did not return a Firebase token"
+            )
         }
         return try {
             FirebaseAuth.getInstance().signInWithCustomToken(customToken).await()
-            true
+            FirebaseSignInResult(authenticated = true)
         } catch (e: Exception) {
             Log.e("LicenseCheck", "Firebase custom-token sign-in failed", e)
-            false
+            FirebaseSignInResult(
+                authenticated = false,
+                errorCode = (e as? FirebaseAuthException)?.errorCode ?: e.javaClass.simpleName,
+                errorMessage = e.localizedMessage
+            )
         }
     }
 
     private fun saveWarehouseId(context: Context, warehouseId: String?) {
-        if (warehouseId.isNullOrBlank()) return
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .edit()
-            .putString(FirebaseManager.PREF_WAREHOUSE_ID, warehouseId.trim())
-            .apply()
+        PreferenceManager.getDefaultSharedPreferences(context).edit().apply {
+            if (warehouseId.isNullOrBlank()) remove(FirebaseManager.PREF_WAREHOUSE_ID)
+            else putString(FirebaseManager.PREF_WAREHOUSE_ID, warehouseId.trim())
+        }.apply()
     }
 
     private fun saveCountryCode(context: Context, countryCode: String?) {
@@ -175,7 +184,7 @@ class LicenseChecker(private val userId: String) {
             .apply()
     }
 
-    private fun LicenseServerResponse.toResult(firebaseAuthenticated: Boolean): LicenseCheckResult {
+    private fun LicenseServerResponse.toResult(firebaseSignIn: FirebaseSignInResult): LicenseCheckResult {
         val normalizedStatus = (status ?: reason).orEmpty().lowercase()
         if (!ok) {
             return LicenseCheckResult(normalizedStatus.toLicenseStatus())
@@ -186,13 +195,24 @@ class LicenseChecker(private val userId: String) {
         val nowSeconds = System.currentTimeMillis() / 1000
         val isExpired = expiresAt > 0L && nowSeconds >= expiresAt
 
-        return when {
-            status == LicenseStatus.ACTIVE && expiresAt == 0L -> LicenseCheckResult(status, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
-            status in ACCESS_STATUSES && !isExpired -> LicenseCheckResult(status, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
-            status in ACCESS_STATUSES -> LicenseCheckResult(LicenseStatus.EXPIRED, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
-            else -> LicenseCheckResult(status, token, expiresAt, firebaseAuthenticated = firebaseAuthenticated)
-        }
+        val effectiveStatus = if (status in ACCESS_STATUSES && isExpired) LicenseStatus.EXPIRED else status
+        return LicenseCheckResult(
+            status = effectiveStatus,
+            token = token,
+            expiresAt = expiresAt,
+            firebaseAuthenticated = firebaseSignIn.authenticated,
+            firebaseErrorCode = firebaseSignIn.errorCode,
+            firebaseErrorMessage = firebaseSignIn.errorMessage,
+            warehouseId = warehouseId ?: legacyTenantId,
+            countryCode = countryCode
+        )
     }
+
+    private data class FirebaseSignInResult(
+        val authenticated: Boolean,
+        val errorCode: String? = null,
+        val errorMessage: String? = null
+    )
 
     private fun String.toLicenseStatus(): LicenseStatus {
         return when (this) {
@@ -292,8 +312,12 @@ data class LicenseCheckResult(
     val status: LicenseStatus,
     val token: String? = null,
     val expiresAt: Long = 0L,
-    val errorMessage: String? = null,
-    val firebaseAuthenticated: Boolean = false
+    val firebaseAuthenticated: Boolean = false,
+    val firebaseErrorCode: String? = null,
+    val firebaseErrorMessage: String? = null,
+    val warehouseId: String? = null,
+    val countryCode: String? = null,
+    val errorMessage: String? = null
 ) {
     val hasAccess: Boolean
         get() = status == LicenseStatus.TRIAL || status == LicenseStatus.ACTIVE

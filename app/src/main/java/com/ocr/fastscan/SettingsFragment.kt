@@ -13,6 +13,9 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.ocr.fastscan.utils.AppDependencies
 import com.ocr.fastscan.utils.LanguageHelper
 import com.ocr.fastscan.utils.LicenseCheckResult
@@ -26,6 +29,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -72,6 +76,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         setupEmailPreference()
+        setupServiceDiagnostics()
 
         findPreference<Preference>("developer_info")?.setOnPreferenceClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DEVELOPER_URL)))
@@ -118,6 +123,94 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun updateEmailSummary(emailPref: EditTextPreference, email: String) {
         emailPref.summary = email.ifEmpty { getString(R.string.licence_email_summary) }
+    }
+
+    private fun setupServiceDiagnostics() {
+        findPreference<Preference>("service_diagnostics")?.setOnPreferenceClickListener { preference ->
+            runServiceDiagnostics(preference)
+            true
+        }
+    }
+
+    private fun runServiceDiagnostics(preference: Preference) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val email = prefs.getString("user_email", "").orEmpty().normalizeEmail()
+        if (email.isBlank()) {
+            Toast.makeText(requireContext(), R.string.license_email_missing, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        preference.isEnabled = false
+        preference.summary = getString(R.string.diagnostics_checking)
+        lifecycleScope.launch {
+            val license = LicenseChecker(email).checkLicense(requireContext())
+            val firebaseAuthenticated = license.firebaseAuthenticated && FirebaseAuth.getInstance().currentUser != null
+            val appCheck = runCatching {
+                FirebaseAppCheck.getInstance().getAppCheckToken(false).await().token.isNotBlank()
+            }
+            val firestore = runCatching {
+                AppDependencies.firebaseManager.verifyWarehouseAccess()
+            }
+
+            if (!isAdded) return@launch
+            val warehouse = license.warehouseId.orEmpty()
+            val selectedCountry = prefs.getString(
+                LicenseChecker.PREF_COUNTRY_CODE,
+                LicenseChecker.DEFAULT_COUNTRY_CODE
+            ).orEmpty()
+            val country = license.countryCode.orEmpty().ifBlank {
+                selectedCountry.ifBlank { getString(R.string.diagnostics_not_assigned) }
+            }
+            val serverAvailable = license.status != LicenseStatus.CONNECTION_ERROR
+            val firestoreError = firestore.exceptionOrNull()
+            val appCheckError = appCheck.exceptionOrNull()
+            val lines = listOf(
+                getString(R.string.diagnostics_license_server) to diagnosticValue(serverAvailable, license.errorMessage),
+                getString(R.string.diagnostics_license) to license.toStatusText(),
+                getString(R.string.diagnostics_firebase_auth) to diagnosticValue(
+                    firebaseAuthenticated,
+                    listOfNotNull(license.firebaseErrorCode, license.firebaseErrorMessage).joinToString(": ")
+                ),
+                getString(R.string.diagnostics_warehouse) to warehouse.ifBlank { getString(R.string.diagnostics_not_assigned) },
+                getString(R.string.diagnostics_country) to country,
+                getString(R.string.diagnostics_app_check) to diagnosticValue(
+                    appCheck.getOrDefault(false),
+                    appCheckError?.diagnosticDescription()
+                ),
+                getString(R.string.diagnostics_firestore) to diagnosticValue(
+                    firestore.isSuccess,
+                    firestoreError?.diagnosticDescription()
+                )
+            )
+            val primaryServicesAvailable = serverAvailable && license.hasAccess &&
+                firebaseAuthenticated && firestore.isSuccess
+            preference.summary = getString(
+                if (primaryServicesAvailable) R.string.diagnostics_all_available
+                else R.string.diagnostics_has_errors
+            )
+            preference.isEnabled = true
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.service_diagnostics_title)
+                .setMessage(lines.joinToString("\n") { (label, value) -> "$label: $value" })
+                .setPositiveButton(R.string.ok, null)
+                .show()
+        }
+    }
+
+    private fun diagnosticValue(available: Boolean, error: String?): String {
+        val status = getString(
+            if (available) R.string.diagnostics_available else R.string.diagnostics_unavailable
+        )
+        val detail = error?.trim()?.takeIf(String::isNotEmpty)?.take(MAX_DIAGNOSTIC_LENGTH)
+        return if (available || detail == null) status
+        else getString(R.string.diagnostics_error_detail, status, detail)
+    }
+
+    private fun Throwable.diagnosticDescription(): String {
+        val code = (this as? FirebaseFirestoreException)?.code?.name
+        return listOfNotNull(code, localizedMessage, javaClass.simpleName)
+            .distinct()
+            .joinToString(": ")
     }
 
     private fun updateLicenseStatus(licensePref: Preference) {
@@ -207,5 +300,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     companion object {
         private const val DEVELOPER_URL = "https://t.me/slavafit"
+        private const val MAX_DIAGNOSTIC_LENGTH = 180
     }
 }
