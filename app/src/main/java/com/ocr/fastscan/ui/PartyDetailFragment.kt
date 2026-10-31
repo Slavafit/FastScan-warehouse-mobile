@@ -19,6 +19,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PartyDetailFragment : BaseFragment() {
 
@@ -377,11 +380,41 @@ class PartyDetailFragment : BaseFragment() {
     }
 
     private fun sharePartyReport(reports: List<BoxInventoryReport>) {
-        if (reports.isEmpty()) {
-            Log.w("PartyDetail", "Inventory share attempted with no reports")
+        val boxes = currentBoxes
+        if (boxes.isEmpty()) {
+            Log.w("PartyDetail", "Party report attempted with no boxes")
             return
         }
-        val text = reports.joinToString("\n\n────────────────\n\n") { it.reportText }
+
+        val legacyReport = buildString {
+            append("📋 ОТЧЕТ ПО ПАРТИИ: $displayPartyNumber\n")
+            append("🆔 Код: $partialCode\n")
+            append(
+                "📅 Дата: ${
+                    SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())
+                }\n"
+            )
+            append("📦 Коробок: ${boxes.size}\n")
+            append("────────────────\n")
+
+            var totalWeight = 0.0
+            boxes.forEachIndexed { index, box ->
+                append("${index + 1}. 📦 ${box.tracking_code}\n")
+                append("   📏 Размеры: ${box.length} × ${box.width} × ${box.height} см\n")
+                append("   ⚖️ Вес: ${String.format(Locale.getDefault(), "%.2f", box.gross_weight)} кг\n")
+                totalWeight += box.gross_weight
+            }
+
+            append("────────────────\n")
+            append("⚖️ ОБЩИЙ ВЕС: ${String.format(Locale.getDefault(), "%.2f", totalWeight)} кг\n")
+            append("\n✅ Партия успешно закрыта.")
+        }
+        val inventoryText = reports.joinToString("\n\n────────────────\n\n") { it.reportText }
+        val text = if (inventoryText.isBlank()) {
+            legacyReport
+        } else {
+            "$legacyReport\n\n\nBOX CONTENTS\n\n$inventoryText"
+        }
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
