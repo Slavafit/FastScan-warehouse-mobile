@@ -429,9 +429,11 @@
     <string name="content_saved">Contenido guardado</string>
     <string name="content_save_error">No se pudo guardar el contenido</string>
     <string name="custom_product">Otro artículo</string>
+    <string name="new_product">+ Nuevo artículo</string>
     <string name="custom_product_local_name">Nombre del artículo</string>
     <string name="custom_product_english_name">Nombre en inglés</string>
     <string name="custom_product_names_required">Introduzca ambos nombres</string>
+    <string name="custom_product_save_error">No se pudo guardar el nuevo artículo</string>
     <string name="select_unit">Seleccione la unidad</string>
     <string name="inventory_preparing">Preparando inventarios de cajas…</string>
     <string name="inventory_missing_warning">%1$d pedidos no tienen contenido. ¿Cerrar el lote sin ellos?</string>

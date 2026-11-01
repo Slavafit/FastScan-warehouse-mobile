@@ -50,6 +50,7 @@ class OrderContentDialogFragment : DialogFragment() {
     private var reviewIndex = 0
     private var editingProductId: String? = null
     private var screen = Screen.CATEGORIES
+    private var productPage = 0
 
     private val voiceQuantityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -146,6 +147,17 @@ class OrderContentDialogFragment : DialogFragment() {
         }
         binding.btnReviewContents.setOnClickListener { showReview() }
         binding.btnContentFinish.setOnClickListener { saveAndFinish() }
+        binding.btnNewProduct.setOnClickListener { showCustomProductDialog() }
+        binding.btnProductPrevious.setOnClickListener {
+            if (productPage > 0) {
+                productPage--
+                showProducts(selectedCategory.orEmpty())
+            }
+        }
+        binding.btnProductNext.setOnClickListener {
+            productPage++
+            showProducts(selectedCategory.orEmpty())
+        }
         binding.btnReviewPrevious.setOnClickListener {
             if (items.isNotEmpty()) {
                 reviewIndex = (reviewIndex - 1 + items.size) % items.size
@@ -194,12 +206,8 @@ class OrderContentDialogFragment : DialogFragment() {
 
     private fun openCategory(categoryId: String) {
         selectedCategory = categoryId
-        val products = catalog.filter { it.categoryId == categoryId }.sortedBy { it.sortOrder }
-        if (products.size == 1) {
-            showQuantity(products.first())
-        } else {
-            showProducts(categoryId)
-        }
+        productPage = 0
+        showProducts(categoryId)
     }
 
     private fun showProducts(categoryId: String) {
@@ -207,16 +215,21 @@ class OrderContentDialogFragment : DialogFragment() {
         selectedCategory = categoryId
         showPanel(binding.gridContentChoices)
         val language = currentLanguage()
-        val choices = catalog
+        val products = catalog
             .filter { it.categoryId == categoryId }
             .sortedBy { it.sortOrder }
+        val pageCount = ((products.size - 1) / PRODUCTS_PER_PAGE + 1).coerceAtLeast(1)
+        productPage = productPage.coerceIn(0, pageCount - 1)
+        val choices = products
+            .drop(productPage * PRODUCTS_PER_PAGE)
+            .take(PRODUCTS_PER_PAGE)
             .map { product ->
                 Choice(ProductCatalog.displayName(product, language)) { showQuantity(product) }
             }
-            .toMutableList()
-        if (categoryId == ProductCatalog.CATEGORY_OTHER && choices.size < 6) {
-            choices += Choice(getString(R.string.custom_product)) { showCustomProductDialog() }
-        }
+        binding.btnProductPrevious.isEnabled = productPage > 0
+        binding.btnProductNext.isEnabled = productPage < pageCount - 1
+        binding.btnProductPrevious.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
+        binding.btnProductNext.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
         fillGrid(choices)
     }
 
@@ -312,6 +325,7 @@ class OrderContentDialogFragment : DialogFragment() {
     }
 
     private fun showCustomProductDialog() {
+        if (selectedCategory.isNullOrBlank()) return
         val localName = EditText(requireContext()).apply { hint = getString(R.string.custom_product_local_name) }
         val englishName = EditText(requireContext()).apply { hint = getString(R.string.custom_product_english_name) }
         val container = LinearLayout(requireContext()).apply {
@@ -343,6 +357,7 @@ class OrderContentDialogFragment : DialogFragment() {
     }
 
     private fun selectCustomProductUnit(localName: String, englishName: String) {
+        val categoryId = selectedCategory ?: return
         val units = listOf(
             "pcs" to ("pc" to "pcs"),
             "pairs" to ("pair" to "pairs"),
@@ -356,18 +371,33 @@ class OrderContentDialogFragment : DialogFragment() {
                 val language = currentLanguage().substringBefore('-')
                 val product = ProductCatalogItem(
                     id = "custom_${UUID.randomUUID()}",
-                    categoryId = ProductCatalog.CATEGORY_OTHER,
+                    categoryId = categoryId,
                     names = mapOf(language to localName, "en" to englishName),
                     reportNameEn = englishName,
                     unitSingular = units[which].second.first,
                     unitPlural = units[which].second.second,
-                    sortOrder = 1000,
+                    sortOrder = (catalog.filter { it.categoryId == categoryId }
+                        .maxOfOrNull { it.sortOrder } ?: 0) + 10,
                     custom = true
                 )
                 viewLifecycleOwner.lifecycleScope.launch {
-                    runCatching { AppDependencies.firebaseManager.saveProductCatalogItem(product) }
-                    catalog = (catalog + product).distinctBy { it.id }
-                    showQuantity(product)
+                    try {
+                        AppDependencies.firebaseManager.saveProductCatalogItem(product)
+                        catalog = (catalog + product).distinctBy { it.id }
+                        productPage = catalog
+                            .filter { it.categoryId == categoryId }
+                            .sortedBy { it.sortOrder }
+                            .indexOfFirst { it.id == product.id }
+                            .coerceAtLeast(0) / PRODUCTS_PER_PAGE
+                        showQuantity(product)
+                    } catch (e: Exception) {
+                        Log.e("OrderContent", "Failed to save custom product", e)
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.custom_product_save_error,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
             .setNegativeButton(R.string.cancel, null)
@@ -441,6 +471,8 @@ class OrderContentDialogFragment : DialogFragment() {
 
     private fun showPanel(visible: View) {
         binding.gridContentChoices.visibility = if (visible === binding.gridContentChoices) View.VISIBLE else View.GONE
+        binding.productActions.visibility =
+            if (visible === binding.gridContentChoices && screen == Screen.PRODUCTS) View.VISIBLE else View.GONE
         binding.quantityPanel.visibility = if (visible === binding.quantityPanel) View.VISIBLE else View.GONE
         binding.reviewPanel.visibility = if (visible === binding.reviewPanel) View.VISIBLE else View.GONE
     }
@@ -487,6 +519,7 @@ class OrderContentDialogFragment : DialogFragment() {
         const val RESULT_ITEM_COUNT = "item_count"
         private const val ARG_TRACKING = "tracking"
         private const val MAX_QUANTITY = 9999
+        private const val PRODUCTS_PER_PAGE = 6
 
         fun newInstance(tracking: String) = OrderContentDialogFragment().apply {
             arguments = bundleOf(ARG_TRACKING to tracking)

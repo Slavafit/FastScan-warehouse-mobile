@@ -456,9 +456,11 @@
     <string name="content_saved">Состав сохранён</string>
     <string name="content_save_error">Не удалось сохранить состав</string>
     <string name="custom_product">Другой товар</string>
+    <string name="new_product">+ Новый товар</string>
     <string name="custom_product_local_name">Название товара</string>
     <string name="custom_product_english_name">Название на английском</string>
     <string name="custom_product_names_required">Введите оба названия</string>
+    <string name="custom_product_save_error">Не удалось сохранить новый товар</string>
     <string name="select_unit">Выберите единицу</string>
     <string name="inventory_preparing">Подготовка описей коробок…</string>
     <string name="inventory_missing_warning">У %1$d заказов не заполнен состав. Закрыть партию без них?</string>

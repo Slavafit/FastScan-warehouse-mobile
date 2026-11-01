@@ -440,9 +440,11 @@
     <string name="content_saved">Contents saved</string>
     <string name="content_save_error">Could not save contents</string>
     <string name="custom_product">Other item</string>
+    <string name="new_product">+ New item</string>
     <string name="custom_product_local_name">Item name</string>
     <string name="custom_product_english_name">English name</string>
     <string name="custom_product_names_required">Enter both names</string>
+    <string name="custom_product_save_error">Could not save the new item</string>
     <string name="select_unit">Select unit</string>
     <string name="inventory_preparing">Preparing box inventories…</string>
     <string name="inventory_missing_warning">%1$d orders have no contents. Close the batch without them?</string>
