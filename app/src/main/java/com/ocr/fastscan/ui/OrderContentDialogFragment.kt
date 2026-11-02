@@ -214,10 +214,11 @@ class OrderContentDialogFragment : DialogFragment() {
             choices = categoryDefinitions().map { category ->
                 Choice(category.title) { openCategory(category.id) }
             },
-            columns = 3,
-            rows = 3,
-            minTextSizeSp = 10,
-            maxTextSizeSp = 15
+            columns = 2,
+            rows = 5,
+            minTextSizeSp = 11,
+            maxTextSizeSp = 16,
+            spanLastItem = true
         )
         updateSummary()
     }
@@ -596,7 +597,8 @@ class OrderContentDialogFragment : DialogFragment() {
         columns: Int = 2,
         rows: Int = 3,
         minTextSizeSp: Int = 12,
-        maxTextSizeSp: Int = 17
+        maxTextSizeSp: Int = 17,
+        spanLastItem: Boolean = false
     ) {
         binding.gridContentChoices.removeAllViews()
         binding.gridContentChoices.columnCount = columns
@@ -616,11 +618,15 @@ class OrderContentDialogFragment : DialogFragment() {
                 )
                 setOnClickListener { choice.action() }
             }
+            val isSpanningLastItem = spanLastItem &&
+                index == choices.lastIndex &&
+                choices.size % columns != 0
             val row = index / columns
-            val column = index % columns
+            val column = if (isSpanningLastItem) 0 else index % columns
+            val columnSpan = if (isSpanningLastItem) columns else 1
             val params = GridLayout.LayoutParams(
                 GridLayout.spec(row, 1f),
-                GridLayout.spec(column, 1f)
+                GridLayout.spec(column, columnSpan, 1f)
             ).apply {
                 width = 0
                 height = 0
