@@ -7,7 +7,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.text.InputType
+import android.util.TypedValue
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +21,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
@@ -50,7 +53,6 @@ class OrderContentDialogFragment : DialogFragment() {
     private var reviewIndex = 0
     private var editingProductId: String? = null
     private var screen = Screen.CATEGORIES
-    private var categoryPage = 0
     private var productPage = 0
 
     private val voiceQuantityLauncher = registerForActivityResult(
@@ -163,29 +165,15 @@ class OrderContentDialogFragment : DialogFragment() {
         binding.btnVoiceSelection.setOnClickListener { startVoiceSelectionInput() }
         binding.btnNewProduct.setOnClickListener { showCustomProductDialog() }
         binding.btnProductPrevious.setOnClickListener {
-            when (screen) {
-                Screen.CATEGORIES -> if (categoryPage > 0) {
-                    categoryPage--
-                    showCategories()
-                }
-                Screen.PRODUCTS -> if (productPage > 0) {
-                    productPage--
-                    showProducts(selectedCategory.orEmpty())
-                }
-                else -> Unit
+            if (screen == Screen.PRODUCTS && productPage > 0) {
+                productPage--
+                showProducts(selectedCategory.orEmpty())
             }
         }
         binding.btnProductNext.setOnClickListener {
-            when (screen) {
-                Screen.CATEGORIES -> {
-                    categoryPage++
-                    showCategories()
-                }
-                Screen.PRODUCTS -> {
-                    productPage++
-                    showProducts(selectedCategory.orEmpty())
-                }
-                else -> Unit
+            if (screen == Screen.PRODUCTS) {
+                productPage++
+                showProducts(selectedCategory.orEmpty())
             }
         }
         binding.btnReviewPrevious.setOnClickListener {
@@ -222,16 +210,15 @@ class OrderContentDialogFragment : DialogFragment() {
         editingProductId = null
         showPanel(binding.gridContentChoices)
         binding.tvContentTitle.setText(R.string.order_content)
-        val categories = categoryDefinitions()
-        val pageCount = ((categories.size - 1) / CHOICES_PER_PAGE + 1).coerceAtLeast(1)
-        categoryPage = categoryPage.coerceIn(0, pageCount - 1)
-        fillGrid(categories
-            .drop(categoryPage * CHOICES_PER_PAGE)
-            .take(CHOICES_PER_PAGE)
-            .map { category ->
-            Choice(category.title) { openCategory(category.id) }
-        })
-        updatePagingActions(categoryPage, pageCount, showNewProduct = false)
+        fillGrid(
+            choices = categoryDefinitions().map { category ->
+                Choice(category.title) { openCategory(category.id) }
+            },
+            columns = 3,
+            rows = 3,
+            minTextSizeSp = 10,
+            maxTextSizeSp = 15
+        )
         updateSummary()
     }
 
@@ -604,17 +591,33 @@ class OrderContentDialogFragment : DialogFragment() {
         binding.btnReviewContents.isEnabled = items.isNotEmpty()
     }
 
-    private fun fillGrid(choices: List<Choice>) {
+    private fun fillGrid(
+        choices: List<Choice>,
+        columns: Int = 2,
+        rows: Int = 3,
+        minTextSizeSp: Int = 12,
+        maxTextSizeSp: Int = 17
+    ) {
         binding.gridContentChoices.removeAllViews()
-        choices.take(6).forEachIndexed { index, choice ->
+        binding.gridContentChoices.columnCount = columns
+        binding.gridContentChoices.rowCount = rows
+        choices.take(columns * rows).forEachIndexed { index, choice ->
             val button = MaterialButton(requireContext()).apply {
                 text = choice.title
-                textSize = 17f
                 isAllCaps = false
+                gravity = Gravity.CENTER
+                maxLines = 3
+                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                    this,
+                    minTextSizeSp,
+                    maxTextSizeSp,
+                    1,
+                    TypedValue.COMPLEX_UNIT_SP
+                )
                 setOnClickListener { choice.action() }
             }
-            val row = index / 2
-            val column = index % 2
+            val row = index / columns
+            val column = index % columns
             val params = GridLayout.LayoutParams(
                 GridLayout.spec(row, 1f),
                 GridLayout.spec(column, 1f)
@@ -632,7 +635,7 @@ class OrderContentDialogFragment : DialogFragment() {
         binding.btnVoiceSelection.visibility =
             if (visible === binding.gridContentChoices) View.VISIBLE else View.GONE
         binding.productActions.visibility =
-            if (visible === binding.gridContentChoices) View.VISIBLE else View.GONE
+            if (visible === binding.gridContentChoices && screen == Screen.PRODUCTS) View.VISIBLE else View.GONE
         binding.quantityPanel.visibility = if (visible === binding.quantityPanel) View.VISIBLE else View.GONE
         binding.reviewPanel.visibility = if (visible === binding.reviewPanel) View.VISIBLE else View.GONE
     }
