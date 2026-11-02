@@ -156,7 +156,12 @@ class OrderContentDialogFragment : DialogFragment() {
                 Screen.CATEGORIES -> dismiss()
                 Screen.PRODUCTS, Screen.REVIEW -> showCategories()
                 Screen.QUANTITY -> {
-                    if (editingProductId != null) showReview() else showProducts(selectedCategory.orEmpty())
+                    val categoryId = selectedCategory.orEmpty()
+                    when {
+                        editingProductId != null -> showReview()
+                        opensQuantityDirectly(categoryId) -> showCategories()
+                        else -> showProducts(categoryId)
+                    }
                 }
             }
         }
@@ -226,7 +231,14 @@ class OrderContentDialogFragment : DialogFragment() {
     private fun openCategory(categoryId: String) {
         selectedCategory = categoryId
         productPage = 0
-        showProducts(categoryId)
+        val products = catalog
+            .filter { it.categoryId == categoryId }
+            .sortedBy { it.sortOrder }
+        if (opensQuantityDirectly(categoryId)) {
+            showQuantity(products.first())
+        } else {
+            showProducts(categoryId)
+        }
     }
 
     private fun showProducts(categoryId: String) {
@@ -237,16 +249,25 @@ class OrderContentDialogFragment : DialogFragment() {
         val products = catalog
             .filter { it.categoryId == categoryId }
             .sortedBy { it.sortOrder }
-        val pageCount = ((products.size - 1) / CHOICES_PER_PAGE + 1).coerceAtLeast(1)
+        val pageSize = productPageSize(categoryId)
+        val pageCount = ((products.size - 1) / pageSize + 1).coerceAtLeast(1)
         productPage = productPage.coerceIn(0, pageCount - 1)
         val choices = products
-            .drop(productPage * CHOICES_PER_PAGE)
-            .take(CHOICES_PER_PAGE)
+            .drop(productPage * pageSize)
+            .take(pageSize)
             .map { product ->
                 Choice(ProductCatalog.displayName(product, language)) { showQuantity(product) }
             }
         updatePagingActions(productPage, pageCount, showNewProduct = true)
-        fillGrid(choices)
+        val showFiveRows = pageSize == CLOTHING_CHOICES_PER_PAGE
+        fillGrid(
+            choices = choices,
+            columns = 2,
+            rows = if (showFiveRows) 5 else 3,
+            minTextSizeSp = if (showFiveRows) 11 else 12,
+            maxTextSizeSp = if (showFiveRows) 16 else 17,
+            spanLastItem = showFiveRows
+        )
     }
 
     private fun showQuantity(product: ProductCatalogItem, initialQuantity: Int = 1) {
@@ -534,7 +555,7 @@ class OrderContentDialogFragment : DialogFragment() {
                             .filter { it.categoryId == categoryId }
                             .sortedBy { it.sortOrder }
                             .indexOfFirst { it.id == product.id }
-                            .coerceAtLeast(0) / CHOICES_PER_PAGE
+                            .coerceAtLeast(0) / productPageSize(categoryId)
                         showQuantity(product)
                     } catch (e: Exception) {
                         Log.e("OrderContent", "Failed to save custom product", e)
@@ -654,6 +675,17 @@ class OrderContentDialogFragment : DialogFragment() {
         binding.btnProductNext.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
     }
 
+    private fun productPageSize(categoryId: String): Int =
+        if (categoryId == ProductCatalog.CATEGORY_CLOTHING) {
+            CLOTHING_CHOICES_PER_PAGE
+        } else {
+            DEFAULT_CHOICES_PER_PAGE
+        }
+
+    private fun opensQuantityDirectly(categoryId: String): Boolean =
+        categoryId == ProductCatalog.CATEGORY_FOOTWEAR &&
+            catalog.count { it.categoryId == categoryId } == 1
+
     private fun setLoading(loading: Boolean) {
         _binding?.contentProgress?.visibility = if (loading) View.VISIBLE else View.GONE
         _binding?.btnContentFinish?.isEnabled = !loading
@@ -707,7 +739,8 @@ class OrderContentDialogFragment : DialogFragment() {
         const val RESULT_ITEM_COUNT = "item_count"
         private const val ARG_TRACKING = "tracking"
         private const val MAX_QUANTITY = 9999
-        private const val CHOICES_PER_PAGE = 6
+        private const val DEFAULT_CHOICES_PER_PAGE = 6
+        private const val CLOTHING_CHOICES_PER_PAGE = 10
 
         fun newInstance(tracking: String) = OrderContentDialogFragment().apply {
             arguments = bundleOf(ARG_TRACKING to tracking)
