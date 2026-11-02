@@ -50,6 +50,7 @@ class OrderContentDialogFragment : DialogFragment() {
     private var reviewIndex = 0
     private var editingProductId: String? = null
     private var screen = Screen.CATEGORIES
+    private var categoryPage = 0
     private var productPage = 0
 
     private val voiceQuantityLauncher = registerForActivityResult(
@@ -65,6 +66,16 @@ class OrderContentDialogFragment : DialogFragment() {
         } else {
             setQuantity(recognized)
         }
+    }
+
+    private val voiceSelectionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        val candidates = result.data
+            ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            .orEmpty()
+        handleVoiceSelection(candidates)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -103,15 +114,17 @@ class OrderContentDialogFragment : DialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val manager = AppDependencies.firebaseManager
             val remoteCatalog = manager.getProductCatalog()
-            catalog = if (remoteCatalog.isEmpty()) {
+            val defaultIds = ProductCatalog.defaultItems.mapTo(mutableSetOf(), ProductCatalogItem::id)
+            if (remoteCatalog.isEmpty() || defaultIds.any { id -> remoteCatalog.none { it.id == id } }) {
                 runCatching { manager.seedProductCatalog(ProductCatalog.defaultItems) }
-                ProductCatalog.defaultItems
-            } else {
-                val remoteById = remoteCatalog.associateBy { it.id }
-                (ProductCatalog.defaultItems.map { remoteById[it.id] ?: it } +
-                    remoteCatalog.filter { it.id !in ProductCatalog.defaultItems.map(ProductCatalogItem::id).toSet() })
-                    .sortedWith(compareBy(ProductCatalogItem::categoryId, ProductCatalogItem::sortOrder))
             }
+            val customItems = remoteCatalog
+                .filter(ProductCatalogItem::custom)
+                .map(::migrateCustomProductCategory)
+                .filter { it.categoryId in ProductCatalog.categoryIds }
+            catalog = (ProductCatalog.defaultItems + customItems)
+                .distinctBy { it.id }
+                .sortedWith(compareBy(ProductCatalogItem::categoryId, ProductCatalogItem::sortOrder))
             manager.getOrderContent(tracking)?.items?.let {
                 items.clear()
                 items.addAll(it.filter { entry -> entry.quantity > 0 })
@@ -147,16 +160,33 @@ class OrderContentDialogFragment : DialogFragment() {
         }
         binding.btnReviewContents.setOnClickListener { showReview() }
         binding.btnContentFinish.setOnClickListener { saveAndFinish() }
+        binding.btnVoiceSelection.setOnClickListener { startVoiceSelectionInput() }
         binding.btnNewProduct.setOnClickListener { showCustomProductDialog() }
         binding.btnProductPrevious.setOnClickListener {
-            if (productPage > 0) {
-                productPage--
-                showProducts(selectedCategory.orEmpty())
+            when (screen) {
+                Screen.CATEGORIES -> if (categoryPage > 0) {
+                    categoryPage--
+                    showCategories()
+                }
+                Screen.PRODUCTS -> if (productPage > 0) {
+                    productPage--
+                    showProducts(selectedCategory.orEmpty())
+                }
+                else -> Unit
             }
         }
         binding.btnProductNext.setOnClickListener {
-            productPage++
-            showProducts(selectedCategory.orEmpty())
+            when (screen) {
+                Screen.CATEGORIES -> {
+                    categoryPage++
+                    showCategories()
+                }
+                Screen.PRODUCTS -> {
+                    productPage++
+                    showProducts(selectedCategory.orEmpty())
+                }
+                else -> Unit
+            }
         }
         binding.btnReviewPrevious.setOnClickListener {
             if (items.isNotEmpty()) {
@@ -192,15 +222,16 @@ class OrderContentDialogFragment : DialogFragment() {
         editingProductId = null
         showPanel(binding.gridContentChoices)
         binding.tvContentTitle.setText(R.string.order_content)
-        val categories = listOf(
-            ProductCatalog.CATEGORY_CLOTHING to R.string.category_clothing,
-            ProductCatalog.CATEGORY_FOOTWEAR to R.string.category_footwear,
-            ProductCatalog.CATEGORY_ELECTRONICS to R.string.category_electronics,
-            ProductCatalog.CATEGORY_FOOD to R.string.category_food,
-            ProductCatalog.CATEGORY_BAGS to R.string.category_bags,
-            ProductCatalog.CATEGORY_OTHER to R.string.category_other
-        )
-        fillGrid(categories.map { (id, title) -> Choice(getString(title)) { openCategory(id) } })
+        val categories = categoryDefinitions()
+        val pageCount = ((categories.size - 1) / CHOICES_PER_PAGE + 1).coerceAtLeast(1)
+        categoryPage = categoryPage.coerceIn(0, pageCount - 1)
+        fillGrid(categories
+            .drop(categoryPage * CHOICES_PER_PAGE)
+            .take(CHOICES_PER_PAGE)
+            .map { category ->
+            Choice(category.title) { openCategory(category.id) }
+        })
+        updatePagingActions(categoryPage, pageCount, showNewProduct = false)
         updateSummary()
     }
 
@@ -218,18 +249,15 @@ class OrderContentDialogFragment : DialogFragment() {
         val products = catalog
             .filter { it.categoryId == categoryId }
             .sortedBy { it.sortOrder }
-        val pageCount = ((products.size - 1) / PRODUCTS_PER_PAGE + 1).coerceAtLeast(1)
+        val pageCount = ((products.size - 1) / CHOICES_PER_PAGE + 1).coerceAtLeast(1)
         productPage = productPage.coerceIn(0, pageCount - 1)
         val choices = products
-            .drop(productPage * PRODUCTS_PER_PAGE)
-            .take(PRODUCTS_PER_PAGE)
+            .drop(productPage * CHOICES_PER_PAGE)
+            .take(CHOICES_PER_PAGE)
             .map { product ->
                 Choice(ProductCatalog.displayName(product, language)) { showQuantity(product) }
             }
-        binding.btnProductPrevious.isEnabled = productPage > 0
-        binding.btnProductNext.isEnabled = productPage < pageCount - 1
-        binding.btnProductPrevious.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
-        binding.btnProductNext.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
+        updatePagingActions(productPage, pageCount, showNewProduct = true)
         fillGrid(choices)
     }
 
@@ -324,6 +352,136 @@ class OrderContentDialogFragment : DialogFragment() {
         }
     }
 
+    private fun startVoiceSelectionInput() {
+        if (screen != Screen.CATEGORIES && screen != Screen.PRODUCTS) return
+        val locale = resources.configuration.locales[0]
+        val prompt = if (screen == Screen.CATEGORIES) {
+            R.string.voice_category_prompt
+        } else {
+            R.string.voice_product_prompt
+        }
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, locale.toLanguageTag())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, getString(prompt))
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+        }
+        try {
+            voiceSelectionLauncher.launch(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun handleVoiceSelection(spokenCandidates: List<String>) {
+        val options = when (screen) {
+            Screen.CATEGORIES -> categoryDefinitions().map { category ->
+                VoiceOption(category.id, category.title, category.aliases) {
+                    openCategory(category.id)
+                }
+            }
+            Screen.PRODUCTS -> catalog
+                .filter { it.categoryId == selectedCategory }
+                .sortedBy { it.sortOrder }
+                .map { product ->
+                    VoiceOption(
+                        id = product.id,
+                        title = ProductCatalog.displayName(product, currentLanguage()),
+                        aliases = product.names.values + product.reportNameEn
+                    ) { showQuantity(product) }
+                }
+            else -> emptyList()
+        }
+        val optionById = options.associateBy { it.id }
+        val matches = VoiceChoiceMatcher.bestMatches(
+            spokenCandidates,
+            options.associate { it.id to it.aliases }
+        ).mapNotNull(optionById::get)
+
+        when (matches.size) {
+            0 -> Toast.makeText(
+                requireContext(),
+                R.string.voice_selection_not_recognized,
+                Toast.LENGTH_SHORT
+            ).show()
+            1 -> matches.first().action()
+            else -> AlertDialog.Builder(requireContext())
+                .setTitle(R.string.voice_selection_ambiguous)
+                .setItems(matches.map { it.title }.toTypedArray()) { _, index ->
+                    matches[index].action()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun categoryDefinitions(): List<CategoryDefinition> = listOf(
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_CLOTHING,
+            getString(R.string.category_clothing),
+            listOf("одежда", "clothing", "clothes", "ropa")
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_FOOTWEAR,
+            getString(R.string.category_footwear),
+            listOf("обувь", "footwear", "shoes", "calzado", "zapatos")
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_BAGS_ACCESSORIES,
+            getString(R.string.category_bags_accessories),
+            listOf("сумки и аксессуары", "bags and accessories", "bolsos y accesorios")
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_BEAUTY,
+            getString(R.string.category_beauty),
+            listOf(
+                "красота и уход", "косметика", "beauty and personal care",
+                "beauty", "belleza y cuidado personal", "belleza"
+            )
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_TOYS_SPORTS,
+            getString(R.string.category_toys_sports),
+            listOf("игрушки и спорт", "toys and sports", "juguetes y deporte")
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_ELECTRONICS_APPLIANCES,
+            getString(R.string.category_electronics_appliances),
+            listOf(
+                "электроника и техника", "электроника", "electronics and appliances",
+                "electronics", "electrónica y electrodomésticos", "electronica"
+            )
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_HOME,
+            getString(R.string.category_home),
+            listOf("товары для дома", "для дома", "home goods", "home", "artículos para el hogar")
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_HEALTH,
+            getString(R.string.category_health),
+            listOf("здоровье", "health", "salud")
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_FOOD_DRINKS,
+            getString(R.string.category_food_drinks),
+            listOf(
+                "продукты питания и напитки", "продукты", "food and beverages",
+                "food", "alimentos y bebidas", "alimentos"
+            )
+        )
+    ).map { it.copy(aliases = it.aliases + it.title) }
+
+    private fun migrateCustomProductCategory(item: ProductCatalogItem): ProductCatalogItem {
+        val categoryId = when (item.categoryId) {
+            "bags" -> ProductCatalog.CATEGORY_BAGS_ACCESSORIES
+            "electronics" -> ProductCatalog.CATEGORY_ELECTRONICS_APPLIANCES
+            "food" -> ProductCatalog.CATEGORY_FOOD_DRINKS
+            else -> item.categoryId
+        }
+        return if (categoryId == item.categoryId) item else item.copy(categoryId = categoryId)
+    }
+
     private fun showCustomProductDialog() {
         if (selectedCategory.isNullOrBlank()) return
         val localName = EditText(requireContext()).apply { hint = getString(R.string.custom_product_local_name) }
@@ -388,7 +546,7 @@ class OrderContentDialogFragment : DialogFragment() {
                             .filter { it.categoryId == categoryId }
                             .sortedBy { it.sortOrder }
                             .indexOfFirst { it.id == product.id }
-                            .coerceAtLeast(0) / PRODUCTS_PER_PAGE
+                            .coerceAtLeast(0) / CHOICES_PER_PAGE
                         showQuantity(product)
                     } catch (e: Exception) {
                         Log.e("OrderContent", "Failed to save custom product", e)
@@ -471,10 +629,20 @@ class OrderContentDialogFragment : DialogFragment() {
 
     private fun showPanel(visible: View) {
         binding.gridContentChoices.visibility = if (visible === binding.gridContentChoices) View.VISIBLE else View.GONE
+        binding.btnVoiceSelection.visibility =
+            if (visible === binding.gridContentChoices) View.VISIBLE else View.GONE
         binding.productActions.visibility =
-            if (visible === binding.gridContentChoices && screen == Screen.PRODUCTS) View.VISIBLE else View.GONE
+            if (visible === binding.gridContentChoices) View.VISIBLE else View.GONE
         binding.quantityPanel.visibility = if (visible === binding.quantityPanel) View.VISIBLE else View.GONE
         binding.reviewPanel.visibility = if (visible === binding.reviewPanel) View.VISIBLE else View.GONE
+    }
+
+    private fun updatePagingActions(currentPage: Int, pageCount: Int, showNewProduct: Boolean) {
+        binding.btnNewProduct.visibility = if (showNewProduct) View.VISIBLE else View.GONE
+        binding.btnProductPrevious.isEnabled = currentPage > 0
+        binding.btnProductNext.isEnabled = currentPage < pageCount - 1
+        binding.btnProductPrevious.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
+        binding.btnProductNext.visibility = if (pageCount > 1) View.VISIBLE else View.INVISIBLE
     }
 
     private fun setLoading(loading: Boolean) {
@@ -511,6 +679,17 @@ class OrderContentDialogFragment : DialogFragment() {
     }
 
     private data class Choice(val title: String, val action: () -> Unit)
+    private data class CategoryDefinition(
+        val id: String,
+        val title: String,
+        val aliases: List<String>
+    )
+    private data class VoiceOption(
+        val id: String,
+        val title: String,
+        val aliases: Collection<String>,
+        val action: () -> Unit
+    )
     private enum class Screen { CATEGORIES, PRODUCTS, QUANTITY, REVIEW }
 
     companion object {
@@ -519,7 +698,7 @@ class OrderContentDialogFragment : DialogFragment() {
         const val RESULT_ITEM_COUNT = "item_count"
         private const val ARG_TRACKING = "tracking"
         private const val MAX_QUANTITY = 9999
-        private const val PRODUCTS_PER_PAGE = 6
+        private const val CHOICES_PER_PAGE = 6
 
         fun newInstance(tracking: String) = OrderContentDialogFragment().apply {
             arguments = bundleOf(ARG_TRACKING to tracking)
