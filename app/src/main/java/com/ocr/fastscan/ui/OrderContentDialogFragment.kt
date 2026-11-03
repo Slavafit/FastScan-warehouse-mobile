@@ -66,7 +66,7 @@ class OrderContentDialogFragment : DialogFragment() {
         if (recognized == null) {
             Toast.makeText(requireContext(), R.string.quantity_not_recognized, Toast.LENGTH_SHORT).show()
         } else {
-            setQuantity(recognized)
+            selectQuickQuantity(recognized)
         }
     }
 
@@ -144,7 +144,9 @@ class OrderContentDialogFragment : DialogFragment() {
             binding.btnQuick2 to 2,
             binding.btnQuick3 to 3,
             binding.btnQuick4 to 4
-        ).forEach { (button, value) -> button.setOnClickListener { setQuantity(value) } }
+        ).forEach { (button, value) ->
+            button.setOnClickListener { selectQuickQuantity(value) }
+        }
         binding.btnManualQuantity.setOnClickListener { showManualQuantityDialog() }
         binding.btnVoiceQuantity.setOnClickListener { startVoiceQuantityInput() }
         binding.btnAddContentItem.setOnClickListener { addSelectedItem() }
@@ -334,6 +336,11 @@ class OrderContentDialogFragment : DialogFragment() {
     private fun setQuantity(value: Int) {
         quantity = value.coerceIn(1, MAX_QUANTITY)
         _binding?.tvQuantity?.text = quantity.toString()
+    }
+
+    private fun selectQuickQuantity(value: Int) {
+        setQuantity(value)
+        addSelectedItem()
     }
 
     private fun showManualQuantityDialog() {
