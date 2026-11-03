@@ -166,7 +166,12 @@ class OrderContentDialogFragment : DialogFragment() {
             }
         }
         binding.btnReviewContents.setOnClickListener { showReview() }
-        binding.btnContentFinish.setOnClickListener { saveAndFinish() }
+        binding.btnContentFinish.setOnClickListener {
+            if (screen == Screen.QUANTITY && !addSelectedItem(returnToCategories = false)) {
+                return@setOnClickListener
+            }
+            saveAndFinish()
+        }
         binding.btnVoiceSelection.setOnClickListener { startVoiceSelectionInput() }
         binding.btnNewProduct.setOnClickListener { showCustomProductDialog() }
         binding.btnProductPrevious.setOnClickListener {
@@ -300,8 +305,8 @@ class OrderContentDialogFragment : DialogFragment() {
         binding.tvReviewItem.text = getString(R.string.content_item_format, name, item.quantity, unit)
     }
 
-    private fun addSelectedItem() {
-        val product = selectedProduct ?: return
+    private fun addSelectedItem(returnToCategories: Boolean = true): Boolean {
+        val product = selectedProduct ?: return false
         val newItem = OrderContentItem(
             productId = product.id,
             categoryId = product.categoryId,
@@ -322,7 +327,8 @@ class OrderContentDialogFragment : DialogFragment() {
             items += newItem
         }
         editingProductId = null
-        showCategories()
+        if (returnToCategories) showCategories()
+        return true
     }
 
     private fun setQuantity(value: Int) {
