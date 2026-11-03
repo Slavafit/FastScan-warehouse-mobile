@@ -10,11 +10,14 @@ import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ocr.fastscan.R
+import com.ocr.fastscan.data.model.BoxInPartial
+import com.ocr.fastscan.data.model.BoxInventoryReport
 import com.ocr.fastscan.data.model.FirestoreShipment
 import com.ocr.fastscan.data.model.OrderDetails
 import com.ocr.fastscan.data.model.Partial
 import com.ocr.fastscan.data.model.UnpackedOrder
 import com.ocr.fastscan.databinding.FragmentReportsBinding
+import com.ocr.fastscan.utils.FirebaseManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -221,23 +224,23 @@ class ReportsFragment : BaseFragment() {
                 showToast(R.string.error_load_boxes_short)
                 return@launchReportJob
             }
-            val orders = boxes.chunked(4).flatMap { chunk ->
-                chunk.map { box ->
-                    async { apiService.getOrderDetailsBox(box.tracking_code).body().orEmpty() }
-                }.awaitAll().flatten()
-            }.filter {
+            val ordersByBox = loadOrdersByBox(boxes)
+            val orders = ordersByBox.values.flatten().filter {
                 clientCodeFilter.isBlank() ||
                     ReportsCalculator.normalize(it.clientCode.orEmpty()) == clientCodeFilter
             }
-            showTrackReport(
-                buildPartyReport(
-                    party = party,
-                    boxWeight = boxes.sumOf { it.gross_weight },
-                    orders = orders,
-                    boxCount = boxes.size,
-                    clientCodeFilter = clientCodeFilter
-                )
+            val partyReport = buildPartyReport(
+                party = party,
+                boxWeight = boxes.sumOf { it.gross_weight },
+                orders = orders,
+                boxCount = boxes.size,
+                clientCodeFilter = clientCodeFilter
             )
+            val savedInventories = firebaseManager.getBoxInventoryReports(party.guid)
+            val inventories = savedInventories.ifEmpty {
+                buildLiveBoxInventoryReports(party, boxes, ordersByBox)
+            }
+            showTrackReport(appendBoxContents(partyReport, inventories))
         }
     }
 
@@ -262,7 +265,18 @@ class ReportsFragment : BaseFragment() {
 
     private fun loadBoxContentsReport(party: Partial) {
         launchReportJob {
-            val reports = firebaseManager.getBoxInventoryReports(party.guid)
+            val savedReports = firebaseManager.getBoxInventoryReports(party.guid)
+            val reports = if (savedReports.isNotEmpty()) {
+                savedReports
+            } else {
+                val boxesResponse = apiService.getBoxesInPartial(party.guid)
+                val boxes = boxesResponse.body().orEmpty()
+                if (!boxesResponse.isSuccessful) {
+                    showToast(R.string.error_load_boxes_short)
+                    return@launchReportJob
+                }
+                buildLiveBoxInventoryReports(party, boxes, loadOrdersByBox(boxes))
+            }
             if (reports.isEmpty()) {
                 showTrackReport(getString(R.string.no_box_contents_reports))
                 return@launchReportJob
@@ -271,6 +285,50 @@ class ReportsFragment : BaseFragment() {
                 reports.joinToString("\n\n────────────────\n\n") { it.reportText }
             )
         }
+    }
+
+    private suspend fun CoroutineScope.loadOrdersByBox(
+        boxes: List<BoxInPartial>
+    ): Map<BoxInPartial, List<OrderDetails>> = boxes.chunked(4).flatMap { chunk ->
+        chunk.map { box ->
+            async {
+                val response = apiService.getOrderDetailsBox(box.tracking_code)
+                box to if (response.isSuccessful) response.body().orEmpty() else emptyList()
+            }
+        }.awaitAll()
+    }.toMap()
+
+    private suspend fun buildLiveBoxInventoryReports(
+        party: Partial,
+        boxes: List<BoxInPartial>,
+        ordersByBox: Map<BoxInPartial, List<OrderDetails>>
+    ): List<BoxInventoryReport> {
+        val trackings = ordersByBox.values
+            .flatten()
+            .mapNotNull { it.trackingNumber?.trim()?.takeIf(String::isNotBlank) }
+        val contentsByTracking = firebaseManager.getOrderContents(trackings)
+        val partyName = PartyNumberFormatter.display(party.partial_name).ifBlank { party.partial_code }
+        return boxes.map { box ->
+            val contents = ordersByBox[box].orEmpty().mapNotNull { order ->
+                contentsByTracking[FirebaseManager.normalizeTracking(order.trackingNumber.orEmpty())]
+            }
+            BoxInventoryFormatter.createReport(
+                partyGuid = party.guid,
+                partyName = partyName,
+                boxTracking = box.tracking_code,
+                contents = contents
+            )
+        }
+    }
+
+    private fun appendBoxContents(
+        partyReport: String,
+        inventories: List<BoxInventoryReport>
+    ): String = if (inventories.isEmpty()) {
+        partyReport
+    } else {
+        partyReport + "\n\nBOX CONTENTS\n\n" +
+            inventories.joinToString("\n\n────────────────\n\n") { it.reportText }
     }
 
     private fun buildDailyReport(
