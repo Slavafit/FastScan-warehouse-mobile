@@ -478,4 +478,6 @@
     <string name="no_box_contents_reports">Для этой партии сохранённых описей нет</string>
     <string name="view_box_contents">Состав коробки</string>
     <string name="box_contents_load_error">Не удалось загрузить состав коробки</string>
+    <string name="view_box_contents_count">Состав коробки · %1$d из %2$d заказов</string>
+    <string name="inventory_coverage_warning">Состав найден для %1$d из %2$d заказов</string>
 </resources>

@@ -462,4 +462,6 @@
     <string name="no_box_contents_reports">There are no saved inventories for this batch</string>
     <string name="view_box_contents">Box contents</string>
     <string name="box_contents_load_error">Could not load the box contents</string>
+    <string name="view_box_contents_count">Box contents · %1$d of %2$d orders</string>
+    <string name="inventory_coverage_warning">Contents found for %1$d of %2$d orders</string>
 </resources>

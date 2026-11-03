@@ -236,9 +236,12 @@ class ReportsFragment : BaseFragment() {
                 boxCount = boxes.size,
                 clientCodeFilter = clientCodeFilter
             )
-            val savedInventories = firebaseManager.getBoxInventoryReports(party.guid)
-            val inventories = savedInventories.ifEmpty {
+            val inventories = if (party.status == 0) {
                 buildLiveBoxInventoryReports(party, boxes, ordersByBox)
+            } else {
+                firebaseManager.getBoxInventoryReports(party.guid).ifEmpty {
+                    buildLiveBoxInventoryReports(party, boxes, ordersByBox)
+                }
             }
             showTrackReport(appendBoxContents(partyReport, inventories))
         }
@@ -265,16 +268,18 @@ class ReportsFragment : BaseFragment() {
 
     private fun loadBoxContentsReport(party: Partial) {
         launchReportJob {
-            val savedReports = firebaseManager.getBoxInventoryReports(party.guid)
-            val reports = if (savedReports.isNotEmpty()) {
-                savedReports
+            val savedReports = if (party.status == 0) {
+                emptyList()
             } else {
+                firebaseManager.getBoxInventoryReports(party.guid)
+            }
+            val reports = savedReports.ifEmpty {
                 val boxesResponse = apiService.getBoxesInPartial(party.guid)
-                val boxes = boxesResponse.body().orEmpty()
                 if (!boxesResponse.isSuccessful) {
                     showToast(R.string.error_load_boxes_short)
                     return@launchReportJob
                 }
+                val boxes = boxesResponse.body().orEmpty()
                 buildLiveBoxInventoryReports(party, boxes, loadOrdersByBox(boxes))
             }
             if (reports.isEmpty()) {
@@ -306,7 +311,18 @@ class ReportsFragment : BaseFragment() {
         val trackings = ordersByBox.values
             .flatten()
             .mapNotNull { it.trackingNumber?.trim()?.takeIf(String::isNotBlank) }
+            .map(FirebaseManager::normalizeTracking)
+            .distinct()
         val contentsByTracking = firebaseManager.getOrderContents(trackings)
+        if (contentsByTracking.size < trackings.size && isAdded) {
+            showToast(
+                getString(
+                    R.string.inventory_coverage_warning,
+                    contentsByTracking.size,
+                    trackings.size
+                )
+            )
+        }
         val partyName = PartyNumberFormatter.display(party.partial_name).ifBlank { party.partial_code }
         return boxes.map { box ->
             val contents = ordersByBox[box].orEmpty().mapNotNull { order ->

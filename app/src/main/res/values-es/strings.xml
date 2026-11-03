@@ -451,4 +451,6 @@
     <string name="no_box_contents_reports">No hay inventarios guardados para este lote</string>
     <string name="view_box_contents">Contenido de la caja</string>
     <string name="box_contents_load_error">No se pudo cargar el contenido de la caja</string>
+    <string name="view_box_contents_count">Contenido de la caja · %1$d de %2$d pedidos</string>
+    <string name="inventory_coverage_warning">Contenido encontrado para %1$d de %2$d pedidos</string>
 </resources>

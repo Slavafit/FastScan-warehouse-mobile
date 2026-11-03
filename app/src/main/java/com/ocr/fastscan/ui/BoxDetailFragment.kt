@@ -158,6 +158,8 @@ class BoxDetailFragment : BaseFragment() {
                 }
                 val trackings = response.body().orEmpty()
                     .mapNotNull { it.trackingNumber?.trim()?.takeIf(String::isNotBlank) }
+                    .map(com.ocr.fastscan.utils.FirebaseManager::normalizeTracking)
+                    .distinct()
                 val contentsByTracking = firebaseManager.getOrderContents(trackings)
                 val contents = trackings.mapNotNull {
                     contentsByTracking[com.ocr.fastscan.utils.FirebaseManager.normalizeTracking(it)]
@@ -170,7 +172,13 @@ class BoxDetailFragment : BaseFragment() {
                 ).reportText
                 if (_binding == null || !isAdded) return@launch
                 AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.view_box_contents)
+                    .setTitle(
+                        getString(
+                            R.string.view_box_contents_count,
+                            contentsByTracking.size,
+                            trackings.size
+                        )
+                    )
                     .setMessage(report)
                     .setNeutralButton(R.string.share_report) { _, _ -> shareBoxContents(report) }
                     .setPositiveButton(R.string.ok, null)
