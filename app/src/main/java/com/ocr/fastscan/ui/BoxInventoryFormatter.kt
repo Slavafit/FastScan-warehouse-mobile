@@ -39,7 +39,9 @@ internal object BoxInventoryFormatter {
             .sortedBy { it.reportNameEn.lowercase(Locale.ENGLISH) }
 
         val reportText = buildString {
-            append("BATCH ").append(partyName).append('\n')
+            if (partyName.isNotBlank()) {
+                append("BATCH ").append(partyName).append('\n')
+            }
             append("BOX ").append(boxTracking).append('\n')
             append(SimpleDateFormat("dd MMM yyyy HH:mm", Locale.ENGLISH).format(createdAt))
             append("\n\n")

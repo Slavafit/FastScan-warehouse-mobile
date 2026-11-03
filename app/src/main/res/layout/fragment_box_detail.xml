@@ -127,6 +127,18 @@
                 app:iconTint="@color/action_button_text" />
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewContents"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/view_box_contents"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_menu_view"
+            app:iconGravity="textStart" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

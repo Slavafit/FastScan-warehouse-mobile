@@ -3,6 +3,7 @@ package com.ocr.fastscan.ui
 import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import com.google.firebase.Timestamp
 import com.ocr.fastscan.data.model.*
 import com.ocr.fastscan.databinding.FragmentBoxDetailBinding
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import android.text.TextWatcher
 import android.util.Log
 import com.ocr.fastscan.R
@@ -119,6 +121,10 @@ class BoxDetailFragment : BaseFragment() {
             ScanUtils.launchCamera(requireContext(), "barcode", scanLauncher)
         }
 
+        binding.btnViewContents.setOnClickListener {
+            showBoxContents()
+        }
+
         binding.btnPasteOrderTrack.setOnClickListener {
             pasteOrderTrackFromClipboard()
         }
@@ -140,6 +146,54 @@ class BoxDetailFragment : BaseFragment() {
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+    }
+
+    private fun showBoxContents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            showLoading()
+            try {
+                val response = apiService.getOrderDetailsBox(boxTracking)
+                if (!response.isSuccessful) {
+                    throw IllegalStateException("Failed to load box orders: ${response.code()}")
+                }
+                val trackings = response.body().orEmpty()
+                    .mapNotNull { it.trackingNumber?.trim()?.takeIf(String::isNotBlank) }
+                val contentsByTracking = firebaseManager.getOrderContents(trackings)
+                val contents = trackings.mapNotNull {
+                    contentsByTracking[com.ocr.fastscan.utils.FirebaseManager.normalizeTracking(it)]
+                }
+                val report = BoxInventoryFormatter.createReport(
+                    partyGuid = "",
+                    partyName = "",
+                    boxTracking = boxTracking,
+                    contents = contents
+                ).reportText
+                if (_binding == null || !isAdded) return@launch
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.view_box_contents)
+                    .setMessage(report)
+                    .setNeutralButton(R.string.share_report) { _, _ -> shareBoxContents(report) }
+                    .setPositiveButton(R.string.ok, null)
+                    .show()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("BoxDetail", "Failed to load box contents", e)
+                if (isAdded) {
+                    Toast.makeText(requireContext(), R.string.box_contents_load_error, Toast.LENGTH_LONG).show()
+                    soundManager.playError()
+                }
+            } finally {
+                hideLoading()
+            }
+        }
+    }
+
+    private fun shareBoxContents(report: String) {
+        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, report)
+        }, getString(R.string.share_report)))
     }
 
     private fun pasteOrderTrackFromClipboard() {

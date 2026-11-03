@@ -476,4 +476,6 @@
     <string name="inventory_save_error">Партия закрыта, но описи не удалось сохранить</string>
     <string name="box_contents_report">Описи коробок</string>
     <string name="no_box_contents_reports">Для этой партии сохранённых описей нет</string>
+    <string name="view_box_contents">Состав коробки</string>
+    <string name="box_contents_load_error">Не удалось загрузить состав коробки</string>
 </resources>

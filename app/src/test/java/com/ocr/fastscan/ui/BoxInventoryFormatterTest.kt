@@ -61,4 +61,18 @@ class BoxInventoryFormatterTest {
 
         assertTrue(report.reportText.contains("Cosmetics — 1 box"))
     }
+
+    @Test
+    fun omitsBatchLineForStandaloneBoxView() {
+        val report = BoxInventoryFormatter.createReport(
+            partyGuid = "",
+            partyName = "",
+            boxTracking = "BOX-1",
+            contents = emptyList(),
+            createdAt = Date(0)
+        )
+
+        assertTrue(report.reportText.startsWith("BOX BOX-1\n"))
+        assertFalse(report.reportText.contains("BATCH"))
+    }
 }

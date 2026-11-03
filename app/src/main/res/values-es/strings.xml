@@ -449,4 +449,6 @@
     <string name="inventory_save_error">El lote se cerró, pero no se pudieron guardar los inventarios</string>
     <string name="box_contents_report">Contenido de cajas</string>
     <string name="no_box_contents_reports">No hay inventarios guardados para este lote</string>
+    <string name="view_box_contents">Contenido de la caja</string>
+    <string name="box_contents_load_error">No se pudo cargar el contenido de la caja</string>
 </resources>

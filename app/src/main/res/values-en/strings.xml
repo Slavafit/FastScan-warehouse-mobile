@@ -460,4 +460,6 @@
     <string name="inventory_save_error">The batch was closed, but inventories could not be saved</string>
     <string name="box_contents_report">Box contents</string>
     <string name="no_box_contents_reports">There are no saved inventories for this batch</string>
+    <string name="view_box_contents">Box contents</string>
+    <string name="box_contents_load_error">Could not load the box contents</string>
 </resources>
