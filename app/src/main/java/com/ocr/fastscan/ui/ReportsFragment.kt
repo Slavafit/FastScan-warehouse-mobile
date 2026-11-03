@@ -236,13 +236,9 @@ class ReportsFragment : BaseFragment() {
                 boxCount = boxes.size,
                 clientCodeFilter = clientCodeFilter
             )
-            val inventories = if (party.status == 0) {
-                buildLiveBoxInventoryReports(party, boxes, ordersByBox)
-            } else {
-                firebaseManager.getBoxInventoryReports(party.guid).ifEmpty {
-                    buildLiveBoxInventoryReports(party, boxes, ordersByBox)
-                }
-            }
+            // Build the inventory from the same tracking list shown inside each box.
+            // Saved snapshots are kept for recovery, but must not override the current box list.
+            val inventories = buildLiveBoxInventoryReports(party, boxes, ordersByBox)
             showTrackReport(appendBoxContents(partyReport, inventories))
         }
     }
@@ -268,19 +264,12 @@ class ReportsFragment : BaseFragment() {
 
     private fun loadBoxContentsReport(party: Partial) {
         launchReportJob {
-            val savedReports = if (party.status == 0) {
-                emptyList()
-            } else {
-                firebaseManager.getBoxInventoryReports(party.guid)
-            }
-            val reports = savedReports.ifEmpty {
-                val boxesResponse = apiService.getBoxesInPartial(party.guid)
-                if (!boxesResponse.isSuccessful) {
-                    showToast(R.string.error_load_boxes_short)
-                    return@launchReportJob
-                }
+            val boxesResponse = apiService.getBoxesInPartial(party.guid)
+            val reports = if (boxesResponse.isSuccessful) {
                 val boxes = boxesResponse.body().orEmpty()
                 buildLiveBoxInventoryReports(party, boxes, loadOrdersByBox(boxes))
+            } else {
+                firebaseManager.getBoxInventoryReports(party.guid)
             }
             if (reports.isEmpty()) {
                 showTrackReport(getString(R.string.no_box_contents_reports))
