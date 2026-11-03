@@ -243,18 +243,39 @@ class FirebaseManager(context: Context) {
             .filter(String::isNotBlank)
             .distinct()
             .toList()
-        return coroutineScope {
+        val exactMatches = coroutineScope {
             normalizedTrackings.map { tracking ->
                 async {
-                    warehouseDocument.collection("order_contents")
+                    tracking to warehouseDocument.collection("order_contents")
                         .document(safeDocumentId(tracking))
                         .get()
                         .await()
                         .toObject<OrderContent>()
                 }
             }.awaitAll()
-                .filterNotNull()
-                .associateBy { normalizeTracking(it.tracking) }
+                .mapNotNull { (requestedTracking, content) ->
+                    content?.let { requestedTracking to it }
+                }
+                .toMap()
+        }
+        if (exactMatches.size == normalizedTrackings.size) return exactMatches
+
+        // Compatibility for contents saved by older builds with a differently
+        // formatted document ID or tracking value. This runs only when direct
+        // reads did not find every tracking from the box.
+        val missing = normalizedTrackings.filterNot(exactMatches::containsKey)
+        val legacyContents = warehouseDocument.collection("order_contents")
+            .get()
+            .await()
+            .toObjects(OrderContent::class.java)
+            .filter { it.tracking.isNotBlank() }
+            .groupBy { comparableTracking(it.tracking) }
+        return exactMatches.toMutableMap().apply {
+            missing.forEach { requestedTracking ->
+                legacyContents[comparableTracking(requestedTracking)]
+                    ?.maxByOrNull { it.updatedAt.seconds }
+                    ?.let { put(requestedTracking, it) }
+            }
         }
     }
 
@@ -305,6 +326,12 @@ class FirebaseManager(context: Context) {
         private const val FIRESTORE_BATCH_LIMIT = 450
 
         fun normalizeTracking(value: String): String = value.trim().uppercase(Locale.ROOT)
+
+        internal fun comparableTracking(value: String): String {
+            val compact = normalizeTracking(value).filter(Char::isLetterOrDigit)
+            if (compact.isEmpty()) return ""
+            return if (compact.all(Char::isDigit)) compact.trimStart('0').ifEmpty { "0" } else compact
+        }
 
         private fun safeDocumentId(value: String): String = Base64.encodeToString(
             value.toByteArray(Charsets.UTF_8),

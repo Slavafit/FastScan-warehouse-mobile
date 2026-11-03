@@ -2,6 +2,7 @@ package com.ocr.fastscan.ui
 
 import com.ocr.fastscan.data.model.OrderContent
 import com.ocr.fastscan.data.model.OrderContentItem
+import com.ocr.fastscan.utils.FirebaseManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -74,5 +75,17 @@ class BoxInventoryFormatterTest {
 
         assertTrue(report.reportText.startsWith("BOX BOX-1\n"))
         assertFalse(report.reportText.contains("BATCH"))
+    }
+
+    @Test
+    fun trackingComparisonHandlesScannerFormatting() {
+        assertEquals(
+            FirebaseManager.comparableTracking("00317 4458-1220"),
+            FirebaseManager.comparableTracking("31744581220")
+        )
+        assertEquals(
+            FirebaseManager.comparableTracking(" rr-123 456-es "),
+            FirebaseManager.comparableTracking("RR123456ES")
+        )
     }
 }
