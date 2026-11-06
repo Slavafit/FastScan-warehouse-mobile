@@ -1,9 +1,11 @@
 package com.ocr.fastscan.ui
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.ActivityNotFoundException
+import android.content.res.ColorStateList
 import android.content.pm.PackageInfo
 import android.os.Build
 import android.os.Bundle
@@ -20,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.ocr.fastscan.R
@@ -98,6 +101,10 @@ class ScanFragment : BaseFragment() {
     private var scannedOrderNumber: String? = null
     private var isApplyingScannedTracking = false
     private var contentCountJob: Job? = null
+    private var contentItemCount: Int? = null
+    private var contentWarningAnimator: ValueAnimator? = null
+    private var defaultContentStrokeColor: ColorStateList? = null
+    private var defaultContentStrokeWidth: Int = 0
 
     private val receiverCacheRepository by lazy {
         ReceiverCacheRepository(requireContext(), apiService)
@@ -117,6 +124,8 @@ class ScanFragment : BaseFragment() {
 
         requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         binding.tvAppVersion.text = getAppVersionText()
+        defaultContentStrokeColor = binding.btnContent.strokeColor
+        defaultContentStrokeWidth = binding.btnContent.strokeWidth
 
         binding.etTracking.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE ||
@@ -147,6 +156,8 @@ class ScanFragment : BaseFragment() {
         }
         setupButtons()
         setupClientCodeInput()
+        binding.etClientCode.doOnTextChanged { _, _, _, _ -> updateContentWarning() }
+        binding.etWeight.doOnTextChanged { _, _, _, _ -> updateContentWarning() }
     }
 
     private fun getAppVersionText(): String {
@@ -249,6 +260,8 @@ class ScanFragment : BaseFragment() {
 
     private fun scheduleContentCountUpdate() {
         contentCountJob?.cancel()
+        contentItemCount = null
+        updateContentWarning()
         val track = _binding?.etTracking?.text?.toString()?.trim().orEmpty()
         if (track.isBlank()) {
             updateContentButton(0)
@@ -264,10 +277,53 @@ class ScanFragment : BaseFragment() {
     }
 
     private fun updateContentButton(itemCount: Int) {
+        contentItemCount = itemCount
         _binding?.btnContent?.text = if (itemCount > 0) {
             getString(R.string.order_content_with_count, itemCount)
         } else {
             getString(R.string.order_content)
+        }
+        updateContentWarning()
+    }
+
+    private fun updateContentWarning() {
+        val activeBinding = _binding ?: return
+        val weight = activeBinding.etWeight.text?.toString()
+            ?.trim()
+            ?.replace(',', '.')
+            ?.toDoubleOrNull()
+            ?: 0.0
+        val registrationReady = activeBinding.etTracking.text?.isNotBlank() == true &&
+            activeBinding.etClientCode.text?.isNotBlank() == true &&
+            weight > 0.0
+        val shouldWarn = registrationReady && contentItemCount == 0
+        if (shouldWarn) startContentWarningAnimation() else stopContentWarningAnimation()
+    }
+
+    private fun startContentWarningAnimation() {
+        if (contentWarningAnimator?.isRunning == true) return
+        val activeBinding = _binding ?: return
+        val warningColor = ContextCompat.getColor(requireContext(), R.color.delete_icon_tint)
+        val dimWarningColor = ColorUtils.setAlphaComponent(warningColor, 70)
+        activeBinding.btnContent.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+        contentWarningAnimator = ValueAnimator.ofArgb(dimWarningColor, warningColor).apply {
+            duration = 650L
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener { animator ->
+                _binding?.btnContent?.strokeColor =
+                    ColorStateList.valueOf(animator.animatedValue as Int)
+            }
+            start()
+        }
+    }
+
+    private fun stopContentWarningAnimation() {
+        contentWarningAnimator?.cancel()
+        contentWarningAnimator = null
+        _binding?.btnContent?.apply {
+            strokeColor = defaultContentStrokeColor
+            strokeWidth = defaultContentStrokeWidth
         }
     }
 
@@ -696,6 +752,7 @@ class ScanFragment : BaseFragment() {
 
     override fun onDestroyView() {
         contentCountJob?.cancel()
+        stopContentWarningAnimation()
         super.onDestroyView()
         _binding = null
     }
