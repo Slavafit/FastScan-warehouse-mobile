@@ -12,11 +12,12 @@ object ProductCatalog {
     const val CATEGORY_HOME = "home"
     const val CATEGORY_HEALTH = "health"
     const val CATEGORY_FOOD_DRINKS = "food_drinks"
+    const val CATEGORY_MISC = "misc"
 
     val categoryIds = setOf(
         CATEGORY_CLOTHING, CATEGORY_FOOTWEAR, CATEGORY_BAGS_ACCESSORIES,
         CATEGORY_BEAUTY, CATEGORY_TOYS_SPORTS, CATEGORY_ELECTRONICS_APPLIANCES,
-        CATEGORY_HOME, CATEGORY_HEALTH, CATEGORY_FOOD_DRINKS
+        CATEGORY_HOME, CATEGORY_HEALTH, CATEGORY_FOOD_DRINKS, CATEGORY_MISC
     )
 
     val defaultItems: List<ProductCatalogItem> = listOf(
@@ -96,7 +97,14 @@ object ProductCatalog {
             "Продукты питания", "Food products", "Productos alimenticios",
             10, "package", "packages"),
         item("beverages", CATEGORY_FOOD_DRINKS,
-            "Напитки", "Beverages", "Bebidas", 20, "bottle", "bottles")
+            "Напитки", "Beverages", "Bebidas", 20, "bottle", "bottles"),
+
+        item("documents", CATEGORY_MISC,
+            "Документы", "Documents", "Documentos", 10),
+        item("optical_discs", CATEGORY_MISC,
+            "Диски (CD/DVD)", "CDs and DVDs", "Discos (CD/DVD)", 20),
+        item("magazines", CATEGORY_MISC,
+            "Журналы", "Magazines", "Revistas", 30)
     )
 
     fun displayName(item: ProductCatalogItem, language: String): String =

@@ -427,6 +427,7 @@
     <string name="category_home">Home goods</string>
     <string name="category_health">Health</string>
     <string name="category_food_drinks">Food and beverages</string>
+    <string name="category_misc">Other</string>
     <string name="manual_input">Manual</string>
     <string name="voice_input">Voice</string>
     <string name="voice_select">Choose by voice</string>

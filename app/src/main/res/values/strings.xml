@@ -443,6 +443,7 @@
     <string name="category_home">Товары для дома</string>
     <string name="category_health">Здоровье</string>
     <string name="category_food_drinks">Продукты питания и напитки</string>
+    <string name="category_misc">Прочее</string>
     <string name="manual_input">Вручную</string>
     <string name="voice_input">Голосом</string>
     <string name="voice_select">Выбрать голосом</string>

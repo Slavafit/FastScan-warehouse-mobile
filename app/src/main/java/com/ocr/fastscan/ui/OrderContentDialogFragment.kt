@@ -491,6 +491,14 @@ class OrderContentDialogFragment : DialogFragment() {
                 "продукты питания и напитки", "продукты", "food and beverages",
                 "food", "alimentos y bebidas", "alimentos"
             )
+        ),
+        CategoryDefinition(
+            ProductCatalog.CATEGORY_MISC,
+            getString(R.string.category_misc),
+            listOf(
+                "прочее", "другое", "other", "miscellaneous", "misc",
+                "otros", "otro"
+            )
         )
     ).map { it.copy(aliases = it.aliases + it.title) }
 

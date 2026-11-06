@@ -7,8 +7,8 @@ import org.junit.Test
 class ProductCatalogTest {
     @Test
     fun `catalog contains the approved groups and products`() {
-        assertEquals(9, ProductCatalog.categoryIds.size)
-        assertEquals(27, ProductCatalog.defaultItems.size)
+        assertEquals(10, ProductCatalog.categoryIds.size)
+        assertEquals(30, ProductCatalog.defaultItems.size)
         assertEquals(
             ProductCatalog.defaultItems.size,
             ProductCatalog.defaultItems.map { it.id }.distinct().size
@@ -24,9 +24,11 @@ class ProductCatalogTest {
         val coats = ProductCatalog.defaultItems.single { it.id == "clothing_coats_jackets" }
         val cosmetics = ProductCatalog.defaultItems.single { it.id == "beauty_cosmetics_skin" }
         val food = ProductCatalog.defaultItems.single { it.id == "food_products" }
+        val documents = ProductCatalog.defaultItems.single { it.id == "documents" }
 
         assertEquals("Jackets, coats and down jackets", coats.reportNameEn)
         assertEquals("Cosmetics and skin care products", cosmetics.reportNameEn)
         assertEquals("Food products", food.reportNameEn)
+        assertEquals("Documents", documents.reportNameEn)
     }
 }

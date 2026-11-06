@@ -416,6 +416,7 @@
     <string name="category_home">Artículos para el hogar</string>
     <string name="category_health">Salud</string>
     <string name="category_food_drinks">Alimentos y bebidas</string>
+    <string name="category_misc">Otros</string>
     <string name="manual_input">Manual</string>
     <string name="voice_input">Voz</string>
     <string name="voice_select">Elegir por voz</string>
