@@ -103,8 +103,10 @@ object ProductCatalog {
             "Документы", "Documents", "Documentos", 10),
         item("optical_discs", CATEGORY_MISC,
             "Диски (CD/DVD)", "CDs and DVDs", "Discos (CD/DVD)", 20),
+        item("vinyl_records", CATEGORY_MISC,
+            "Пластинки", "Vinyl records", "Discos de vinilo", 30),
         item("magazines", CATEGORY_MISC,
-            "Журналы", "Magazines", "Revistas", 30)
+            "Журналы", "Magazines", "Revistas", 40)
     )
 
     fun displayName(item: ProductCatalogItem, language: String): String =
