@@ -481,4 +481,13 @@
     <string name="box_contents_load_error">Не удалось загрузить состав коробки</string>
     <string name="view_box_contents_count">Состав коробки · %1$d из %2$d заказов</string>
     <string name="inventory_coverage_warning">Состав найден для %1$d из %2$d заказов</string>
+    <string name="add_closed_box">Добавить закрытую коробку</string>
+    <string name="closed_box_track_title">Трек закрытой коробки</string>
+    <string name="closed_box_not_found">Коробка с таким треком не найдена</string>
+    <string name="closed_box_already_assigned">Коробка уже находится в партии %1$s</string>
+    <string name="box_not_orphaned_closed">Можно добавить только закрытую коробку без номера партии</string>
+    <string name="closed_box_data_incomplete">Сервер вернул неполные данные коробки</string>
+    <string name="select_party_for_box">Выберите партию для коробки</string>
+    <string name="search_party_hint">Поиск по номеру или треку партии</string>
+    <string name="closed_box_attach_error">Не удалось добавить коробку в партию</string>
 </resources>

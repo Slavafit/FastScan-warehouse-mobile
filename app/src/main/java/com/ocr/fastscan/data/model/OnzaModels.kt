@@ -99,7 +99,11 @@ data class BoxItem(
     @SerializedName("v_weight") val vWeight: Double?,
     @SerializedName("gross_weight") val grossWeight: Double?,
     @SerializedName("date_created") val dateCreated: String?,
-    @SerializedName("orderCount") val orderCount: Int?
+    @SerializedName("orderCount") val orderCount: Int?,
+    @SerializedName("partial") val partial: String? = null,
+    @SerializedName("partial_name") val partialName: String? = null,
+    @SerializedName("partial_code") val partialCode: String? = null,
+    @SerializedName("status") val status: Int? = null
 )
 
 // Запрос для создания/update коробки (POST /api/order/box)
@@ -275,7 +279,7 @@ data class AddBoxRequest(
     val height: Int,
     val length: Int,
     val v_weight: Double,
-    val gross_weight: Double,
+    val gross_weight: Double?,
 )
 
 //ответ сервера при добавлении коробки в партию
