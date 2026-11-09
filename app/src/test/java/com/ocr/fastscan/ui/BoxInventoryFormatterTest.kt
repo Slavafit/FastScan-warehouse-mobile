@@ -88,4 +88,28 @@ class BoxInventoryFormatterTest {
             FirebaseManager.comparableTracking("RR123456ES")
         )
     }
+
+    @Test
+    fun combinedReportShowsBatchAndDateOnlyOnce() {
+        val first = BoxInventoryFormatter.createReport(
+            partyGuid = "party-guid",
+            partyName = "157",
+            boxTracking = "BOX-1",
+            contents = emptyList(),
+            createdAt = Date(0)
+        )
+        val second = first.copy(boxTracking = "BOX-2")
+
+        val combined = BoxInventoryFormatter.formatCombinedReport("157", listOf(first, second))
+
+        assertEquals(1, Regex("BATCH 157").findAll(combined).count())
+        assertEquals(
+            1,
+            Regex("\\d{2} [A-Z][a-z]{2} \\d{4} \\d{2}:\\d{2}")
+                .findAll(combined)
+                .count()
+        )
+        assertTrue(combined.contains("BOX BOX-1\n\nNo declared contents"))
+        assertTrue(combined.contains("BOX BOX-2\n\nNo declared contents"))
+    }
 }

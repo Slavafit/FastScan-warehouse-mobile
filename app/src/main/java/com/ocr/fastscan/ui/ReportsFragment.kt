@@ -276,7 +276,11 @@ class ReportsFragment : BaseFragment() {
                 return@launchReportJob
             }
             showTrackReport(
-                reports.joinToString("\n\n────────────────\n\n") { it.reportText }
+                BoxInventoryFormatter.formatCombinedReport(
+                    partyName = PartyNumberFormatter.display(party.partial_name)
+                        .ifBlank { party.partial_code },
+                    reports = reports
+                )
             )
         }
     }
@@ -333,7 +337,10 @@ class ReportsFragment : BaseFragment() {
         partyReport
     } else {
         partyReport + "\n\nBOX CONTENTS\n\n" +
-            inventories.joinToString("\n\n────────────────\n\n") { it.reportText }
+            inventories.joinToString(
+                "\n\n────────────────\n\n",
+                transform = BoxInventoryFormatter::formatBoxSection
+            )
     }
 
     private fun buildDailyReport(

@@ -409,7 +409,10 @@ class PartyDetailFragment : BaseFragment() {
             append("⚖️ ОБЩИЙ ВЕС: ${String.format(Locale.getDefault(), "%.2f", totalWeight)} кг\n")
             append("\n✅ Партия успешно закрыта.")
         }
-        val inventoryText = reports.joinToString("\n\n────────────────\n\n") { it.reportText }
+        val inventoryText = reports.joinToString(
+            "\n\n────────────────\n\n",
+            transform = BoxInventoryFormatter::formatBoxSection
+        )
         val text = if (inventoryText.isBlank()) {
             legacyReport
         } else {

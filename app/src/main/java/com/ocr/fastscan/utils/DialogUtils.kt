@@ -80,6 +80,7 @@ object DialogUtils {
             )
             //Log.d("SaveOrderJSON", "Отправляем: $result")
 
+            hideDialogKeyboard(context, dialog)
             onResult(result)
             dialog.dismiss()
         }
@@ -96,6 +97,15 @@ object DialogUtils {
                 context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.showSoftInput(dialogBinding.etLength, InputMethodManager.SHOW_IMPLICIT)
         }
+    }
+
+    private fun hideDialogKeyboard(context: Context, dialog: AlertDialog) {
+        val focusedView = dialog.currentFocus ?: dialog.window?.decorView ?: return
+        val inputMethodManager =
+            context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(focusedView.windowToken, 0)
+        focusedView.clearFocus()
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
     }
 
 
