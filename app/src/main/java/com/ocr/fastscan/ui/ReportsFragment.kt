@@ -201,7 +201,7 @@ class ReportsFragment : BaseFragment() {
             val response = apiService.getPartials(null)
             val parties = response.body().orEmpty().sortedByDescending { it.date_created }
             if (!response.isSuccessful || parties.isEmpty()) {
-                showToast(R.string.no_parties_found)
+                showWarningToast(R.string.no_parties_found)
                 return@launchReportJob
             }
             val labels = parties.map {
@@ -221,7 +221,7 @@ class ReportsFragment : BaseFragment() {
             val boxesResponse = apiService.getBoxesInPartial(party.guid)
             val boxes = boxesResponse.body().orEmpty()
             if (!boxesResponse.isSuccessful) {
-                showToast(R.string.error_load_boxes_short)
+                showErrorToast(R.string.error_load_boxes_short)
                 return@launchReportJob
             }
             val ordersByBox = loadOrdersByBox(boxes)
@@ -248,7 +248,7 @@ class ReportsFragment : BaseFragment() {
             val response = apiService.getPartials(null)
             val parties = response.body().orEmpty().sortedByDescending { it.date_created }
             if (!response.isSuccessful || parties.isEmpty()) {
-                showToast(R.string.no_parties_found)
+                showWarningToast(R.string.no_parties_found)
                 return@launchReportJob
             }
             val labels = parties.map {
@@ -308,7 +308,7 @@ class ReportsFragment : BaseFragment() {
             .distinct()
         val contentsByTracking = firebaseManager.getOrderContents(trackings)
         if (contentsByTracking.size < trackings.size && isAdded) {
-            showToast(
+            showWarningToast(
                 getString(
                     R.string.inventory_coverage_warning,
                     contentsByTracking.size,
@@ -532,7 +532,7 @@ class ReportsFragment : BaseFragment() {
                 throw e
             } catch (e: Exception) {
                 Log.e("ReportsFragment", "Report loading failed", e)
-                showToast(R.string.report_load_error)
+                showErrorToast(R.string.report_load_error)
             } finally {
                 if (requestId == loadRequestId) setLoading(false)
             }
@@ -541,7 +541,7 @@ class ReportsFragment : BaseFragment() {
 
     private fun shareReport(report: String) {
         if (report.isBlank()) {
-            showToast(R.string.no_data_to_send)
+            showWarningToast(R.string.no_data_to_send)
             return
         }
         startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {

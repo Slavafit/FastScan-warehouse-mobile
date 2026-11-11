@@ -34,6 +34,7 @@ import com.ocr.fastscan.data.model.OrderContentItem
 import com.ocr.fastscan.data.model.ProductCatalogItem
 import com.ocr.fastscan.databinding.DialogOrderContentBinding
 import com.ocr.fastscan.utils.AppDependencies
+import com.ocr.fastscan.utils.StatusToast
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.UUID
@@ -64,7 +65,7 @@ class OrderContentDialogFragment : DialogFragment() {
             .orEmpty()
         val recognized = candidates.firstNotNullOfOrNull(::parseQuantity)
         if (recognized == null) {
-            Toast.makeText(requireContext(), R.string.quantity_not_recognized, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.quantity_not_recognized)
         } else {
             selectQuickQuantity(recognized)
         }
@@ -293,7 +294,7 @@ class OrderContentDialogFragment : DialogFragment() {
 
     private fun showReview() {
         if (items.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.content_empty, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.content_empty)
             return
         }
         screen = Screen.REVIEW
@@ -375,7 +376,7 @@ class OrderContentDialogFragment : DialogFragment() {
         try {
             voiceQuantityLauncher.launch(intent)
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG).show()
+            StatusToast.warning(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG)
         }
     }
 
@@ -396,7 +397,7 @@ class OrderContentDialogFragment : DialogFragment() {
         try {
             voiceSelectionLauncher.launch(intent)
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG).show()
+            StatusToast.warning(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG)
         }
     }
 
@@ -426,11 +427,7 @@ class OrderContentDialogFragment : DialogFragment() {
         ).mapNotNull(optionById::get)
 
         when (matches.size) {
-            0 -> Toast.makeText(
-                requireContext(),
-                R.string.voice_selection_not_recognized,
-                Toast.LENGTH_SHORT
-            ).show()
+            0 -> StatusToast.warning(requireContext(), R.string.voice_selection_not_recognized)
             1 -> matches.first().action()
             else -> AlertDialog.Builder(requireContext())
                 .setTitle(R.string.voice_selection_ambiguous)
@@ -539,7 +536,7 @@ class OrderContentDialogFragment : DialogFragment() {
                 val local = localName.text.toString().trim()
                 val english = englishName.text.toString().trim()
                 if (local.isBlank() || english.isBlank()) {
-                    Toast.makeText(requireContext(), R.string.custom_product_names_required, Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(requireContext(), R.string.custom_product_names_required)
                 } else {
                     dialog.dismiss()
                     selectCustomProductUnit(local, english)
@@ -585,11 +582,7 @@ class OrderContentDialogFragment : DialogFragment() {
                         showQuantity(product)
                     } catch (e: Exception) {
                         Log.e("OrderContent", "Failed to save custom product", e)
-                        Toast.makeText(
-                            requireContext(),
-                            R.string.custom_product_save_error,
-                            Toast.LENGTH_LONG
-                        ).show()
+                        StatusToast.error(requireContext(), R.string.custom_product_save_error, Toast.LENGTH_LONG)
                     }
                 }
             }
@@ -621,11 +614,11 @@ class OrderContentDialogFragment : DialogFragment() {
                 val detail = (e as? FirebaseFirestoreException)?.code?.name
                     ?: e.localizedMessage
                     ?: e.javaClass.simpleName
-                Toast.makeText(
+                StatusToast.error(
                     requireContext(),
                     getString(R.string.content_save_error_detail, detail.take(120)),
                     Toast.LENGTH_LONG
-                ).show()
+                )
             }
         }
     }

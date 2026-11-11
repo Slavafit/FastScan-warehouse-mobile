@@ -23,6 +23,7 @@ import com.ocr.fastscan.utils.LicenseChecker
 import com.ocr.fastscan.utils.LicenseCheckResult
 import com.ocr.fastscan.utils.LicenseStatus
 import com.ocr.fastscan.utils.LanguageHelper
+import com.ocr.fastscan.utils.StatusToast
 import com.ocr.fastscan.utils.ThemeHelper
 import com.ocr.fastscan.utils.normalizeEmail
 import kotlinx.coroutines.launch
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (login.isBlank() || password.isBlank() || email.isBlank()) {
-            Toast.makeText(this, R.string.settings_required_message, Toast.LENGTH_LONG).show()
+            StatusToast.warning(this, R.string.settings_required_message, Toast.LENGTH_LONG)
             startActivity(Intent(this, SettingsActivity::class.java))
             finish()
             return
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
                 setupNavigationWhenSafe(showInitialScreen = savedInstanceState == null)
 
                 // Показываем статус лицензии
-                Toast.makeText(this@MainActivity, licenseResult.toUserMessage(), Toast.LENGTH_LONG).show()
+                StatusToast.error(this@MainActivity, licenseResult.toUserMessage(), Toast.LENGTH_LONG)
             } else {
                 Toast.makeText(this@MainActivity, licenseResult.toUserMessage(), Toast.LENGTH_LONG).show()
                 startActivity(Intent(this@MainActivity, SettingsActivity::class.java))

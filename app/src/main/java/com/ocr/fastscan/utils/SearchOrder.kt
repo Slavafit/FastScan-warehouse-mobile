@@ -53,7 +53,7 @@ class SearchOrder(private val fragment: Fragment) {
                 val result = firebaseManager.findOrderEverywhere(normalizedTrack)
                 displayResults(normalizedTrack, result)
             } catch (e: Exception) {
-                Toast.makeText(context, context.getString(R.string.error, e.message), Toast.LENGTH_SHORT).show()
+                StatusToast.error(context, context.getString(R.string.error, e.message))
             }
         }
     }

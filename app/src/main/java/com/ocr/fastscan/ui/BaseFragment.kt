@@ -8,6 +8,7 @@ import com.ocr.fastscan.api.OnzaApiService
 import com.ocr.fastscan.utils.AppDependencies
 import com.ocr.fastscan.utils.FirebaseManager
 import com.ocr.fastscan.utils.SoundManager
+import com.ocr.fastscan.utils.StatusToast
 import com.ocr.fastscan.utils.TokenManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -41,6 +42,22 @@ abstract class BaseFragment : Fragment() {
 
     protected fun showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(requireContext(), message, duration).show()
+    }
+
+    protected fun showErrorToast(@StringRes messageRes: Int, duration: Int = Toast.LENGTH_SHORT) {
+        StatusToast.error(requireContext(), messageRes, duration)
+    }
+
+    protected fun showErrorToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        StatusToast.error(requireContext(), message, duration)
+    }
+
+    protected fun showWarningToast(@StringRes messageRes: Int, duration: Int = Toast.LENGTH_SHORT) {
+        StatusToast.warning(requireContext(), messageRes, duration)
+    }
+
+    protected fun showWarningToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        StatusToast.warning(requireContext(), message, duration)
     }
 
     // Здесь можно будет позже добавить общие методы (toast, hideKeyboard и т.д.)

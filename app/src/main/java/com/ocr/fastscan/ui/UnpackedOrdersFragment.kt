@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ocr.fastscan.R
 import com.ocr.fastscan.data.model.UnpackedOrder
 import com.ocr.fastscan.databinding.FragmentUnpackedOrdersBinding
+import com.ocr.fastscan.utils.StatusToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -116,7 +117,7 @@ class UnpackedOrdersFragment : BaseFragment() {
                 throw e
             } catch (e: Exception) {
                 Log.e("UnpackedFragment", "Load error", e)
-                context?.let { Toast.makeText(it, R.string.error_load_data, Toast.LENGTH_LONG).show() }
+                context?.let { StatusToast.error(it, R.string.error_load_data, Toast.LENGTH_LONG) }
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
             }
@@ -158,7 +159,7 @@ class UnpackedOrdersFragment : BaseFragment() {
     private fun shareReport() {
         val currentContext = context ?: return
         if (allUnpackedOrders.isEmpty()) {
-            Toast.makeText(currentContext, R.string.no_data_to_send, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(currentContext, R.string.no_data_to_send)
             return
         }
 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/bg_status_toast"
+    android:gravity="center_vertical"
+    android:maxWidth="360dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/ivStatusIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/tvStatusMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:maxLines="4"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp" />
+
+</LinearLayout>

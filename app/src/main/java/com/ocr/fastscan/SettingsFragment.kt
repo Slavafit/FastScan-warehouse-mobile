@@ -22,6 +22,7 @@ import com.ocr.fastscan.utils.LicenseCheckResult
 import com.ocr.fastscan.utils.LicenseChecker
 import com.ocr.fastscan.utils.LicenseStatus
 import com.ocr.fastscan.utils.PrintHelper
+import com.ocr.fastscan.utils.StatusToast
 import com.ocr.fastscan.utils.ThemeHelper
 import com.ocr.fastscan.utils.normalizeEmail
 import com.ocr.fastscan.utils.saveVolWeightDivider
@@ -136,7 +137,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val email = prefs.getString("user_email", "").orEmpty().normalizeEmail()
         if (email.isBlank()) {
-            Toast.makeText(requireContext(), R.string.license_email_missing, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.license_email_missing)
             return
         }
 

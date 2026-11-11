@@ -18,6 +18,7 @@ import com.ocr.fastscan.data.model.BoxItem
 import com.ocr.fastscan.data.model.BoxRequest
 import com.ocr.fastscan.databinding.FragmentBoxBinding
 import com.ocr.fastscan.utils.DialogUtils
+import com.ocr.fastscan.utils.StatusToast
 import com.ocr.fastscan.utils.getBoxTareWeight
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -85,7 +86,7 @@ class BoxFragment : BaseFragment() {
                     }
                 },
                 onError = { errorMsg ->
-                    Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+                    StatusToast.error(requireContext(), errorMsg, Toast.LENGTH_LONG)
                 }
             )
         }
@@ -174,13 +175,13 @@ class BoxFragment : BaseFragment() {
                     binding.tvNoBoxes.visibility = if (boxes.isEmpty()) View.VISIBLE else View.GONE
                     updateCalculatedBoxWeights(boxes, boxTareWeight, requestId)
                 } else {
-                    Toast.makeText(requireContext(), R.string.error_load, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(requireContext(), R.string.error_load)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.e("BoxFragment", "Load error", e)
-                Toast.makeText(requireContext(), R.string.net_error_short, Toast.LENGTH_SHORT).show()
+                StatusToast.error(requireContext(), R.string.net_error_short)
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
                 isLoading = false
@@ -360,11 +361,11 @@ class BoxFragment : BaseFragment() {
                 val oldTrackingCode = currentTrackingCode
 
                 if (newTrackingCode.isBlank()) {
-                    Toast.makeText(requireContext(), R.string.box_tracking_empty, Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(requireContext(), R.string.box_tracking_empty)
                     return@setOnClickListener
                 }
                 if (newTrackingCode == oldTrackingCode) {
-                    Toast.makeText(requireContext(), R.string.box_tracking_unchanged, Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(requireContext(), R.string.box_tracking_unchanged)
                     dialog.dismiss()
                     return@setOnClickListener
                 }
@@ -414,14 +415,14 @@ class BoxFragment : BaseFragment() {
                         highlightTrackingCode = newTrackingCode
                     )
                 } else {
-                    Toast.makeText(requireContext(), R.string.error_update_box_tracking, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(requireContext(), R.string.error_update_box_tracking)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.e("BoxFragment", "Failed to update box tracking", e)
                 if (isAdded) {
-                    Toast.makeText(requireContext(), getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_SHORT).show()
+                    StatusToast.error(requireContext(), getString(R.string.net_error, e.localizedMessage))
                 }
             } finally {
                 isUpdatingTracking = false

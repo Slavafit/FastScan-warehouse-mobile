@@ -129,14 +129,14 @@ class PartyDetailFragment : BaseFragment() {
                         .setPositiveButton(android.R.string.ok, null)
                         .show()
                 } else {
-                    showToast(R.string.party_weight_error)
+                    showErrorToast(R.string.party_weight_error)
                     soundManager.playError()
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 Log.e("PartyDetail", "Calculate party weight error", e)
-                if (isAdded) showToast(R.string.party_weight_error)
+                if (isAdded) showErrorToast(R.string.party_weight_error)
                 soundManager.playError()
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
@@ -176,7 +176,7 @@ class PartyDetailFragment : BaseFragment() {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val newName = PartyNumberFormatter.normalize(input.text.toString().trim())
                 if (newName.isBlank()) {
-                    showToast(R.string.input_part_name)
+                    showWarningToast(R.string.input_part_name)
                     return@setOnClickListener
                 }
                 if (newName == partialName) {
@@ -213,14 +213,14 @@ class PartyDetailFragment : BaseFragment() {
                     dialog.dismiss()
                 } else {
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = true
-                    showToast(getString(R.string.server_error, response.code()))
+                    showErrorToast(getString(R.string.server_error, response.code()))
                     soundManager.playError()
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = true
-                showToast(R.string.net_error_short)
+                showErrorToast(R.string.net_error_short)
                 soundManager.playError()
                 Log.e("PartyDetail", "Update party name error", e)
             } finally {
@@ -280,7 +280,7 @@ class PartyDetailFragment : BaseFragment() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (isAdded) showToast(R.string.error_load_boxes_short)
+                if (isAdded) showErrorToast(R.string.error_load_boxes_short)
             }
         }
         dialog.show()
@@ -317,7 +317,7 @@ class PartyDetailFragment : BaseFragment() {
                     showToast(R.string.box_added_to_party)
                     loadBoxDetails()
                 } else {
-                    showToast(R.string.error_adding_box)
+                    showErrorToast(R.string.error_adding_box)
                     soundManager.playError()
                 }
             } catch (e: CancellationException) {
@@ -326,7 +326,7 @@ class PartyDetailFragment : BaseFragment() {
                 Log.e("PartyDetail", "Failed to add box ${box.codeid} to party $partialGuid", e)
                 soundManager.playError()
                 if (_binding != null && isAdded) {
-                    showToast(R.string.error_adding_box)
+                    showErrorToast(R.string.error_adding_box)
                 }
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
@@ -354,7 +354,7 @@ class PartyDetailFragment : BaseFragment() {
                         firebaseManager.saveBoxInventoryReports(inventoryReports)
                     } catch (e: Exception) {
                         Log.e("PartyDetail", "Batch closed but inventory snapshots were not saved", e)
-                        showToast(R.string.inventory_save_error)
+                        showErrorToast(R.string.inventory_save_error)
                     }
 
                     sharePartyReport(inventoryReports)
@@ -365,7 +365,7 @@ class PartyDetailFragment : BaseFragment() {
                     }
                 } else {
                     isFinishing = false
-                    showToast(getString(R.string.server_error, response.code()))
+                    showErrorToast(getString(R.string.server_error, response.code()))
                     soundManager.playError()
                 }
             } catch (e: CancellationException) {
@@ -439,7 +439,7 @@ class PartyDetailFragment : BaseFragment() {
             try {
                 val boxesResponse = apiService.getBoxesInPartial(partialGuid)
                 if (!boxesResponse.isSuccessful) {
-                    showToast(R.string.error_load_boxes_short)
+                    showErrorToast(R.string.error_load_boxes_short)
                     return@launchOnViewLifecycle
                 }
                 val boxes = boxesResponse.body().orEmpty()
@@ -490,7 +490,7 @@ class PartyDetailFragment : BaseFragment() {
                 throw e
             } catch (e: Exception) {
                 Log.e("PartyDetail", "Failed to prepare box inventories", e)
-                showToast(R.string.report_load_error)
+                showErrorToast(R.string.report_load_error)
                 soundManager.playError()
             } finally {
                 _binding?.progressBar?.visibility = View.GONE

@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.ocr.fastscan.databinding.ActivityCameraBinding
 import com.ocr.fastscan.utils.LanguageHelper
+import com.ocr.fastscan.utils.StatusToast
 import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
@@ -165,7 +166,7 @@ class CameraActivity : AppCompatActivity() {
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            Toast.makeText(this, R.string.camera_permission_required, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(this, R.string.camera_permission_required)
             finish()
         }
     }

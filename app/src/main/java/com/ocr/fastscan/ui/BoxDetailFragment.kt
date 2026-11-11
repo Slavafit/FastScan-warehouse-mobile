@@ -23,6 +23,7 @@ import android.util.Log
 import com.ocr.fastscan.R
 import com.ocr.fastscan.utils.PrintHelper
 import com.ocr.fastscan.utils.ScanUtils
+import com.ocr.fastscan.utils.StatusToast
 import com.ocr.fastscan.utils.getBoxTareWeight
 import com.ocr.fastscan.utils.getVolWeightDivider
 import com.ocr.fastscan.utils.saveBoxTareWeight
@@ -52,7 +53,7 @@ class BoxDetailFragment : BaseFragment() {
             if (mode == "barcode" && value.isNotEmpty()) {
                 addOrderByTrack(value)
             } else {
-                Toast.makeText(requireContext(), R.string.scan_error_result, Toast.LENGTH_SHORT).show()
+                StatusToast.warning(requireContext(), R.string.scan_error_result)
             }
         }
     }
@@ -188,7 +189,7 @@ class BoxDetailFragment : BaseFragment() {
             } catch (e: Exception) {
                 Log.e("BoxDetail", "Failed to load box contents", e)
                 if (isAdded) {
-                    Toast.makeText(requireContext(), R.string.box_contents_load_error, Toast.LENGTH_LONG).show()
+                    StatusToast.error(requireContext(), R.string.box_contents_load_error, Toast.LENGTH_LONG)
                     soundManager.playError()
                 }
             } finally {
@@ -215,7 +216,7 @@ class BoxDetailFragment : BaseFragment() {
             .orEmpty()
 
         if (pastedTrack.isBlank()) {
-            Toast.makeText(requireContext(), R.string.clipboard_empty, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.clipboard_empty)
             soundManager.playError()
             return
         }
@@ -239,10 +240,10 @@ class BoxDetailFragment : BaseFragment() {
                     _binding?.tvOrderCount?.text = getString(R.string.orders_count, orders.size)
                     updateGrossWeightFromOrdersAndBox()
                 } else {
-                    Toast.makeText(context, R.string.error_load_orders, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(context, R.string.error_load_orders)
                 }
             } catch (e: Exception) {
-                if (isAdded) Toast.makeText(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_SHORT).show()
+                if (isAdded) StatusToast.error(context, getString(R.string.net_error, e.localizedMessage))
             } finally {
                 hideLoading()
             }
@@ -265,7 +266,7 @@ class BoxDetailFragment : BaseFragment() {
         val boxTareWeight = parseWeight(binding.etBoxTareWeight.text.toString()) ?: requireContext().getBoxTareWeight()
 
         if (length <= 0 || width <= 0 || height <= 0) {
-            Toast.makeText(requireContext(), R.string.all_values_positive, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.all_values_positive)
             return
         }
 
@@ -290,10 +291,10 @@ class BoxDetailFragment : BaseFragment() {
                     Toast.makeText(context, R.string.weight_saved, Toast.LENGTH_SHORT).show()
                     loadBoxInfo()
                 } else {
-                    Toast.makeText(context, R.string.error_saving_dim, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(context, R.string.error_saving_dim)
                 }
             } catch (e: Exception) {
-                if (isAdded) Toast.makeText(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_SHORT).show()
+                if (isAdded) StatusToast.error(context, getString(R.string.net_error, e.localizedMessage))
             } finally {
                 hideLoading()
             }
@@ -353,10 +354,10 @@ class BoxDetailFragment : BaseFragment() {
                     Toast.makeText(context, R.string.order_deleted, Toast.LENGTH_SHORT).show()
                     loadOrdersInBox()
                 } else {
-                    Toast.makeText(context, R.string.error_deleting, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(context, R.string.error_deleting)
                 }
             } catch (e: Exception) {
-                if (isAdded) Toast.makeText(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_SHORT).show()
+                if (isAdded) StatusToast.error(context, getString(R.string.net_error, e.localizedMessage))
             }
         }
     }
@@ -368,7 +369,7 @@ class BoxDetailFragment : BaseFragment() {
         val weightValue = parseWeight(binding.etGrossWeight.text.toString())
 
         if (weightValue == null || weightValue <= 0.0) {
-            Toast.makeText(requireContext(), R.string.incorrect_weight, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.incorrect_weight)
             soundManager.playError()
             return
         }
@@ -393,7 +394,7 @@ class BoxDetailFragment : BaseFragment() {
             Toast.makeText(requireContext(), R.string.sent_for_printing, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("printHelper", "Ошибка печати", e)
-            if (isAdded) Toast.makeText(requireContext(), getString(R.string.error_printing, e.localizedMessage), Toast.LENGTH_LONG).show()
+            if (isAdded) StatusToast.error(requireContext(), getString(R.string.error_printing, e.localizedMessage), Toast.LENGTH_LONG)
             soundManager.playError()
         }
     }
@@ -406,14 +407,18 @@ class BoxDetailFragment : BaseFragment() {
 
                 if (!searchResponse.isSuccessful || searchResponse.body().isNullOrEmpty()) {
                     val msg = if (!searchResponse.isSuccessful) getString(R.string.search_error, searchResponse.code()) else getString(R.string.order_not_found)
-                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    if (searchResponse.isSuccessful) {
+                        StatusToast.warning(context, msg)
+                    } else {
+                        StatusToast.error(context, msg)
+                    }
                     soundManager.playError()
                     return@launch
                 }
 
                 val order = searchResponse.body()!![0]
                 val orderGuid = order.guid ?: run {
-                    Toast.makeText(context, R.string.no_GUID, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(context, R.string.no_GUID)
                     soundManager.playError()
                     return@launch
                 }
@@ -440,11 +445,11 @@ class BoxDetailFragment : BaseFragment() {
                         Log.e("AddOrder", "Firebase error", e)
                     })
                 } else {
-                    Toast.makeText(context, getString(R.string.server_error, addResponse.code()), Toast.LENGTH_LONG).show()
+                    StatusToast.error(context, getString(R.string.server_error, addResponse.code()), Toast.LENGTH_LONG)
                     soundManager.playError()
                 }
             } catch (e: Exception) {
-                if (isAdded) Toast.makeText(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_LONG).show()
+                if (isAdded) StatusToast.error(context, getString(R.string.net_error, e.localizedMessage), Toast.LENGTH_LONG)
                 soundManager.playError()
             }
         }
@@ -469,10 +474,10 @@ class BoxDetailFragment : BaseFragment() {
                     updateGrossWeightFromOrdersAndBox()
                     _binding?.tvVWeight?.text = getString(R.string.volume_weight, box.vWeight ?: calculateVWeight())
                 } else {
-                    Toast.makeText(context, R.string.error_load_detal, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(context, R.string.error_load_detal)
                 }
             } catch (e: Exception) {
-                if (isAdded) Toast.makeText(context, R.string.net_error_short, Toast.LENGTH_SHORT).show()
+                if (isAdded) StatusToast.error(context, R.string.net_error_short)
             } finally {
                 hideLoading()
             }

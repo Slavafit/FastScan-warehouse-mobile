@@ -146,7 +146,7 @@ class PartyFragment : BaseFragment() {
             try {
                 val response = apiService.getBoxes(tCode = tracking)
                 if (!response.isSuccessful) {
-                    showToast(getString(R.string.server_error, response.code()))
+                    showErrorToast(getString(R.string.server_error, response.code()))
                     soundManager.playError()
                     return@launchOnViewLifecycle
                 }
@@ -155,7 +155,7 @@ class PartyFragment : BaseFragment() {
                     it.trackingCode?.trim()?.equals(tracking, ignoreCase = true) == true
                 }
                 if (box == null) {
-                    showToast(R.string.closed_box_not_found)
+                    showWarningToast(R.string.closed_box_not_found)
                     soundManager.playError()
                     return@launchOnViewLifecycle
                 }
@@ -164,32 +164,32 @@ class PartyFragment : BaseFragment() {
                     ?: box.partialCode?.trim().takeUnless { it.isNullOrBlank() }
                     ?: box.partial?.trim().takeUnless { it.isNullOrBlank() }
                 if (assignedParty != null) {
-                    showToast(getString(R.string.closed_box_already_assigned, assignedParty))
+                    showWarningToast(getString(R.string.closed_box_already_assigned, assignedParty))
                     soundManager.playError()
                     return@launchOnViewLifecycle
                 }
 
                 if (box.status != 16) {
-                    showToast(R.string.box_not_orphaned_closed)
+                    showWarningToast(R.string.box_not_orphaned_closed)
                     soundManager.playError()
                     return@launchOnViewLifecycle
                 }
 
                 if (!box.hasRequiredDataForParty()) {
-                    showToast(R.string.closed_box_data_incomplete)
+                    showErrorToast(R.string.closed_box_data_incomplete)
                     soundManager.playError()
                     return@launchOnViewLifecycle
                 }
 
                 val partiesResponse = apiService.getPartials(null)
                 if (!partiesResponse.isSuccessful) {
-                    showToast(getString(R.string.server_error, partiesResponse.code()))
+                    showErrorToast(getString(R.string.server_error, partiesResponse.code()))
                     soundManager.playError()
                     return@launchOnViewLifecycle
                 }
                 val parties = partiesResponse.body().orEmpty().sortedByDescending { it.date_created }
                 if (parties.isEmpty()) {
-                    showToast(R.string.no_parties_found)
+                    showWarningToast(R.string.no_parties_found)
                     return@launchOnViewLifecycle
                 }
 
@@ -199,7 +199,7 @@ class PartyFragment : BaseFragment() {
                 throw e
             } catch (e: Exception) {
                 Log.e("PartyFragment", "Closed box lookup failed for $tracking", e)
-                showToast(R.string.net_error_short)
+                showErrorToast(R.string.net_error_short)
                 soundManager.playError()
             } finally {
                 findButton.isEnabled = true
@@ -289,7 +289,7 @@ class PartyFragment : BaseFragment() {
                     soundManager.playSuccess()
                     loadParties()
                 } else {
-                    showToast(R.string.closed_box_attach_error)
+                    showErrorToast(R.string.closed_box_attach_error)
                     soundManager.playError()
                 }
                 onComplete(success)
@@ -297,7 +297,7 @@ class PartyFragment : BaseFragment() {
                 throw e
             } catch (e: Exception) {
                 Log.e("PartyFragment", "Failed to attach closed box to ${party.guid}", e)
-                showToast(R.string.closed_box_attach_error)
+                showErrorToast(R.string.closed_box_attach_error)
                 soundManager.playError()
                 onComplete(false)
             } finally {
@@ -382,13 +382,13 @@ class PartyFragment : BaseFragment() {
                     soundManager.playSuccess()
                     loadParties()
                 } else {
-                    showToast(getString(R.string.server_error, response.code()))
+                    showErrorToast(getString(R.string.server_error, response.code()))
                     soundManager.playError()
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                showToast(R.string.net_error_short)
+                showErrorToast(R.string.net_error_short)
                 soundManager.playError()
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
@@ -414,7 +414,7 @@ class PartyFragment : BaseFragment() {
             button.setOnClickListener {
                 val inputName = dialogBinding.etPartialName.text.toString().trim()
                 if (inputName.isEmpty()) {
-                    showToast(getString(R.string.input_part_name))
+                    showWarningToast(getString(R.string.input_part_name))
                     return@setOnClickListener
                 }
 
@@ -435,14 +435,14 @@ class PartyFragment : BaseFragment() {
                             loadParties()
                         } else {
                             button.isEnabled = true
-                            showToast(getString(R.string.error_code, response.code()))
+                            showErrorToast(getString(R.string.error_code, response.code()))
                             soundManager.playError()
                         }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
                         button.isEnabled = true
-                        showToast(R.string.net_error_short)
+                        showErrorToast(R.string.net_error_short)
                         soundManager.playError()
                     }
                 }

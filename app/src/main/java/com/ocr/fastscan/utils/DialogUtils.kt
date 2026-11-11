@@ -59,11 +59,7 @@ object DialogUtils {
 
             // Проверка на заполненность
             if (length <= 0 || width <= 0 || height <= 0) {
-                Toast.makeText(
-                    context,
-                    (R.string.dimensions_more_0),
-                    Toast.LENGTH_SHORT)
-                    .show()
+                StatusToast.warning(context, R.string.dimensions_more_0)
                 return@setOnClickListener // Прерываем выполнение, диалог не закрываем
             }
             // Финальный расчёт (переводим одно из чисел в Double до деления, чтобы сохранить дроби)
@@ -150,7 +146,7 @@ object DialogUtils {
                 val height = dialogBinding.etHeight.text.toString().toIntOrNull() ?: 50
 
                 if (length <= 0 || width <= 0 || height <= 0) {
-                    Toast.makeText(context, (R.string.dimensions_more_0), Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(context, R.string.dimensions_more_0)
                     return@setOnClickListener
                 }
 
@@ -205,24 +201,21 @@ object DialogUtils {
                         } else {
                             val errorMsg = response.body()?.message ?: context.getString(R.string.error_create)
 
-                            Toast.makeText(context,
-                                context.getString(
-                                R.string.error_create,
-                                errorMsg),
-                                Toast.LENGTH_LONG)
-                                .show()
+                            StatusToast.error(
+                                context,
+                                context.getString(R.string.error_create, errorMsg),
+                                Toast.LENGTH_LONG
+                            )
                             soundManager.playError()
                             onError(errorMsg)
                         }
                     } catch (e: Exception) {
                         val errorMsg = e.localizedMessage
-                        Toast.makeText(
+                        StatusToast.error(
                             context,
-                            context.getString(
-                                R.string.net_error,
-                                errorMsg),
-                            Toast.LENGTH_LONG)
-                            .show()
+                            context.getString(R.string.net_error, errorMsg),
+                            Toast.LENGTH_LONG
+                        )
                         soundManager.playError()
                         onError(e.localizedMessage ?: context.getString(R.string.unknown_error))
                     } finally {

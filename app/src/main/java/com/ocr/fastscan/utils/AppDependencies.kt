@@ -31,7 +31,7 @@ object AppDependencies {
         val passVal = prefs.getString("password", "")?.trim().orEmpty()
 
         if (loginVal.isEmpty() || passVal.isEmpty()) {
-            Toast.makeText(context, R.string.login_not_filled, Toast.LENGTH_LONG).show()
+            StatusToast.warning(context, R.string.login_not_filled, Toast.LENGTH_LONG)
             return false
         }
 
@@ -53,23 +53,19 @@ object AppDependencies {
                             true
                         } else {
                             Log.e("Auth", "Login response has no access token: ${response.code()}")
-                            Toast.makeText(context, R.string.token_error, Toast.LENGTH_SHORT).show()
+                            StatusToast.error(context, R.string.token_error)
                             false
                         }
                     } else {
                         Log.e("Auth", "Login failed: ${response.code()}")
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.net_error_code, response.code()),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        StatusToast.error(context, context.getString(R.string.net_error_code, response.code()))
                         false
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Log.e("Auth", "Auto-login error", e)
-                    Toast.makeText(context, R.string.net_error_short, Toast.LENGTH_LONG).show()
+                    StatusToast.error(context, R.string.net_error_short, Toast.LENGTH_LONG)
                     false
                 }
             }

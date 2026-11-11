@@ -73,7 +73,7 @@ class ScanFragment : BaseFragment() {
                 .orEmpty()
             val clientCode = ClientCodeVoiceParser.parse(candidates)
             if (clientCode == null) {
-                Toast.makeText(requireContext(), R.string.voice_client_code_not_recognized, Toast.LENGTH_LONG).show()
+                StatusToast.warning(requireContext(), R.string.voice_client_code_not_recognized, Toast.LENGTH_LONG)
                 soundManager.playError()
                 return@registerForActivityResult
             }
@@ -251,7 +251,7 @@ class ScanFragment : BaseFragment() {
     private fun openOrderContent() {
         val track = binding.etTracking.text.toString().trim()
         if (track.isBlank()) {
-            Toast.makeText(requireContext(), R.string.input_track_for_content, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.input_track_for_content)
             return
         }
         OrderContentDialogFragment.newInstance(track)
@@ -339,7 +339,7 @@ class ScanFragment : BaseFragment() {
         try {
             clientCodeVoiceLauncher.launch(intent)
         } catch (_: ActivityNotFoundException) {
-            Toast.makeText(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG).show()
+            StatusToast.warning(requireContext(), R.string.voice_recognition_unavailable, Toast.LENGTH_LONG)
             soundManager.playError()
         }
     }
@@ -384,7 +384,7 @@ class ScanFragment : BaseFragment() {
                     hideKeyboard(binding.etClientCode)
                     true
                 } else {
-                    Toast.makeText(requireContext(), getString(R.string.input_4_numbers), Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(requireContext(), getString(R.string.input_4_numbers))
                     false
                 }
             } else false
@@ -472,7 +472,7 @@ class ScanFragment : BaseFragment() {
                 }
             } catch (e: Exception) {
                 Log.e("FetchInfo", "Error: ${e.message}")
-                Toast.makeText(requireContext(), R.string.net_error_short, Toast.LENGTH_SHORT).show()
+                StatusToast.error(requireContext(), R.string.net_error_short)
             } finally {
                 _binding?.progressBar?.visibility = View.GONE
             }
@@ -516,13 +516,13 @@ class ScanFragment : BaseFragment() {
         val weightStr = binding.etWeight.text.toString().trim()
 
         if (track.isEmpty() || !kg.startsWith("KG") || weightStr.isEmpty() || currentReceiverGuid == null) {
-            Toast.makeText(requireContext(), getString(R.string.input_all_fields), Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), getString(R.string.input_all_fields))
             return
         }
 
         val grossWeight = weightStr.replace(',', '.').toDoubleOrNull() ?: 0.0
         if (grossWeight <= 0.0) {
-            Toast.makeText(requireContext(), getString(R.string.input_weight), Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), getString(R.string.input_weight))
             return
         }
 
@@ -581,7 +581,7 @@ class ScanFragment : BaseFragment() {
                 val activeBinding = _binding ?: return@error
                 activeBinding.progressBar.visibility = View.GONE
                 soundManager.playError()
-                Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
+                StatusToast.error(requireContext(), error, Toast.LENGTH_LONG)
                 activeBinding.btnSubmit.isEnabled = true
             }
         )
@@ -590,7 +590,7 @@ class ScanFragment : BaseFragment() {
     private fun printCurrentOrderLabel() {
         val currentTracking = binding.etTracking.text.toString().trim()
         if (currentTracking.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.input_track, Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), R.string.input_track)
             return
         }
 
@@ -637,7 +637,7 @@ class ScanFragment : BaseFragment() {
                     searchClientByName(first, last)
                     dialog.dismiss()
                 } else {
-                    Toast.makeText(requireContext(), getString(R.string.input_name_surname), Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(requireContext(), getString(R.string.input_name_surname))
                 }
             }
         }
@@ -652,7 +652,7 @@ class ScanFragment : BaseFragment() {
                     searchClientByName(first, last)
                     dialog.dismiss()
                 } else {
-                    Toast.makeText(requireContext(), getString(R.string.input_name_surname), Toast.LENGTH_SHORT).show()
+                    StatusToast.warning(requireContext(), getString(R.string.input_name_surname))
                 }
                 true
             } else false
@@ -668,7 +668,7 @@ class ScanFragment : BaseFragment() {
 
     private fun searchClientByName(first: String, last: String) {
         if ((first + last).trim().length < 3) {
-            Toast.makeText(requireContext(), getString(R.string.input_3_chars), Toast.LENGTH_SHORT).show()
+            StatusToast.warning(requireContext(), getString(R.string.input_3_chars))
             return
         }
 
@@ -684,7 +684,7 @@ class ScanFragment : BaseFragment() {
 
                 when {
                     filtered.isEmpty() -> {
-                        Toast.makeText(requireContext(), getString(R.string.no_client_found), Toast.LENGTH_SHORT).show()
+                        StatusToast.warning(requireContext(), getString(R.string.no_client_found))
                         soundManager.playWarning()
                     }
                     filtered.size == 1 -> {
@@ -696,7 +696,7 @@ class ScanFragment : BaseFragment() {
                     else -> showMultipleResultsDialog(filtered)
                 }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), R.string.net_error_short, Toast.LENGTH_SHORT).show()
+                StatusToast.error(requireContext(), R.string.net_error_short)
             } finally {
                 binding.progressBar.visibility = View.GONE
                 binding.btnSearchClient.isEnabled = true
@@ -734,7 +734,7 @@ class ScanFragment : BaseFragment() {
                     binding.etWeight.setText(weightStr)
                     soundManager.playSuccess()
                 } else {
-                    Toast.makeText(requireContext(), R.string.weight_fetch_error, Toast.LENGTH_SHORT).show()
+                    StatusToast.error(requireContext(), R.string.weight_fetch_error)
                     soundManager.playError()
                 }
             } finally {
