@@ -145,6 +145,7 @@
                 android:textSize="26sp" />
         </LinearLayout>
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -187,6 +188,50 @@
                 android:layout_marginStart="4dp"
                 android:layout_weight="1"
                 android:text="4" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnQuick5"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:text="5" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnQuick6"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:text="6" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnQuick8"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:text="8" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnQuick10"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:text="10" />
         </LinearLayout>
 
         <LinearLayout

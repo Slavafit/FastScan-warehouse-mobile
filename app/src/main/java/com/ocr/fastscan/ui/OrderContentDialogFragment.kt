@@ -63,7 +63,7 @@ class OrderContentDialogFragment : DialogFragment() {
         val candidates = result.data
             ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             .orEmpty()
-        val recognized = candidates.firstNotNullOfOrNull(::parseQuantity)
+        val recognized = candidates.firstNotNullOfOrNull(QuantityVoiceParser::parse)
         if (recognized == null) {
             StatusToast.warning(requireContext(), R.string.quantity_not_recognized)
         } else {
@@ -144,7 +144,11 @@ class OrderContentDialogFragment : DialogFragment() {
             binding.btnQuick1 to 1,
             binding.btnQuick2 to 2,
             binding.btnQuick3 to 3,
-            binding.btnQuick4 to 4
+            binding.btnQuick4 to 4,
+            binding.btnQuick5 to 5,
+            binding.btnQuick6 to 6,
+            binding.btnQuick8 to 8,
+            binding.btnQuick10 to 10
         ).forEach { (button, value) ->
             button.setOnClickListener { selectQuickQuantity(value) }
         }
@@ -711,17 +715,6 @@ class OrderContentDialogFragment : DialogFragment() {
     }
 
     private fun currentLanguage(): String = resources.configuration.locales[0].toLanguageTag().lowercase(Locale.ROOT)
-
-    private fun parseQuantity(value: String): Int? {
-        Regex("\\d+").find(value)?.value?.toIntOrNull()?.let { return it.coerceIn(1, MAX_QUANTITY) }
-        val normalized = value.lowercase(Locale.ROOT).trim()
-        val words = mapOf(
-            "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
-            "один" to 1, "одна" to 1, "два" to 2, "две" to 2, "три" to 3, "четыре" to 4, "пять" to 5,
-            "uno" to 1, "una" to 1, "dos" to 2, "tres" to 3, "cuatro" to 4, "cinco" to 5
-        )
-        return words.entries.firstOrNull { (word, _) -> normalized.contains(word) }?.value
-    }
 
     private fun OrderContentItem.toCatalogItem() = ProductCatalogItem(
         id = productId,
