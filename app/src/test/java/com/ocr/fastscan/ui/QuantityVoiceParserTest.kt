@@ -23,6 +23,15 @@ class QuantityVoiceParserTest {
     }
 
     @Test
+    fun `parses spoken quantities from eleven through twenty`() {
+        assertEquals(11, QuantityVoiceParser.parse("одиннадцать"))
+        assertEquals(17, QuantityVoiceParser.parse("seventeen"))
+        assertEquals(11, QuantityVoiceParser.parse("once"))
+        assertEquals(16, QuantityVoiceParser.parse("dieciséis"))
+        assertEquals(20, QuantityVoiceParser.parse("veinte"))
+    }
+
+    @Test
     fun `prefers spoken digits and rejects unrelated speech`() {
         assertEquals(26, QuantityVoiceParser.parse("26 pieces"))
         assertNull(QuantityVoiceParser.parse("muchas unidades"))
