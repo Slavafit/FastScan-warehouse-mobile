@@ -266,14 +266,19 @@ class OrderContentDialogFragment : DialogFragment() {
                 Choice(ProductCatalog.displayName(product, language)) { showQuantity(product) }
             }
         updatePagingActions(productPage, pageCount, showNewProduct = true)
-        val showFiveRows = pageSize == CLOTHING_CHOICES_PER_PAGE
+        val rows = when (pageSize) {
+            CLOTHING_CHOICES_PER_PAGE -> 5
+            BAGS_ACCESSORIES_CHOICES_PER_PAGE -> 4
+            else -> 3
+        }
+        val useCompactButtons = rows >= 4
         fillGrid(
             choices = choices,
             columns = 2,
-            rows = if (showFiveRows) 5 else 3,
-            minTextSizeSp = if (showFiveRows) 11 else 12,
-            maxTextSizeSp = if (showFiveRows) 16 else 17,
-            spanLastItem = showFiveRows
+            rows = rows,
+            minTextSizeSp = if (useCompactButtons) 11 else 12,
+            maxTextSizeSp = if (useCompactButtons) 16 else 17,
+            spanLastItem = useCompactButtons
         )
     }
 
@@ -697,10 +702,10 @@ class OrderContentDialogFragment : DialogFragment() {
     }
 
     private fun productPageSize(categoryId: String): Int =
-        if (categoryId == ProductCatalog.CATEGORY_CLOTHING) {
-            CLOTHING_CHOICES_PER_PAGE
-        } else {
-            DEFAULT_CHOICES_PER_PAGE
+        when (categoryId) {
+            ProductCatalog.CATEGORY_CLOTHING -> CLOTHING_CHOICES_PER_PAGE
+            ProductCatalog.CATEGORY_BAGS_ACCESSORIES -> BAGS_ACCESSORIES_CHOICES_PER_PAGE
+            else -> DEFAULT_CHOICES_PER_PAGE
         }
 
     private fun opensQuantityDirectly(categoryId: String): Boolean =
@@ -761,6 +766,7 @@ class OrderContentDialogFragment : DialogFragment() {
         private const val ARG_TRACKING = "tracking"
         private const val MAX_QUANTITY = 9999
         private const val DEFAULT_CHOICES_PER_PAGE = 6
+        private const val BAGS_ACCESSORIES_CHOICES_PER_PAGE = 8
         private const val CLOTHING_CHOICES_PER_PAGE = 10
 
         fun newInstance(tracking: String) = OrderContentDialogFragment().apply {
