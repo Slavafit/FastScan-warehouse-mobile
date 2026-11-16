@@ -9,6 +9,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.ocr.fastscan.R
 import com.ocr.fastscan.data.model.SearchResult
@@ -23,6 +24,8 @@ class SearchOrder(private val fragment: Fragment) {
     fun showSearchDialog(onScanRequested: () -> Unit) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_search_order, null)
         val input = dialogView.findViewById<EditText>(R.id.etSearchTrack)
+        input.setTextColor(ContextCompat.getColor(context, R.color.app_text_primary))
+        input.setHintTextColor(ContextCompat.getColor(context, R.color.app_text_secondary))
 
         val dialog = AlertDialog.Builder(context)
             .setTitle(R.string.title_find)

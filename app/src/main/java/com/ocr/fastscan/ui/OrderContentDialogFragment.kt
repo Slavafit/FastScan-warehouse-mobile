@@ -357,16 +357,22 @@ class OrderContentDialogFragment : DialogFragment() {
         val input = EditText(requireContext()).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             setText(quantity.toString())
-            selectAll()
+            setSelectAllOnFocus(true)
         }
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.manual_input)
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
                 input.text.toString().toIntOrNull()?.let(::setQuantity)
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+        dialog.setOnShowListener {
+            input.requestFocus()
+            input.post { input.selectAll() }
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        }
+        dialog.show()
     }
 
     private fun startVoiceQuantityInput() {

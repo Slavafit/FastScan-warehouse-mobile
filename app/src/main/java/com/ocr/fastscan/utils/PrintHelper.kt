@@ -45,6 +45,7 @@ class PrintHelper(private val activity: Activity) {
             ^FO80,$weightY^FB600,1,0,L,0^FDGross weight: $weight kg^FS
         """.trimIndent()
         val headerY = 10
+        val warehouseIdentity = WarehousePrintIdentityResolver.resolve(getWarehouseCountryCode())
 
         val zpl = """
             ^XA
@@ -52,7 +53,7 @@ class PrintHelper(private val activity: Activity) {
             ^LL$heightDots
             ^CI28
             ^CF0,40
-            ^FO80,$headerY^FDONZA ESPAÑA^FS
+            ^FO80,$headerY^FD${warehouseIdentity.header}^FS
             $codeBlock
             ^FO80,$dividerY^GB600,3,3^FS
             ^CF0,50
@@ -91,6 +92,7 @@ class PrintHelper(private val activity: Activity) {
         val appVersion = getAppVersion()
         val developer = context.getString(R.string.developer_title)
         val weightWarning = buildWeightWarning(weight, 740)
+        val warehouseIdentity = WarehousePrintIdentityResolver.resolve(getWarehouseCountryCode())
         
         val zpl = """
             ^XA
@@ -98,13 +100,13 @@ class PrintHelper(private val activity: Activity) {
             ^LL$heightDots
             ^CI28
             ^CF0,50
-            ^FO80,40^FDOnza España^FS
+            ^FO80,40^FD${warehouseIdentity.header}^FS
             ^BY3,3,120
             ^FO80,110^BCN,120,Y,N,N^FD$trackingNumber^FS
             ^FO80,330^A0N,80,80^FD$last4^FS
             ^FO80,420^GB600,3,3^FS
             ^CF0,30
-            ^FO80,440^FDPacked in Malaga: $dateStr^FS
+            ^FO80,440^FD${warehouseIdentity.packedIn}: $dateStr^FS
             ^FO80,480^GB600,3,3^FS
             ^FO80,510^A0N,120,120^FD$partialName^FS
             ^CF0,50
@@ -177,6 +179,14 @@ class PrintHelper(private val activity: Activity) {
         return heightStr.toIntOrNull() ?: 150
     }
 
+    private fun getWarehouseCountryCode(): String {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        return prefs.getString(
+            LicenseChecker.PREF_COUNTRY_CODE,
+            LicenseChecker.DEFAULT_COUNTRY_CODE
+        ).orEmpty()
+    }
+
     private fun getAppLabel(): String {
         return context.packageManager.getApplicationLabel(context.applicationInfo).toString()
     }
@@ -231,6 +241,20 @@ class PrintHelper(private val activity: Activity) {
     private fun showToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
+}
+
+internal data class WarehousePrintIdentity(
+    val header: String,
+    val packedIn: String
+)
+
+internal object WarehousePrintIdentityResolver {
+    fun resolve(countryCode: String): WarehousePrintIdentity =
+        if (countryCode.trim().uppercase(Locale.ROOT) == "US") {
+            WarehousePrintIdentity(header = "Onza USA", packedIn = "Packed in USA")
+        } else {
+            WarehousePrintIdentity(header = "Onza España", packedIn = "Packed in Malaga")
+        }
 }
 
 internal object GeneratedOrderLabelLayout {

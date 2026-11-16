@@ -27,12 +27,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:drawable/edit_text"
+            android:background="@drawable/bg_search_input"
             android:hint="@string/for_example"
             android:inputType="textCapCharacters"
             android:padding="12dp"
             android:textColor="@color/app_text_primary"
-            android:textColorHint="@color/app_text_secondary" />
+            android:textColorHint="@color/app_text_secondary"
+            android:textSize="18sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnScanSearchTrack"
