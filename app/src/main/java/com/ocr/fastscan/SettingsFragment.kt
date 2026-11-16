@@ -84,6 +84,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+        findPreference<Preference>("privacy_policy")?.setOnPreferenceClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)))
+            true
+        }
+
         findPreference<Preference>("app_version")?.summary = getString(
             R.string.app_version_summary,
             getAppVersionName(),
@@ -301,6 +306,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     companion object {
         private const val DEVELOPER_URL = "https://t.me/slavafit"
+        private const val PRIVACY_POLICY_URL =
+            "https://slavafit.github.io/FastScan-warehouse-mobile/privacy-policy/"
         private const val MAX_DIAGNOSTIC_LENGTH = 180
     }
 }

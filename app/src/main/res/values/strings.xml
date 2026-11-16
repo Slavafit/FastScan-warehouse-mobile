@@ -386,6 +386,8 @@
     <string name="connection_error_message">Проверьте интернет или повторите позже: сервер лицензий сейчас недоступен.</string>
     <string name="app_version_title">Версия приложения</string>
     <string name="app_version_summary">Версия %1$s (код %2$d)</string>
+    <string name="privacy_policy_title">Политика конфиденциальности</string>
+    <string name="privacy_policy_summary">Открыть политику конфиденциальности FastScan Pro</string>
     <string name="party_detail_info">Склад: %1$s | Коробок: %2$d</string>
     <string name="party_detail_info_placeholder">Склад: - | Коробок: 0</string>
     <string name="get_party_weight">Получить вес партии</string>
