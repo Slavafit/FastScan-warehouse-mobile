@@ -386,6 +386,7 @@
     <string name="license_trial_status">Пробный доступ: осталось %1$d дней (до %2$s)</string>
     <string name="connection_error_title">Не удалось проверить лицензию</string>
     <string name="connection_error_message">Проверьте интернет или повторите позже: сервер лицензий сейчас недоступен.</string>
+    <string name="license_rate_limited_message">Слишком много проверок лицензии. Подождите минуту и повторите.</string>
     <string name="app_version_title">Версия приложения</string>
     <string name="app_version_summary">Версия %1$s (код %2$d)</string>
     <string name="privacy_policy_title">Политика конфиденциальности</string>

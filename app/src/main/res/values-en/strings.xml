@@ -370,6 +370,7 @@
     <string name="license_trial_status">Trial access: %1$d days left (until %2$s)</string>
     <string name="connection_error_title">Could not check license</string>
     <string name="connection_error_message">Check the internet connection or try later: the license server is unavailable.</string>
+    <string name="license_rate_limited_message">Too many license checks. Wait a minute and try again.</string>
     <string name="app_version_title">App version</string>
     <string name="app_version_summary">Version %1$s (code %2$d)</string>
     <string name="privacy_policy_title">Privacy Policy</string>

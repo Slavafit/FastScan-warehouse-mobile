@@ -128,6 +128,7 @@ class MainActivity : AppCompatActivity() {
             LicenseStatus.NOT_FOUND -> getString(R.string.license_not_found_message)
             LicenseStatus.TOKEN_MISSING -> getString(R.string.license_token_missing_message)
             LicenseStatus.CONNECTION_ERROR -> getString(R.string.connection_error_message)
+            LicenseStatus.RATE_LIMITED -> getString(R.string.license_rate_limited_message)
             LicenseStatus.INVALID -> getString(R.string.license_invalid_message)
         }
     }

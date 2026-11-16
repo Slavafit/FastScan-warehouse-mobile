@@ -1,6 +1,7 @@
 package com.ocr.fastscan.utils
 
 import android.content.Context
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import androidx.preference.PreferenceManager
@@ -9,6 +10,8 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaType
@@ -30,6 +33,36 @@ class LicenseChecker(private val userId: String) {
         if (email.isEmpty()) {
             return LicenseCheckResult(LicenseStatus.NEED_ACTIVATION)
         }
+
+        return checkMutex.withLock {
+            val now = SystemClock.elapsedRealtime()
+            cachedCheck
+                ?.takeIf { it.email == email && now - it.checkedAtMs < it.cacheDurationMs }
+                ?.let {
+                    Log.d("LicenseCheck", "Using recent license result: ${it.result.status}")
+                    return@withLock it.result
+                }
+
+            val result = checkLicenseFromServer(context, email)
+            cachedCheck = CachedCheck(
+                email = email,
+                result = result,
+                checkedAtMs = SystemClock.elapsedRealtime(),
+                cacheDurationMs = when (result.status) {
+                    LicenseStatus.RATE_LIMITED ->
+                        (result.retryAfterSeconds ?: DEFAULT_RATE_LIMIT_RETRY_SECONDS)
+                            .coerceIn(1, MAX_RATE_LIMIT_RETRY_SECONDS) * 1_000L
+                    else -> CHECK_CACHE_DURATION_MS
+                }
+            )
+            result
+        }
+    }
+
+    private suspend fun checkLicenseFromServer(
+        context: Context,
+        email: String
+    ): LicenseCheckResult {
 
         val deviceId = getDeviceId(context)
         val appId = context.packageName
@@ -130,6 +163,22 @@ class LicenseChecker(private val userId: String) {
             val body = response.body?.string().orEmpty()
             Log.d("LicenseCheck", "${request.method} license response: HTTP ${response.code}")
 
+            if (response.code == 429) {
+                val retryAfter = response.header("Retry-After")
+                val retryAfterSeconds = retryAfter?.trim()?.toLongOrNull()
+                Log.w(
+                    "LicenseCheck",
+                    "License request rate limited; Retry-After=${retryAfter ?: "not provided"}"
+                )
+                return LicenseServerResponse(
+                    ok = false,
+                    status = "rate_limited",
+                    reason = "rate_limited",
+                    errorMessage = "HTTP 429",
+                    retryAfterSeconds = retryAfterSeconds
+                )
+            }
+
             if (body.isBlank()) {
                 Log.w("LicenseCheck", "${request.method} license check failed: empty response")
                 return null
@@ -187,7 +236,11 @@ class LicenseChecker(private val userId: String) {
     private fun LicenseServerResponse.toResult(firebaseSignIn: FirebaseSignInResult): LicenseCheckResult {
         val normalizedStatus = (status ?: reason).orEmpty().lowercase()
         if (!ok) {
-            return LicenseCheckResult(normalizedStatus.toLicenseStatus())
+            return LicenseCheckResult(
+                status = normalizedStatus.toLicenseStatus(),
+                errorMessage = errorMessage ?: reason,
+                retryAfterSeconds = retryAfterSeconds
+            )
         }
 
         val status = normalizedStatus.toLicenseStatus()
@@ -223,6 +276,7 @@ class LicenseChecker(private val userId: String) {
             "revoked" -> LicenseStatus.REVOKED
             "device_mismatch" -> LicenseStatus.DEVICE_MISMATCH
             "connection_error" -> LicenseStatus.CONNECTION_ERROR
+            "rate_limited" -> LicenseStatus.RATE_LIMITED
             "not_found" -> LicenseStatus.NOT_FOUND
             "already_registered" -> LicenseStatus.TOKEN_MISSING
             "need_activation", "missing_email" -> LicenseStatus.NEED_ACTIVATION
@@ -284,6 +338,8 @@ class LicenseChecker(private val userId: String) {
         @SerializedName("firebase_token") val firebaseToken: String? = null,
         @SerializedName("warehouse_id") val warehouseId: String? = null,
         @SerializedName("country_code") val countryCode: String? = null,
+        val errorMessage: String? = null,
+        val retryAfterSeconds: Long? = null,
         // Accepted during rollout from the earlier Worker contract.
         @SerializedName("tenant_id") val legacyTenantId: String? = null
     )
@@ -296,16 +352,28 @@ class LicenseChecker(private val userId: String) {
         const val PREF_COUNTRY_CODE = "warehouse_country"
         const val DEFAULT_COUNTRY_CODE = "ES"
         private const val BROKEN_ANDROID_ID = "9774d56d682e549c"
+        private const val CHECK_CACHE_DURATION_MS = 15_000L
+        private const val DEFAULT_RATE_LIMIT_RETRY_SECONDS = 60L
+        private const val MAX_RATE_LIMIT_RETRY_SECONDS = 15 * 60L
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
         private val ACCESS_STATUSES = setOf(LicenseStatus.TRIAL, LicenseStatus.ACTIVE)
         private val SUPPORTED_COUNTRY_CODES = setOf("ES", "US")
         private val gson = Gson()
+        private val checkMutex = Mutex()
+        private var cachedCheck: CachedCheck? = null
         private val httpClient = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
             .build()
     }
+
+    private data class CachedCheck(
+        val email: String,
+        val result: LicenseCheckResult,
+        val checkedAtMs: Long,
+        val cacheDurationMs: Long
+    )
 }
 
 data class LicenseCheckResult(
@@ -317,7 +385,8 @@ data class LicenseCheckResult(
     val firebaseErrorMessage: String? = null,
     val warehouseId: String? = null,
     val countryCode: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val retryAfterSeconds: Long? = null
 ) {
     val hasAccess: Boolean
         get() = status == LicenseStatus.TRIAL || status == LicenseStatus.ACTIVE
@@ -332,6 +401,7 @@ enum class LicenseStatus {
     DEVICE_MISMATCH,
     NOT_FOUND,
     TOKEN_MISSING,
+    RATE_LIMITED,
     INVALID,
     CONNECTION_ERROR
 }
