@@ -60,6 +60,12 @@
             app:useSimpleSummaryProvider="true"
             android:inputType="textUri" />
 
+        <androidx.preference.SwitchPreferenceCompat
+            app:key="auto_weight_enabled"
+            app:title="@string/auto_weight_title"
+            app:summary="@string/auto_weight_summary"
+            app:persistent="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/printer_settings">

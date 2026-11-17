@@ -494,7 +494,9 @@ class ScanFragment : BaseFragment() {
                         binding.cbShoesBox.isChecked = first.shoesBox == 1
                         binding.cbBagBox.isChecked = first.bagBox == 1
                         soundManager.playSuccess()
-                        fetchWeightFromServer()
+                        if (WeightServerHelper.isAutoWeightEnabled(requireContext())) {
+                            fetchWeightFromServer()
+                        }
                     } else {
                         binding.tvClientName.text = getString(R.string.client_not_found)
                         binding.tvClientName.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark))

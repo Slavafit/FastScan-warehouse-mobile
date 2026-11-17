@@ -11,7 +11,33 @@ import okhttp3.Request
 
 object WeightServerHelper {
 
+    const val PREF_AUTO_WEIGHT_ENABLED = "auto_weight_enabled"
+
     private val client = OkHttpClient()
+
+    fun isAutoWeightEnabled(context: Context): Boolean {
+        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+        if (prefs.contains(PREF_AUTO_WEIGHT_ENABLED)) {
+            return prefs.getBoolean(PREF_AUTO_WEIGHT_ENABLED, true)
+        }
+
+        val countryCode = prefs.getString(
+            LicenseChecker.PREF_COUNTRY_CODE,
+            "ES"
+        ).orEmpty().trim()
+        return !countryCode.equals("US", ignoreCase = true)
+    }
+
+    fun hasAutoWeightOverride(context: Context): Boolean =
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+            .contains(PREF_AUTO_WEIGHT_ENABLED)
+
+    fun setAutoWeightEnabled(context: Context, enabled: Boolean) {
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putBoolean(PREF_AUTO_WEIGHT_ENABLED, enabled)
+            .apply()
+    }
 
     /**
      * Получает вес с сервера

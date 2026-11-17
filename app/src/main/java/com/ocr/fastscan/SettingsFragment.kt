@@ -13,6 +13,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreferenceCompat
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -77,6 +78,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         setupEmailPreference()
+        setupAutoWeightPreference()
         setupServiceDiagnostics()
 
         findPreference<Preference>("developer_info")?.setOnPreferenceClickListener {
@@ -94,6 +96,31 @@ class SettingsFragment : PreferenceFragmentCompat() {
             getAppVersionName(),
             getAppVersionCode()
         )
+    }
+
+    private fun setupAutoWeightPreference() {
+        val autoWeightPreference =
+            findPreference<SwitchPreferenceCompat>(com.ocr.fastscan.utils.WeightServerHelper.PREF_AUTO_WEIGHT_ENABLED)
+                ?: return
+
+        autoWeightPreference.isChecked =
+            com.ocr.fastscan.utils.WeightServerHelper.isAutoWeightEnabled(requireContext())
+        autoWeightPreference.setOnPreferenceChangeListener { _, newValue ->
+            com.ocr.fastscan.utils.WeightServerHelper.setAutoWeightEnabled(
+                requireContext(),
+                newValue as Boolean
+            )
+            true
+        }
+
+        findPreference<ListPreference>(LicenseChecker.PREF_COUNTRY_CODE)
+            ?.setOnPreferenceChangeListener { _, newValue ->
+                if (!com.ocr.fastscan.utils.WeightServerHelper.hasAutoWeightOverride(requireContext())) {
+                    autoWeightPreference.isChecked =
+                        newValue.toString().trim().uppercase(Locale.ROOT) != "US"
+                }
+                true
+            }
     }
 
     override fun onResume() {
