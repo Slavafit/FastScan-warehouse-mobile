@@ -21,6 +21,7 @@ Thumbs.db
 # Local signing material
 *.jks
 *.keystore
+keystore.properties
 
 # Firebase Admin SDK service-account files are server secrets.
 *service-account*.json

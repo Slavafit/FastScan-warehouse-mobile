@@ -1,6 +1,7 @@
 package com.ocr.fastscan.api
 
 import android.content.Context
+import com.ocr.fastscan.BuildConfig
 import com.ocr.fastscan.utils.TokenManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -36,7 +37,11 @@ object NetworkModule {
         }
 
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
 
         val clientBuilder = OkHttpClient.Builder()
