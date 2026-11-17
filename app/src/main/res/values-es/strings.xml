@@ -16,7 +16,7 @@
     <string name="server_weight_address">Dirección de peso del servidor</string>
     <string name="server_weight_address_summary">Por ejemplo: 192.168.1.50</string>
     <string name="auto_weight_title">Obtener el peso automáticamente</string>
-    <string name="auto_weight_summary">Solicitar el peso al servidor después de seleccionar un cliente. Desactivado de forma predeterminada para el almacén de EE. UU.</string>
+    <string name="auto_weight_summary">Solicitar el peso al servidor después de seleccionar un cliente</string>
     <string name="printer_settings">🖨️ Configuración de la impresora</string>
     <string name="printer_ip_title">IP de la impresora (Zebra)</string>
     <string name="printer_ip_summary">Por ejemplo: 192.168.1.168</string>
