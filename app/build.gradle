@@ -4,6 +4,17 @@ plugins {
     id 'com.google.gms.google-services' // Для Firebase
 }
 
+def releaseKeystorePath = System.getenv("FASTSCAN_KEYSTORE_PATH")
+def releaseKeystorePassword = System.getenv("FASTSCAN_KEYSTORE_PASSWORD")
+def releaseKeyAlias = System.getenv("FASTSCAN_KEY_ALIAS")
+def releaseKeyPassword = System.getenv("FASTSCAN_KEY_PASSWORD")
+def hasReleaseSigning = [
+        releaseKeystorePath,
+        releaseKeystorePassword,
+        releaseKeyAlias,
+        releaseKeyPassword
+].every { value -> value != null && !value.trim().isEmpty() }
+
 android {
     namespace 'com.ocr.fastscan'
     compileSdk 36
@@ -19,6 +30,23 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+    }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
     }
     compileOptions {
         // Устанавливаем Java 17 для Java-компилятора
