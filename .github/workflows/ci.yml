@@ -51,3 +51,11 @@ jobs:
 
       - name: Debug build
         run: gradle --no-daemon assembleDebug
+        
+      - name: Upload Lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-lint-report
+          path: app/build/reports/lint-results-debug.*
+          retention-days: 14
