@@ -65,15 +65,31 @@ jobs:
           KEY_ALIAS: ${{ secrets.FASTSCAN_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.FASTSCAN_KEY_PASSWORD }}
         run: |
+          if ! keytool -list \
+            -keystore "$RUNNER_TEMP/fastscan-upload.jks" \
+            -storepass "$KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+            echo "::error::The keystore file or FASTSCAN_KEYSTORE_PASSWORD is invalid"
+            exit 1
+          fi
+          if ! keytool -list \
+            -keystore "$RUNNER_TEMP/fastscan-upload.jks" \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -alias "$KEY_ALIAS" >/dev/null 2>&1; then
+            echo "::error::FASTSCAN_KEY_ALIAS does not identify a key in this keystore"
+            exit 1
+          fi
           mkdir -p "$RUNNER_TEMP/signing-check"
           printf 'FastScan signing check' > "$RUNNER_TEMP/signing-check/content.txt"
           jar --create --file "$RUNNER_TEMP/signing-check.jar" -C "$RUNNER_TEMP/signing-check" content.txt
-          jarsigner \
+          if ! jarsigner \
             -keystore "$RUNNER_TEMP/fastscan-upload.jks" \
             -storepass "$KEYSTORE_PASSWORD" \
             -keypass "$KEY_PASSWORD" \
             "$RUNNER_TEMP/signing-check.jar" \
-            "$KEY_ALIAS" >/dev/null
+            "$KEY_ALIAS" >/dev/null 2>&1; then
+            echo "::error::FASTSCAN_KEY_PASSWORD is invalid for the selected key"
+            exit 1
+          fi
           rm -f "$RUNNER_TEMP/signing-check/content.txt" "$RUNNER_TEMP/signing-check.jar"
           rmdir "$RUNNER_TEMP/signing-check"
 
