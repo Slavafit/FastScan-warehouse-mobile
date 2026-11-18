@@ -20,7 +20,7 @@ android {
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.ocr.fastscan"
+        applicationId "com.slavafit.fastscan"
         minSdk 24
         targetSdk 36
         versionCode 105

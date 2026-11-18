@@ -2,6 +2,7 @@
 .gradle/
 .gradle-user/
 **/build/
+/app/release/
 .cxx/
 **/.cxx/
 externalNativeBuild/
