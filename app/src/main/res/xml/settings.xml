@@ -20,6 +20,16 @@
         app:entryValues="@array/theme_values"
         app:useSimpleSummaryProvider="true" />
 
+    <PreferenceCategory app:title="@string/demo_review_category">
+
+        <Preference
+            app:key="open_demo_mode"
+            app:icon="@drawable/ic_scan"
+            app:title="@string/demo_open_title"
+            app:summary="@string/demo_open_summary" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/server_settings">
 
         <EditTextPreference

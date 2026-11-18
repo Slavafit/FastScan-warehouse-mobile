@@ -49,6 +49,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+        findPreference<Preference>("open_demo_mode")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), DemoActivity::class.java))
+            true
+        }
+
         findPreference<Preference>("test_print")?.setOnPreferenceClickListener {
             PrintHelper(requireActivity()).printTestLabel()
             true

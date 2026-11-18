@@ -41,6 +41,12 @@
             android:screenOrientation="portrait"/>
 
         <activity
+            android:name=".DemoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="@string/demo_mode_title" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:screenOrientation="portrait"
