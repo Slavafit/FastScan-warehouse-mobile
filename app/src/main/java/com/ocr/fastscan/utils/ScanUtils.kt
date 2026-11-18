@@ -29,6 +29,7 @@ object ScanUtils {
         binding.etWidth.text.clear()
         binding.etHeight.text.clear()
         binding.tvClientName.text = context.getString(R.string.scan_wait_client)
+        binding.tvClientName.setTextColor(ContextCompat.getColor(context, R.color.scan_wait_text))
         binding.cbWithBox.isChecked = false
         binding.cbShoesBox.isChecked = false
         binding.cbBagBox.isChecked = false
@@ -41,7 +42,7 @@ object ScanUtils {
         binding.etWidth.text.clear()
         binding.etHeight.text.clear()
         binding.tvClientName.text = context.getString(R.string.scan_wait)
-        binding.tvClientName.setTextColor(ContextCompat.getColor(binding.root.context, android.R.color.black))
+        binding.tvClientName.setTextColor(ContextCompat.getColor(context, R.color.scan_wait_text))
         binding.cbWithBox.isChecked = false
         binding.cbShoesBox.isChecked = false
         binding.cbBagBox.isChecked = false

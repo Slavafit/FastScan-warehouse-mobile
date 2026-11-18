@@ -65,7 +65,7 @@ Actions → Build signed Android artifacts → последний запуск
 Внизу страницы будет artifact вида:
 
 ```text
-FastScan-4.38-signed
+FastScan-4.39-signed
 ```
 
 Внутри находятся подписанные APK, AAB и `SHA256SUMS.txt`. Artifact хранится
