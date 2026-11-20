@@ -32,7 +32,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSectionUnpacked"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
@@ -44,7 +44,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSectionTracks"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
@@ -54,7 +54,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSectionWeight"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
@@ -122,7 +122,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRefreshUnpacked"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
@@ -160,7 +160,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShareUnpackedReport"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.FastScan.Button.Text"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:text="@string/share_report"
@@ -235,7 +235,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPartyReport"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginTop="8dp"
@@ -248,7 +248,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShareTrackReport"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.FastScan.Button.Text"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:enabled="false"
@@ -260,7 +260,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBoxContentsReport"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginTop="8dp"
@@ -367,7 +367,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShareWeightReport"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.FastScan.Button.Text"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:enabled="false"

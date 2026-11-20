@@ -1,5 +1,6 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cameraRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,6 +17,8 @@
         android:textSize="18sp"
         android:textColor="#FFFFFF"
         android:background="#80000000"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"
         android:padding="8dp"
         android:text="@string/scan_mode" />
 
@@ -30,14 +33,16 @@
         android:padding="16dp"
         android:visibility="gone">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDarker"
+            style="@style/Widget.FastScan.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/darker" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBrighter"
+            style="@style/Widget.FastScan.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/lighter"
@@ -45,8 +50,9 @@
     </LinearLayout>
 
     <!-- Кнопка фонарика (для barcode и kg) -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFlashToggle"
+        style="@style/Widget.FastScan.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"

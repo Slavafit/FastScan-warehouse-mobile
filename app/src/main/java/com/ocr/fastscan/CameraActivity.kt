@@ -4,16 +4,19 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
-import android.widget.Toast
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.ocr.fastscan.databinding.ActivityCameraBinding
 import com.ocr.fastscan.utils.LanguageHelper
 import com.ocr.fastscan.utils.StatusToast
@@ -38,6 +41,7 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySystemBarInsets()
 
         //window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -78,6 +82,56 @@ class CameraActivity : AppCompatActivity() {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, 10)
         }
+    }
+
+    private fun applySystemBarInsets() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        WindowCompat.getInsetsController(window, binding.root).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
+
+        val hintParams = binding.tvHint.layoutParams as FrameLayout.LayoutParams
+        val initialHintLeftMargin = hintParams.leftMargin
+        val initialHintTopMargin = hintParams.topMargin
+        val initialHintRightMargin = hintParams.rightMargin
+        val initialExposureLeftPadding = binding.exposureControls.paddingLeft
+        val initialExposureTopPadding = binding.exposureControls.paddingTop
+        val initialExposureRightPadding = binding.exposureControls.paddingRight
+        val initialExposureBottomPadding = binding.exposureControls.paddingBottom
+        val flashParams = binding.btnFlashToggle.layoutParams as FrameLayout.LayoutParams
+        val initialFlashLeftMargin = flashParams.leftMargin
+        val initialFlashRightMargin = flashParams.rightMargin
+        val initialFlashBottomMargin = flashParams.bottomMargin
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.cameraRoot) { _, insets ->
+            val safeInsets = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+
+            (binding.tvHint.layoutParams as FrameLayout.LayoutParams).apply {
+                topMargin = initialHintTopMargin + safeInsets.top
+                leftMargin = initialHintLeftMargin + safeInsets.left
+                rightMargin = initialHintRightMargin + safeInsets.right
+                binding.tvHint.layoutParams = this
+            }
+            binding.exposureControls.setPadding(
+                initialExposureLeftPadding + safeInsets.left,
+                initialExposureTopPadding,
+                initialExposureRightPadding + safeInsets.right,
+                initialExposureBottomPadding + safeInsets.bottom
+            )
+            (binding.btnFlashToggle.layoutParams as FrameLayout.LayoutParams).apply {
+                leftMargin = initialFlashLeftMargin + safeInsets.left
+                rightMargin = initialFlashRightMargin + safeInsets.right
+                bottomMargin = initialFlashBottomMargin + safeInsets.bottom
+                binding.btnFlashToggle.layoutParams = this
+            }
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.cameraRoot)
     }
 
     private fun startCamera() {
