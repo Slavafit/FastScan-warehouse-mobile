@@ -156,7 +156,8 @@
     <string name="apply">ПРИМЕНИТЬ</string>
     <string name="send_order">ОТПРАВИТЬ ЗАКАЗ</string>
     <string name="find_order">Найти информацию о заказе</string>
-    <string name="sending">🚀 Отправка…</string>
+    <string name="sending">Отправка…</string>
+    <string name="sent_short">✓ Отправлено</string>
 
 
     <!-- tost -->

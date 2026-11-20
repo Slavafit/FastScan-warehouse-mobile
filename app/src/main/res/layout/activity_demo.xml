@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/status_open_background"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="@dimen/control_corner_radius"
                 app:strokeColor="@color/app_primary"
                 app:strokeWidth="1dp">
 
@@ -82,7 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="@dimen/control_corner_radius"
                 app:strokeColor="@color/card_stroke"
                 app:strokeWidth="1dp">
 
@@ -114,7 +114,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="@dimen/control_corner_radius"
                 app:strokeColor="@color/card_stroke"
                 app:strokeWidth="1dp">
 
@@ -148,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:minHeight="52dp"
                 android:textAllCaps="false"
-                app:cornerRadius="12dp" />
+                app:cornerRadius="@dimen/control_corner_radius" />
 
             <TextView
                 android:id="@+id/demo_status"

@@ -53,8 +53,9 @@
         android:layout_marginTop="16dp"
         android:textColor="@color/app_primary"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnApplyVolume"
+        style="@style/Widget.FastScan.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/apply"

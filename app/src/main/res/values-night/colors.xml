@@ -23,4 +23,7 @@
     <color name="bottom_nav_active">#81C784</color>
     <color name="bottom_nav_inactive">#B8BDB9</color>
     <color name="box_card_highlight">#234B2A</color>
+    <color name="send_button_halo">#F1FFF2</color>
+    <color name="send_button_halo_base">#B381C784</color>
+    <color name="send_button_error">#FFB4AB</color>
 </resources>

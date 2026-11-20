@@ -87,7 +87,8 @@
     <string name="lighter">Lighter (+)</string>
     <string name="send_order">SEND ORDER</string>
     <string name="find_order">Find order info</string>
-    <string name="sending">🚀 Sending…</string>
+    <string name="sending">Sending…</string>
+    <string name="sent_short">✓ Sent</string>
 
     <string name="scan">Scan</string>
     <string name="boxes">Boxes</string>

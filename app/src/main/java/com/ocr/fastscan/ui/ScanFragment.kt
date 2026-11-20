@@ -560,8 +560,7 @@ class ScanFragment : BaseFragment() {
     }
 
     private fun executeSubmit(req: SaveOrderRequest) {
-        binding.btnSubmit.isEnabled = false
-        binding.progressBar.visibility = View.VISIBLE
+        binding.btnSubmit.showSending()
 
         senderManager.submitOrder(req,
             onSuccess = success@{
@@ -569,7 +568,7 @@ class ScanFragment : BaseFragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     runCatching { firebaseManager.confirmOrderContent(req.trackingNumber) }
                 }
-                activeBinding.progressBar.visibility = View.GONE
+                activeBinding.btnSubmit.showSuccess()
                 soundManager.playSent()
                 Toast.makeText(requireContext(), getString(R.string.order_saved), Toast.LENGTH_SHORT).show()
                 printGeneratedLabelIfNeeded(req)
@@ -577,14 +576,12 @@ class ScanFragment : BaseFragment() {
                 clearDimensions()
                 currentReceiverGuid = null
                 setScannedOrderNumber(null)
-                activeBinding.btnSubmit.isEnabled = true
             },
             onError = error@{ error ->
                 val activeBinding = _binding ?: return@error
-                activeBinding.progressBar.visibility = View.GONE
+                activeBinding.btnSubmit.showError()
                 soundManager.playError()
                 StatusToast.error(requireContext(), error, Toast.LENGTH_LONG)
-                activeBinding.btnSubmit.isEnabled = true
             }
         )
     }

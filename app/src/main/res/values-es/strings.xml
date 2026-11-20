@@ -132,7 +132,8 @@
     <string name="scan_or_input">Escanear o ingresar...</string>
     <string name="generate_track">✨ Generar tracking</string>
     <string name="find_order">Buscar información del pedido</string>
-    <string name="sending">🚀 Enviando...</string>
+    <string name="sending">Enviando…</string>
+    <string name="sent_short">✓ Enviado</string>
 
     //tost
     <string name="name_not_specified">Nombre no especificado</string>

@@ -115,7 +115,9 @@ class MainActivity : AppCompatActivity() {
         val navigationInitialPaddingBottom = binding.bottomNav.paddingBottom
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.fragmentContainer) { view, insets ->
-            val statusBarInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val statusBarInset = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout()
+            ).top
             view.setPadding(
                 view.paddingLeft,
                 contentInitialPaddingTop + statusBarInset,
@@ -126,7 +128,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { view, insets ->
-            val navigationBarInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            val navigationBarInset = insets.getInsets(
+                WindowInsetsCompat.Type.navigationBars() or WindowInsetsCompat.Type.displayCutout()
+            ).bottom
             view.setPadding(
                 view.paddingLeft,
                 view.paddingTop,
