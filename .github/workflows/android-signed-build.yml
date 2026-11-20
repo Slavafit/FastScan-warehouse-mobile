@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
       publish_to_play:
@@ -15,7 +13,7 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: signed-android-${{ github.ref }}
@@ -63,24 +61,6 @@ jobs:
           test -n "$KEYSTORE_PASSWORD" || { echo "::error::Missing FASTSCAN_KEYSTORE_PASSWORD"; exit 1; }
           test -n "$KEY_ALIAS" || { echo "::error::Missing FASTSCAN_KEY_ALIAS"; exit 1; }
           test -n "$KEY_PASSWORD" || { echo "::error::Missing FASTSCAN_KEY_PASSWORD"; exit 1; }
-
-      - name: Validate Google Play service account
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.publish_to_play
-        env:
-          SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-        run: |
-          test -n "$SERVICE_ACCOUNT_JSON" || {
-            echo "::error::Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
-            exit 1
-          }
-          printf '%s' "$SERVICE_ACCOUNT_JSON" | jq -e '
-            .type == "service_account" and
-            (.client_email | type == "string") and
-            (.private_key | type == "string")
-          ' >/dev/null || {
-            echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not a valid service-account JSON key"
-            exit 1
-          }
 
       - name: Restore signing key
         env:
@@ -132,17 +112,46 @@ jobs:
           echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
 
-      - name: Validate release tag
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Determine release action
+        id: release
+        shell: bash
         env:
           VERSION_NAME: ${{ steps.version.outputs.name }}
         run: |
-          test "v$VERSION_NAME" = "$GITHUB_REF_NAME" || {
-            echo "::error::Tag $GITHUB_REF_NAME does not match versionName $VERSION_NAME"
+          echo "publish=false" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_EVENT_NAME" != "push" || "$GITHUB_REF" != "refs/heads/main" ]]; then
+            exit 0
+          fi
+
+          RELEASE_TAG="v$VERSION_NAME"
+          git fetch --force --tags origin
+          if git rev-parse --verify "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            TAGGED_COMMIT=$(git rev-list -n 1 "$RELEASE_TAG")
+            if [[ "$TAGGED_COMMIT" != "$GITHUB_SHA" ]]; then
+              echo "::error::Version $VERSION_NAME is already tagged on another commit. Increase versionName and versionCode."
+              exit 1
+            fi
+            echo "Release $RELEASE_TAG is already published; skipping Google Play upload."
+            exit 0
+          fi
+
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Google Play service account
+        if: steps.release.outputs.publish == 'true' || inputs.publish_to_play
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          test -n "$SERVICE_ACCOUNT_JSON" || {
+            echo "::error::Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
             exit 1
           }
-          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
-            echo "::error::Release tags must point to a commit from main"
+          printf '%s' "$SERVICE_ACCOUNT_JSON" | jq -e '
+            .type == "service_account" and
+            (.client_email | type == "string") and
+            (.private_key | type == "string")
+          ' >/dev/null || {
+            echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not a valid service-account JSON key"
             exit 1
           }
 
@@ -178,7 +187,7 @@ jobs:
           retention-days: 30
 
       - name: Upload AAB to Google Play internal testing
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.publish_to_play
+        if: steps.release.outputs.publish == 'true' || inputs.publish_to_play
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
@@ -187,6 +196,17 @@ jobs:
           tracks: internal
           status: completed
           releaseName: FastScan ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+
+      - name: Create release tag
+        if: steps.release.outputs.publish == 'true'
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+        run: |
+          RELEASE_TAG="v$VERSION_NAME"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" "$GITHUB_SHA" -m "FastScan $VERSION_NAME"
+          git push origin "refs/tags/$RELEASE_TAG"
 
       - name: Remove signing key
         if: always()
