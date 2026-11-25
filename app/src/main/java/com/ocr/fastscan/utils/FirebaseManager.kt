@@ -3,6 +3,7 @@ package com.ocr.fastscan.utils
 import android.content.Context
 import android.util.Base64
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.ocr.fastscan.data.model.BoxEntry
@@ -18,6 +19,14 @@ import kotlinx.coroutines.coroutineScope
 import com.google.firebase.firestore.toObject
 import java.util.Date
 import java.util.Locale
+import java.time.LocalDate
+import java.time.ZoneId
+
+enum class ClientSearchOutcome(val counterField: String) {
+    FOUND("found"),
+    NOT_FOUND("not_found"),
+    ERROR("error")
+}
 
 class FirebaseManager(context: Context) {
     private val db = FirebaseFirestore.getInstance()
@@ -40,6 +49,25 @@ class FirebaseManager(context: Context) {
         .ifBlank { DEFAULT_WAREHOUSE_ID }
 
     fun activeWarehouseId(): String = currentWarehouseId()
+
+    fun recordClientSearch(outcome: ClientSearchOutcome) {
+        val warehouseId = currentWarehouseId()
+        val day = LocalDate.now(ZoneId.of(WAREHOUSE_TIME_ZONE)).toString()
+        val updates = mapOf(
+            "warehouse_id" to warehouseId,
+            "date" to day,
+            "total" to FieldValue.increment(1),
+            outcome.counterField to FieldValue.increment(1),
+            "updated_at" to FieldValue.serverTimestamp()
+        )
+
+        warehouseDocument.collection("client_search_daily")
+            .document(day)
+            .set(updates, SetOptions.merge())
+            .addOnFailureListener { error ->
+                Log.w("FirebaseManager", "Client search statistics were not recorded", error)
+            }
+    }
 
     suspend fun verifyWarehouseAccess() {
         warehouseDocument.collection("order_contents")
@@ -338,6 +366,7 @@ class FirebaseManager(context: Context) {
     companion object {
         const val PREF_WAREHOUSE_ID = "firebase_warehouse_id"
         const val DEFAULT_WAREHOUSE_ID = "es-main"
+        private const val WAREHOUSE_TIME_ZONE = "Europe/Madrid"
         private const val FIRESTORE_BATCH_LIMIT = 450
 
         fun normalizeTracking(value: String): String = value.trim().uppercase(Locale.ROOT)
