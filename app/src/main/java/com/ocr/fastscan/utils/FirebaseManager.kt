@@ -19,8 +19,8 @@ import kotlinx.coroutines.coroutineScope
 import com.google.firebase.firestore.toObject
 import java.util.Date
 import java.util.Locale
-import java.time.LocalDate
-import java.time.ZoneId
+import java.util.TimeZone
+import java.text.SimpleDateFormat
 
 enum class ClientSearchOutcome(val counterField: String) {
     FOUND("found"),
@@ -52,7 +52,9 @@ class FirebaseManager(context: Context) {
 
     fun recordClientSearch(outcome: ClientSearchOutcome) {
         val warehouseId = currentWarehouseId()
-        val day = LocalDate.now(ZoneId.of(WAREHOUSE_TIME_ZONE)).toString()
+        val day = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone(WAREHOUSE_TIME_ZONE)
+        }.format(Date())
         val updates = mapOf(
             "warehouse_id" to warehouseId,
             "date" to day,
