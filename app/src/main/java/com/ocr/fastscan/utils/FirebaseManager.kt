@@ -3,6 +3,7 @@ package com.ocr.fastscan.utils
 import android.content.Context
 import android.util.Base64
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.ocr.fastscan.data.model.BoxEntry
@@ -53,9 +54,41 @@ class FirebaseManager(context: Context) {
         onSuccess: () -> Unit,          // колбэк успеха
         onFailure: (Exception) -> Unit) // колбэк ошибки
     {
-        shipmentsCollection
-            .document(shipment.trackingNumber) // Устанавливаем ID документа равным номеру трека
-            .set(shipment) // .set перезапишет данные, если ID уже существует
+        val warehouseId = currentWarehouseId()
+        val shipmentReference = shipmentsCollection.document(shipment.trackingNumber)
+        db.runTransaction { transaction ->
+            val existing = transaction.get(shipmentReference)
+            val previousWeight = if (existing.exists()) existing.getDouble("weight") ?: 0.0 else null
+            val existingCreatedAt = existing.getTimestamp("createdAt")
+            val day = existing.getString("dateString")
+                ?: ShipmentDailyAggregation.day((existingCreatedAt ?: shipment.createdAt).toDate())
+            val aggregateReference = warehouseDocument.collection("shipment_daily").document(day)
+            val delta = ShipmentDailyAggregation.delta(previousWeight, shipment.weight)
+
+            transaction.set(
+                shipmentReference,
+                mapOf(
+                    "trackingNumber" to shipment.trackingNumber,
+                    "clientCode" to shipment.clientCode,
+                    "clientName" to shipment.clientName,
+                    "weight" to shipment.weight.coerceAtLeast(0.0),
+                    "withBox" to shipment.withBox,
+                    "createdAt" to (existingCreatedAt ?: shipment.createdAt),
+                    "dateString" to day
+                )
+            )
+            transaction.set(
+                aggregateReference,
+                mapOf(
+                    "warehouse_id" to warehouseId,
+                    "date" to day,
+                    "count" to FieldValue.increment(delta.count),
+                    "total_weight" to FieldValue.increment(delta.weight),
+                    "updated_at" to FieldValue.serverTimestamp()
+                ),
+                SetOptions.merge()
+            )
+        }
             .addOnSuccessListener {
                 Log.d("FirebaseManager", "Data saved/updated in Firestore: ${shipment.trackingNumber}")
                 onSuccess()

@@ -23,8 +23,8 @@ android {
         applicationId "com.slavafit.fastscan"
         minSdk 24
         targetSdk 36
-        versionCode 108
-        versionName "4.39"
+        versionCode 109
+        versionName "4.40"
     }
 
     buildFeatures {
