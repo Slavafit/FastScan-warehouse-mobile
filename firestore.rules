@@ -27,6 +27,37 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /warehouses/{warehouseId}/shipment_daily/{day} {
+      allow read: if warehouseAccess(warehouseId)
+        && resource.data.warehouse_id == warehouseId;
+      allow create: if warehouseAccess(warehouseId)
+        && day.matches('\\d{4}-\\d{2}-\\d{2}')
+        && request.resource.data.warehouse_id == warehouseId
+        && request.resource.data.date == day
+        && request.resource.data.count is int
+        && request.resource.data.count >= 0
+        && request.resource.data.total_weight is number
+        && request.resource.data.total_weight >= 0
+        && request.resource.data.updated_at == request.time
+        && request.resource.data.keys().hasOnly([
+          'warehouse_id', 'date', 'count', 'total_weight', 'updated_at'
+        ]);
+      allow update: if warehouseAccess(warehouseId)
+        && day.matches('\\d{4}-\\d{2}-\\d{2}')
+        && resource.data.warehouse_id == warehouseId
+        && request.resource.data.warehouse_id == warehouseId
+        && request.resource.data.date == day
+        && request.resource.data.count is int
+        && request.resource.data.count >= 0
+        && request.resource.data.total_weight is number
+        && request.resource.data.total_weight >= 0
+        && request.resource.data.updated_at == request.time
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'count', 'total_weight', 'updated_at'
+        ]);
+      allow delete: if false;
+    }
+
     match /warehouses/{warehouseId}/product_catalog/{document} {
       allow read, create, update: if warehouseAccess(warehouseId);
       allow delete: if false;
