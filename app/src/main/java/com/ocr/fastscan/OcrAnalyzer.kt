@@ -7,6 +7,8 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.regex.Pattern
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
 
 class OcrAnalyzer(
     private val mode: String,
@@ -16,6 +18,7 @@ class OcrAnalyzer(
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val resultStabilizer = ScanResultStabilizer()
 
+    @OptIn(markerClass = [ExperimentalGetImage::class])
     override fun analyze(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image ?: run { imageProxy.close(); return }
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.text.InputType
@@ -21,10 +22,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.color.MaterialColors
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.ocr.fastscan.R
@@ -55,6 +59,7 @@ class OrderContentDialogFragment : DialogFragment() {
     private var editingProductId: String? = null
     private var screen = Screen.CATEGORIES
     private var productPage = 0
+    private var selectionFeedbackInProgress = false
 
     private val voiceQuantityLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -99,9 +104,30 @@ class OrderContentDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.tvContentTracking.text = getString(R.string.content_tracking, tracking)
+        applySystemBarInsets()
         setupQuantityControls()
         setupNavigationControls()
         loadData()
+    }
+
+    private fun applySystemBarInsets() {
+        val initialLeft = binding.root.paddingLeft
+        val initialTop = binding.root.paddingTop
+        val initialRight = binding.root.paddingRight
+        val initialBottom = binding.root.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val safeInsets = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(
+                initialLeft + safeInsets.left,
+                initialTop + safeInsets.top,
+                initialRight + safeInsets.right,
+                initialBottom + safeInsets.bottom
+            )
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.root)
     }
 
     override fun onStart() {
@@ -150,11 +176,15 @@ class OrderContentDialogFragment : DialogFragment() {
             binding.btnQuick8 to 8,
             binding.btnQuick10 to 10
         ).forEach { (button, value) ->
-            button.setOnClickListener { selectQuickQuantity(value) }
+            button.setOnClickListener {
+                button.performSelectionFeedback { selectQuickQuantity(value) }
+            }
         }
         binding.btnManualQuantity.setOnClickListener { showManualQuantityDialog() }
         binding.btnVoiceQuantity.setOnClickListener { startVoiceQuantityInput() }
-        binding.btnAddContentItem.setOnClickListener { addSelectedItem() }
+        binding.btnAddContentItem.setOnClickListener {
+            binding.btnAddContentItem.performSelectionFeedback { addSelectedItem() }
+        }
     }
 
     private fun setupNavigationControls() {
@@ -174,10 +204,12 @@ class OrderContentDialogFragment : DialogFragment() {
         }
         binding.btnReviewContents.setOnClickListener { showReview() }
         binding.btnContentFinish.setOnClickListener {
-            if (screen == Screen.QUANTITY && !addSelectedItem(returnToCategories = false)) {
-                return@setOnClickListener
+            binding.btnContentFinish.performSelectionFeedback {
+                if (screen == Screen.QUANTITY && !addSelectedItem(returnToCategories = false)) {
+                    return@performSelectionFeedback
+                }
+                saveAndFinish()
             }
-            saveAndFinish()
         }
         binding.btnVoiceSelection.setOnClickListener { startVoiceSelectionInput() }
         binding.btnNewProduct.setOnClickListener { showCustomProductDialog() }
@@ -666,7 +698,9 @@ class OrderContentDialogFragment : DialogFragment() {
                     1,
                     TypedValue.COMPLEX_UNIT_SP
                 )
-                setOnClickListener { choice.action() }
+                setOnClickListener {
+                    performSelectionFeedback(choice.action)
+                }
             }
             val isSpanningLastItem = spanLastItem &&
                 index == choices.lastIndex &&
@@ -694,6 +728,44 @@ class OrderContentDialogFragment : DialogFragment() {
             if (visible === binding.gridContentChoices && screen == Screen.PRODUCTS) View.VISIBLE else View.GONE
         binding.quantityPanel.visibility = if (visible === binding.quantityPanel) View.VISIBLE else View.GONE
         binding.reviewPanel.visibility = if (visible === binding.reviewPanel) View.VISIBLE else View.GONE
+    }
+
+    private fun MaterialButton.performSelectionFeedback(action: () -> Unit) {
+        if (selectionFeedbackInProgress || !isEnabled) return
+        selectionFeedbackInProgress = true
+
+        val originalStrokeColor = strokeColor
+        val originalStrokeWidth = strokeWidth
+        val feedbackColor = MaterialColors.getColor(
+            this,
+            com.google.android.material.R.attr.colorError
+        )
+        strokeColor = ColorStateList.valueOf(feedbackColor)
+        strokeWidth = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            FEEDBACK_STROKE_WIDTH_DP,
+            resources.displayMetrics
+        ).toInt()
+
+        animate().cancel()
+        animate()
+            .scaleX(FEEDBACK_PRESSED_SCALE)
+            .scaleY(FEEDBACK_PRESSED_SCALE)
+            .setDuration(FEEDBACK_PRESS_DURATION_MS)
+            .withEndAction {
+                animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(FEEDBACK_RELEASE_DURATION_MS)
+                    .withEndAction {
+                        strokeColor = originalStrokeColor
+                        strokeWidth = originalStrokeWidth
+                        selectionFeedbackInProgress = false
+                        if (isAdded && _binding != null) action()
+                    }
+                    .start()
+            }
+            .start()
     }
 
     private fun updatePagingActions(currentPage: Int, pageCount: Int, showNewProduct: Boolean) {
@@ -760,6 +832,10 @@ class OrderContentDialogFragment : DialogFragment() {
         private const val DEFAULT_CHOICES_PER_PAGE = 6
         private const val BAGS_ACCESSORIES_CHOICES_PER_PAGE = 8
         private const val CLOTHING_CHOICES_PER_PAGE = 10
+        private const val FEEDBACK_PRESSED_SCALE = 0.96f
+        private const val FEEDBACK_STROKE_WIDTH_DP = 3f
+        private const val FEEDBACK_PRESS_DURATION_MS = 70L
+        private const val FEEDBACK_RELEASE_DURATION_MS = 90L
 
         fun newInstance(tracking: String) = OrderContentDialogFragment().apply {
             arguments = bundleOf(ARG_TRACKING to tracking)

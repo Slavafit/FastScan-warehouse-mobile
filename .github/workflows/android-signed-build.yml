@@ -5,9 +5,15 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      publish_to_play:
+        description: Upload the signed AAB to Google Play internal testing
+        required: true
+        default: false
+        type: boolean
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: signed-android-${{ github.ref }}
@@ -22,6 +28,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -98,8 +106,54 @@ jobs:
         shell: bash
         run: |
           VERSION_NAME=$(sed -n 's/^[[:space:]]*versionName "\([^"]*\)"/\1/p' app/build.gradle | head -n 1)
+          VERSION_CODE=$(sed -n 's/^[[:space:]]*versionCode \([0-9][0-9]*\)/\1/p' app/build.gradle | head -n 1)
           test -n "$VERSION_NAME" || { echo "::error::Could not read versionName"; exit 1; }
+          test -n "$VERSION_CODE" || { echo "::error::Could not read versionCode"; exit 1; }
           echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Determine release action
+        id: release
+        shell: bash
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+        run: |
+          echo "publish=false" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_EVENT_NAME" != "push" || "$GITHUB_REF" != "refs/heads/main" ]]; then
+            exit 0
+          fi
+
+          RELEASE_TAG="v$VERSION_NAME"
+          git fetch --force --tags origin
+          if git rev-parse --verify "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            TAGGED_COMMIT=$(git rev-list -n 1 "$RELEASE_TAG")
+            if [[ "$TAGGED_COMMIT" != "$GITHUB_SHA" ]]; then
+              echo "::error::Version $VERSION_NAME is already tagged on another commit. Increase versionName and versionCode."
+              exit 1
+            fi
+            echo "Release $RELEASE_TAG is already published; skipping Google Play upload."
+            exit 0
+          fi
+
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Google Play service account
+        if: steps.release.outputs.publish == 'true' || inputs.publish_to_play
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          test -n "$SERVICE_ACCOUNT_JSON" || {
+            echo "::error::Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
+            exit 1
+          }
+          printf '%s' "$SERVICE_ACCOUNT_JSON" | jq -e '
+            .type == "service_account" and
+            (.client_email | type == "string") and
+            (.private_key | type == "string")
+          ' >/dev/null || {
+            echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not a valid service-account JSON key"
+            exit 1
+          }
 
       - name: Test and build signed artifacts
         env:
@@ -131,6 +185,28 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Upload AAB to Google Play internal testing
+        if: steps.release.outputs.publish == 'true' || inputs.publish_to_play
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.slavafit.fastscan
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          tracks: internal
+          status: completed
+          releaseName: FastScan ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+
+      - name: Create release tag
+        if: steps.release.outputs.publish == 'true'
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+        run: |
+          RELEASE_TAG="v$VERSION_NAME"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$RELEASE_TAG" "$GITHUB_SHA" -m "FastScan $VERSION_NAME"
+          git push origin "refs/tags/$RELEASE_TAG"
 
       - name: Remove signing key
         if: always()

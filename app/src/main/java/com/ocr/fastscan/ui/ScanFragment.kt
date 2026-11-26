@@ -560,8 +560,7 @@ class ScanFragment : BaseFragment() {
     }
 
     private fun executeSubmit(req: SaveOrderRequest) {
-        binding.btnSubmit.isEnabled = false
-        binding.progressBar.visibility = View.VISIBLE
+        binding.btnSubmit.showSending()
 
         senderManager.submitOrder(req,
             onSuccess = success@{
@@ -569,7 +568,7 @@ class ScanFragment : BaseFragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     runCatching { firebaseManager.confirmOrderContent(req.trackingNumber) }
                 }
-                activeBinding.progressBar.visibility = View.GONE
+                activeBinding.btnSubmit.showSuccess()
                 soundManager.playSent()
                 Toast.makeText(requireContext(), getString(R.string.order_saved), Toast.LENGTH_SHORT).show()
                 printGeneratedLabelIfNeeded(req)
@@ -577,14 +576,12 @@ class ScanFragment : BaseFragment() {
                 clearDimensions()
                 currentReceiverGuid = null
                 setScannedOrderNumber(null)
-                activeBinding.btnSubmit.isEnabled = true
             },
             onError = error@{ error ->
                 val activeBinding = _binding ?: return@error
-                activeBinding.progressBar.visibility = View.GONE
+                activeBinding.btnSubmit.showError()
                 soundManager.playError()
                 StatusToast.error(requireContext(), error, Toast.LENGTH_LONG)
-                activeBinding.btnSubmit.isEnabled = true
             }
         )
     }
@@ -686,18 +683,24 @@ class ScanFragment : BaseFragment() {
 
                 when {
                     filtered.isEmpty() -> {
+                        firebaseManager.recordClientSearch(ClientSearchOutcome.NOT_FOUND)
                         StatusToast.warning(requireContext(), getString(R.string.no_client_found))
                         soundManager.playWarning()
                     }
                     filtered.size == 1 -> {
+                        firebaseManager.recordClientSearch(ClientSearchOutcome.FOUND)
                         val match = filtered[0]
                         binding.etClientCode.setText(match.clientCode ?: "")
                         binding.etClientCode.onEditorAction(EditorInfo.IME_ACTION_DONE)
                         soundManager.playSuccess()
                     }
-                    else -> showMultipleResultsDialog(filtered)
+                    else -> {
+                        firebaseManager.recordClientSearch(ClientSearchOutcome.FOUND)
+                        showMultipleResultsDialog(filtered)
+                    }
                 }
             } catch (e: Exception) {
+                firebaseManager.recordClientSearch(ClientSearchOutcome.ERROR)
                 StatusToast.error(requireContext(), R.string.net_error_short)
             } finally {
                 binding.progressBar.visibility = View.GONE

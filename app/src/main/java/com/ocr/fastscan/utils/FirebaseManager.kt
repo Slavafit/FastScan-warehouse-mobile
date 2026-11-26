@@ -19,6 +19,14 @@ import kotlinx.coroutines.coroutineScope
 import com.google.firebase.firestore.toObject
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+import java.text.SimpleDateFormat
+
+enum class ClientSearchOutcome(val counterField: String) {
+    FOUND("found"),
+    NOT_FOUND("not_found"),
+    ERROR("error")
+}
 
 class FirebaseManager(context: Context) {
     private val db = FirebaseFirestore.getInstance()
@@ -42,6 +50,27 @@ class FirebaseManager(context: Context) {
 
     fun activeWarehouseId(): String = currentWarehouseId()
 
+    fun recordClientSearch(outcome: ClientSearchOutcome) {
+        val warehouseId = currentWarehouseId()
+        val day = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone(WAREHOUSE_TIME_ZONE)
+        }.format(Date())
+        val updates = mapOf(
+            "warehouse_id" to warehouseId,
+            "date" to day,
+            "total" to FieldValue.increment(1),
+            outcome.counterField to FieldValue.increment(1),
+            "updated_at" to FieldValue.serverTimestamp()
+        )
+
+        warehouseDocument.collection("client_search_daily")
+            .document(day)
+            .set(updates, SetOptions.merge())
+            .addOnFailureListener { error ->
+                Log.w("FirebaseManager", "Client search statistics were not recorded", error)
+            }
+    }
+
     suspend fun verifyWarehouseAccess() {
         warehouseDocument.collection("order_contents")
             .limit(1)
@@ -52,7 +81,8 @@ class FirebaseManager(context: Context) {
     fun saveShipment(
         shipment: FirestoreShipment,    // ← основной параметр — объект с данными
         onSuccess: () -> Unit,          // колбэк успеха
-        onFailure: (Exception) -> Unit) // колбэк ошибки
+        onFailure: (Exception) -> Unit
+    ) // колбэк ошибки
     {
         val warehouseId = currentWarehouseId()
         val shipmentReference = shipmentsCollection.document(shipment.trackingNumber)
@@ -90,7 +120,10 @@ class FirebaseManager(context: Context) {
             )
         }
             .addOnSuccessListener {
-                Log.d("FirebaseManager", "Data saved/updated in Firestore: ${shipment.trackingNumber}")
+                Log.d(
+                    "FirebaseManager",
+                    "Data saved/updated in Firestore: ${shipment.trackingNumber}"
+                )
                 onSuccess()
             }
             .addOnFailureListener { e ->
@@ -98,17 +131,21 @@ class FirebaseManager(context: Context) {
                 onFailure(e)
             }
     }
-    fun saveBoxEntry
-                (entry: BoxEntry,
-                 onSuccess: () -> Unit = {},          // колбэк успеха
-                 onFailure: (Exception) -> Unit = {}     // колбэк ошибки)
-    )    {
+
+    fun saveBoxEntry(
+        entry: BoxEntry,
+        onSuccess: () -> Unit = {},          // колбэк успеха
+        onFailure: (Exception) -> Unit = {}     // колбэк ошибки)
+    ) {
         val collection = boxEntriesCollection
-            // Используем трек как ID документа — если запись уже есть, она перезапишется
-            collection.document(entry.orderTracking)  // ← трек как document ID
+        // Используем трек как ID документа — если запись уже есть, она перезапишется
+        collection.document(entry.orderTracking)  // ← трек как document ID
             .set(entry)
             .addOnSuccessListener {
-                Log.d("FirebaseManager", "Box entry saved: order ${entry.orderTracking} in box ${entry.boxTracking}")
+                Log.d(
+                    "FirebaseManager",
+                    "Box entry saved: order ${entry.orderTracking} in box ${entry.boxTracking}"
+                )
                 onSuccess()
             }
             .addOnFailureListener { e ->
@@ -157,6 +194,7 @@ class FirebaseManager(context: Context) {
             SearchResult(null, null)
         }
     }
+
     // Получить ВСЕ зарегистрированные заказы
     suspend fun getAllShipments(): List<FirestoreShipment> {
         return try {
@@ -184,6 +222,7 @@ class FirebaseManager(context: Context) {
             emptyList()
         }
     }
+
     // Получить заказы (shipments) после определённой даты
     suspend fun getShipmentsAfter(date: Date): List<FirestoreShipment> {
         return try {
@@ -229,7 +268,12 @@ class FirebaseManager(context: Context) {
                 .await()
                 .toObjects(ProductCatalogItem::class.java)
                 .filter { it.id.isNotBlank() && it.reportNameEn.isNotBlank() }
-                .sortedWith(compareBy(ProductCatalogItem::categoryId, ProductCatalogItem::sortOrder))
+                .sortedWith(
+                    compareBy(
+                        ProductCatalogItem::categoryId,
+                        ProductCatalogItem::sortOrder
+                    )
+                )
         } catch (e: Exception) {
             Log.e("FirebaseManager", "Failed to load product catalog", e)
             emptyList()
@@ -356,6 +400,7 @@ class FirebaseManager(context: Context) {
     companion object {
         const val PREF_WAREHOUSE_ID = "firebase_warehouse_id"
         const val DEFAULT_WAREHOUSE_ID = "es-main"
+        private const val WAREHOUSE_TIME_ZONE = "Europe/Madrid"
         private const val FIRESTORE_BATCH_LIMIT = 450
 
         fun normalizeTracking(value: String): String = value.trim().uppercase(Locale.ROOT)
@@ -363,7 +408,8 @@ class FirebaseManager(context: Context) {
         internal fun comparableTracking(value: String): String {
             val compact = normalizeTracking(value).filter(Char::isLetterOrDigit)
             if (compact.isEmpty()) return ""
-            return if (compact.all(Char::isDigit)) compact.trimStart('0').ifEmpty { "0" } else compact
+            return if (compact.all(Char::isDigit)) compact.trimStart('0')
+                .ifEmpty { "0" } else compact
         }
 
         private fun safeDocumentId(value: String): String = Base64.encodeToString(

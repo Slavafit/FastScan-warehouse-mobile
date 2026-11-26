@@ -7,8 +7,8 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import androidx.annotation.OptIn
 
-@ExperimentalGetImage
 class TrackAnalyzer(
     private val onResult: (tracking: String, orderNumber: String?) -> Unit
 ) : ImageAnalysis.Analyzer {
@@ -18,6 +18,7 @@ class TrackAnalyzer(
     private val barcodeStabilizer = ScanResultStabilizer()
     private var recognizedOrderNumber: String? = null
 
+    @OptIn(markerClass = [ExperimentalGetImage::class])
     override fun analyze(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image ?: run {
             imageProxy.close()

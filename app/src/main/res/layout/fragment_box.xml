@@ -23,7 +23,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRefresh"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.FastScan.Button.Outlined"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="2dp"
@@ -38,7 +38,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnShowAll"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.FastScan.Button.Outlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"

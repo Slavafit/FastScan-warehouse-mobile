@@ -73,6 +73,32 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /warehouses/{warehouseId}/client_search_daily/{day} {
+      allow read: if warehouseAccess(warehouseId);
+      allow create: if warehouseAccess(warehouseId)
+        && request.resource.data.keys().hasOnly([
+          'warehouse_id', 'date', 'total', 'found', 'not_found', 'error', 'updated_at'
+        ])
+        && request.resource.data.warehouse_id == warehouseId
+        && request.resource.data.date == day
+        && request.resource.data.total == 1
+        && request.resource.data.get('found', 0)
+          + request.resource.data.get('not_found', 0)
+          + request.resource.data.get('error', 0) == 1;
+      allow update: if warehouseAccess(warehouseId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'total', 'found', 'not_found', 'error', 'updated_at'
+        ])
+        && request.resource.data.total == resource.data.total + 1
+        && request.resource.data.get('found', 0) >= resource.data.get('found', 0)
+        && request.resource.data.get('not_found', 0) >= resource.data.get('not_found', 0)
+        && request.resource.data.get('error', 0) >= resource.data.get('error', 0)
+        && (request.resource.data.get('found', 0) - resource.data.get('found', 0))
+          + (request.resource.data.get('not_found', 0) - resource.data.get('not_found', 0))
+          + (request.resource.data.get('error', 0) - resource.data.get('error', 0)) == 1;
+      allow delete: if false;
+    }
+
     // Temporary compatibility for historical root documents, not subcollections.
     match /shipments/{shipmentId} {
       allow read: if warehouseAccess('es-main');

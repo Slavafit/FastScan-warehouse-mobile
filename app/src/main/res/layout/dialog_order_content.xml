@@ -48,7 +48,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnVoiceSelection"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.FastScan.Button.Outlined"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="6dp"
@@ -67,7 +67,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnProductPrevious"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginEnd="4dp"
@@ -76,7 +76,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNewProduct"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginHorizontal="4dp"
@@ -86,7 +86,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnProductNext"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginStart="4dp"
@@ -121,7 +121,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuantityMinus"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="72dp"
                 android:layout_height="64dp"
                 android:text="−"
@@ -155,7 +155,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick1"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginEnd="4dp"
@@ -164,7 +164,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick2"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginHorizontal="4dp"
@@ -173,7 +173,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick3"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginHorizontal="4dp"
@@ -182,7 +182,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick4"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginStart="4dp"
@@ -199,7 +199,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick5"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginEnd="4dp"
@@ -208,7 +208,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick6"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginHorizontal="4dp"
@@ -217,7 +217,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick8"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginHorizontal="4dp"
@@ -226,7 +226,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuick10"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginStart="4dp"
@@ -242,7 +242,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManualQuantity"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginEnd="4dp"
@@ -252,7 +252,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVoiceQuantity"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginStart="4dp"
@@ -304,7 +304,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReviewPrevious"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginEnd="4dp"
@@ -322,7 +322,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReviewNext"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="4dp"
@@ -332,7 +332,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReviewDelete"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="10dp"
@@ -349,7 +349,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnContentBack"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:layout_marginEnd="4dp"
@@ -360,7 +360,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReviewContents"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.FastScan.Button.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:layout_marginHorizontal="4dp"

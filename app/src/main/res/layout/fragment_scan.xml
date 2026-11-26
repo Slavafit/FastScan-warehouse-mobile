@@ -100,7 +100,7 @@
                 android:textSize="12sp"
                 android:visibility="gone" />
 
-            <Button android:id="@+id/btnGenerateOnza" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/generate_track" android:textSize="12sp" style="@style/Widget.MaterialComponents.Button.TextButton"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnGenerateOnza" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/generate_track" android:textSize="12sp" style="@style/Widget.FastScan.Button.Text"/>
 
             <Space android:layout_width="match_parent" android:layout_height="12dp" />
 
@@ -210,7 +210,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnVolumeCalc"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    style="@style/Widget.FastScan.Button.Text"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginBottom="2dp"
@@ -287,7 +287,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnContent"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/Widget.FastScan.Button.Outlined"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="4dp"
@@ -295,10 +295,11 @@
                     android:text="@string/order_content"
                     android:textAllCaps="false"
                     android:textSize="16sp"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="@dimen/control_corner_radius" />
 
-                <com.google.android.material.button.MaterialButton
+                <com.ocr.fastscan.ui.widget.AnimatedSendButton
                     android:id="@+id/btnSubmit"
+                    style="@style/Widget.FastScan.Button"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="4dp"
@@ -306,12 +307,12 @@
                     android:backgroundTint="@color/app_primary"
                     android:text="@string/send_order"
                     android:textSize="16sp"
-                    app:cornerRadius="12dp" />
+                    app:cornerRadius="@dimen/control_corner_radius" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGlobalSearch"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.FastScan.Button.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
